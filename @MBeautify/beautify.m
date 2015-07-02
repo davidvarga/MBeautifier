@@ -36,7 +36,7 @@ source = h.Text;
 new_lines = 2;
 
 
-tokStruct = MBeautifier.MBeautify.getTokenStruct();
+tokStruct = MBeautify.getTokenStruct();
 
 contTokenStruct = tokStruct('ContinueToken');
 
@@ -87,7 +87,6 @@ for j = 1: numel(textArray) % in textArray)
     
     %% Check for line continousment (...)
     trimmedCode = strtrim(actCode);
-    regexp(trimmedCode, '\.\.\.', 'once')
     % Line ends with "..."
     if (numel(trimmedCode) >= 3 && strcmp(trimmedCode(end-2:end), '...')) ...
             || (isequal(splittingPos, 1) && isInContinousLine )
@@ -180,7 +179,7 @@ end
 
 function actCodeFinal = performReplacements(actCode)
 
-tokStruct = MBeautifier.MBeautify.getTokenStruct();
+tokStruct = MBeautify.getTokenStruct();
 %% Transpose
 actCode = replaceTransponations(actCode);
 trnspTokStruct = tokStruct('TransposeToken');
@@ -241,7 +240,7 @@ actCodeFinal = regexprep(actCodeFinal,nonConjTrnspTokStruct.Token,nonConjTrnspTo
 end
 
 function actCode = replaceTransponations(actCode)
-tokStruct = MBeautifier.MBeautify.getTokenStruct();
+tokStruct = MBeautify.getTokenStruct();
 trnspTokStruct = tokStruct('TransposeToken');
 nonConjTrnspTokStruct = tokStruct('NonConjTransposeToken');
 
@@ -496,7 +495,7 @@ end
 end
 
 function data = processBracket(data)
-tokStruct = MBeautifier.MBeautify.getTokenStruct();
+tokStruct = MBeautify.getTokenStruct();
 aithmeticOpetors = {'+','-','&','&&','|','||','/', '*'};
 
 % [sad asd asd] => [sad, asd, asd]
