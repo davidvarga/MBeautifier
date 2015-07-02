@@ -34,7 +34,7 @@ h.smartIndentContents();
 
 source = h.Text;
 new_lines = 2;
-
+newLine = sprintf('\n');
 
 tokStruct = MBeautify.getTokenStruct();
 
@@ -52,12 +52,12 @@ if new_lines > 0
     for n = 1 : numel(source2)
         if isequal(strtrim(source2{n}), '')
             if s < new_lines
-                [source3, lastSrc3Index] = arrayAppend(source3, {source2{n}, sprintf('\n')}, lastSrc3Index);
+                [source3, lastSrc3Index] = arrayAppend(source3, {source2{n}, newLine}, lastSrc3Index);
                 s = s + 1;
             end
         else
             s = 0;
-            [source3, lastSrc3Index] = arrayAppend(source3, {source2{n}, sprintf('\n')}, lastSrc3Index);
+            [source3, lastSrc3Index] = arrayAppend(source3, {source2{n}, newLine}, lastSrc3Index);
         end
     end
     
@@ -66,7 +66,7 @@ if new_lines > 0
 end
 
 %%
-textArray = regexp(source, sprintf('\n'), 'split');
+textArray = regexp(source, newLine, 'split');
 
 replacedTextArray = cell(1, numel(textArray) * 4);
 isInContinousLine = 0;
@@ -108,12 +108,12 @@ for j = 1: numel(textArray) % in textArray)
                 tempRow = strtrim(contLineArray{iLine, 1});
                 tempRow = [tempRow(1:end-3), [ ' ', contTokenStruct.Token, ' ' ]];
                 tempRow = regexprep(tempRow, ['\s+', contTokenStruct.Token, '\s+'], [ ' ', contTokenStruct.Token, ' ' ]);
-                replacedLines = [replacedLines, tempRow];
+                replacedLines = strConcat(replacedLines, tempRow);
                 
             end
             
-            replacedLines = [replacedLines, actCode];
-            
+            % replacedLines = [replacedLines, actCode];
+            replacedLines = strConcat(replacedLines, actCode);
 
             actCodeFinal = performReplacements(replacedLines);
             
@@ -121,13 +121,13 @@ for j = 1: numel(textArray) % in textArray)
             
             line = '';
             for iSplitLine = 1:numel(splitToLine) - 1
-                
-                line = [line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, sprintf('\n')];
+                line = strConcat(line, strtrim(splitToLine{iSplitLine}),  [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, newLine);
+                %line = [line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, sprintf('\n')];
                 
                 
             end
-            
-            line = [line, strtrim(splitToLine{end}), actComment, sprintf('\n')];
+            line = strConcat(line, strtrim(splitToLine{end}),  actComment, newLine);
+           % line = [line, strtrim(splitToLine{end}), actComment, sprintf('\n')];
             %line = [strtrim(splitToLine{iSplitLine}), ' ...', contLineArray{iSplitLine,2}, char(13)];
             
             
@@ -222,7 +222,8 @@ splitByStrTok = regexp(actCodeTemp, strTokenStruct.Token, 'split');
 if numel(strTokStructs)
     actCodeFinal = '';
     for iSplit = 1:numel(strTokStructs)
-        actCodeFinal = [actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, '''' ];
+        actCodeFinal = strConcat(actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, '''');
+        %actCodeFinal = [actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, '''' ];
     end
     
     if numel(splitByStrTok) > numel(strTokStructs)
@@ -258,21 +259,24 @@ for iStr = 1:numel(actCode)
         % .' => NonConj transpose
         if isLastCharDot
             tempCode = tempCode(1:end-1);
-            tempCode = [tempCode, nonConjTrnspTokStruct.Token];
+            tempCode = strConcat(tempCode, nonConjTrnspTokStruct.Token);
+            % tempCode = [tempCode, nonConjTrnspTokStruct.Token];
             isLastCharTransp = true;
         else
             if isLastCharTransp
-               tempCode = [tempCode, trnspTokStruct.Token]; 
+                tempCode = strConcat(tempCode, trnspTokStruct.Token);
+               % tempCode = [tempCode, trnspTokStruct.Token]; 
                isLastCharTransp = true;
             else
                 
                 if numel(tempCode) && numel(regexp(tempCode(end),charsIndicateTranspose)) && ~isInStr
                         
-                    
-                    tempCode = [tempCode, trnspTokStruct.Token]; 
+                    tempCode = strConcat(tempCode, trnspTokStruct.Token);
+                    % tempCode = [tempCode, trnspTokStruct.Token]; 
                     isLastCharTransp = true;
                 else
-                    tempCode = [tempCode, actChar];
+                    tempCode = strConcat(tempCode, actChar);
+                    % tempCode = [tempCode, actChar];
                     isInStr = ~isInStr;
                     isLastCharTransp = false;
                 end 
@@ -282,11 +286,13 @@ for iStr = 1:numel(actCode)
         isLastCharDot = false;
     elseif isequal(actChar,'.') && ~isInStr
         isLastCharDot = true;
-        tempCode = [tempCode, actChar];
+        tempCode = strConcat(tempCode, actChar);
+        % tempCode = [tempCode, actChar];
         isLastCharTransp = false;
     else
         isLastCharDot = false;
-        tempCode = [tempCode, actChar];
+        tempCode = strConcat(tempCode, actChar);
+       % tempCode = [tempCode, actChar];
         isLastCharTransp = false;
     end
 end
