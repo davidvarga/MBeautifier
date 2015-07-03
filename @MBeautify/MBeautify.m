@@ -13,6 +13,9 @@ classdef MBeautify
         tokens = getAllTokens();
         [source, codeToFormat] = handleSource(sourceInput);
         
+        %% ToDO: go to private
+        res = readSettingsXML();
+        
     end
     
     methods(Static = true, Access = private )

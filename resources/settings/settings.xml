@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MBeautifySettings attribute="attribute_value">
+    <OperatorPadding>
+        <OperatorPaddingRule>
+            <Key>Greater</Key>
+            <ValueFrom>&gt;</ValueFrom>
+            <ValueTo> &gt; </ValueTo>
+        </OperatorPaddingRule>
+        
+        <OperatorPaddingRule>
+            <Key>GreaterEquals</Key>
+            <ValueFrom>&gt;=</ValueFrom>
+            <ValueTo> &gt;= </ValueTo>
+        </OperatorPaddingRule>
+        
+        <OperatorPaddingRule>
+            <Key>Less</Key>
+            <ValueFrom>&lt;</ValueFrom>
+            <ValueTo> &lt; </ValueTo>
+        </OperatorPaddingRule>
+        
+        <OperatorPaddingRule>
+            <Key>LessEquals</Key>
+            <ValueFrom>&lt;=</ValueFrom>
+            <ValueTo> &lt;= </ValueTo>
+        </OperatorPaddingRule>
+        
+        
+        
+    </OperatorPadding>
+</MBeautifySettings><!--this is a comment-->
