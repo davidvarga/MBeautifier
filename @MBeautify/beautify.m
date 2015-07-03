@@ -33,37 +33,15 @@ end
 h.smartIndentContents();
 
 source = h.Text;
-new_lines = 2;
+nMaximalNewLines = 2;
 newLine = sprintf('\n');
 
 tokStruct = MBeautify.getTokenStruct();
 
 contTokenStruct = tokStruct('ContinueToken');
 
-%% ToDo: char(13) -> sprintf('%s', '\n')
-%% Process the maximal new-line count
-if new_lines > 0
-    
-    source2 = regexp(source, '\n', 'split');
-    
-    s = 0;
-    source3 = cell(1, numel(source2) * 2);
-    lastSrc3Index = 0;
-    for n = 1 : numel(source2)
-        if isequal(strtrim(source2{n}), '')
-            if s < new_lines
-                [source3, lastSrc3Index] = arrayAppend(source3, {source2{n}, newLine}, lastSrc3Index);
-                s = s + 1;
-            end
-        else
-            s = 0;
-            [source3, lastSrc3Index] = arrayAppend(source3, {source2{n}, newLine}, lastSrc3Index);
-        end
-    end
-    
-    source = [source3{:}];
-    
-end
+
+
 
 %%
 textArray = regexp(source, newLine, 'split');
@@ -75,14 +53,22 @@ contLineArray = cell(0,2);
 isInBlockComment = false;
 blockCommentDepth = 0;
 lastIndexUsed = 0;
+nNewLinesFound = 0;
 for j = 1: numel(textArray) % in textArray)
     line = textArray{j};
-        
     
-    %% ToDo: ! mark
+    %% Process the maximal new-line count
+   [isAcceptable, nNewLinesFound] = MBeautify.handleMaximalNewLines(line, nNewLinesFound, nMaximalNewLines);
+    
+    if ~isAcceptable
+        continue;
+    end
+
+    %% Determine the position where the line shall be splitted into code and comment
     [commPos, exclamationPos, isInBlockComment, blockCommentDepth] = findComment(line, isInBlockComment, blockCommentDepth);
     splittingPos = max(commPos, exclamationPos);
     
+    %% Split the line into two parts: code and comment
     [actCode, actComment] = getCodeAndComment(line, splittingPos);
     
     %% Check for line continousment (...)
@@ -111,8 +97,7 @@ for j = 1: numel(textArray) % in textArray)
                 replacedLines = strConcat(replacedLines, tempRow);
                 
             end
-            
-            % replacedLines = [replacedLines, actCode];
+
             replacedLines = strConcat(replacedLines, actCode);
 
             actCodeFinal = performReplacements(replacedLines);
@@ -122,22 +107,11 @@ for j = 1: numel(textArray) % in textArray)
             line = '';
             for iSplitLine = 1:numel(splitToLine) - 1
                 line = strConcat(line, strtrim(splitToLine{iSplitLine}),  [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, newLine);
-                %line = [line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, sprintf('\n')];
-                
-                
             end
             line = strConcat(line, strtrim(splitToLine{end}),  actComment, newLine);
-           % line = [line, strtrim(splitToLine{end}), actComment, sprintf('\n')];
-            %line = [strtrim(splitToLine{iSplitLine}), ' ...', contLineArray{iSplitLine,2}, char(13)];
-            
-            
-            
+
             [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
-            % replacedTextArray = [replacedTextArray, line];
-            % replacedTextArray{end + 1} = sprintf('\n');
-            
-            
-            
+
             contLineArray = cell(0,2);
             
             continue;
@@ -146,15 +120,11 @@ for j = 1: numel(textArray) % in textArray)
         end
     end
     
-    
-    
+
     actCodeFinal = performReplacements(actCode);
     line = [strtrim(actCodeFinal), ' ', actComment];
     [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
-    %replacedTextArray = [replacedTextArray, line];
-    
-    
-    %replacedTextArray{end + 1} = sprintf('\n');
+
 end
 
 h.Text = [replacedTextArray{:}];

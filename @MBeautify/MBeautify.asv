@@ -6,19 +6,18 @@ classdef MBeautify
         CommentTemplate = 'MBeautify_Comment.xml';
     end
     
-    methods(Static)
-        
-        function pref = getTestPref()
-            % testclass.getSamplePref();
-            pref = MBeautifier.TestClass.getSamplePref();
-            
-            %TestClass.getSamplePref();
-        end
+    methods(Static = true)
         
         beautify(source);
         tokenStructs = getTokenStruct();
         tokens = getAllTokens();
         [source, codeToFormat] = handleSource(sourceInput);
+        
+    end
+    
+    methods(Static = true, Access = private )
+        
+        handleMaximalNewLine
         
     end
     
