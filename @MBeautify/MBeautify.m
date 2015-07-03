@@ -2,7 +2,7 @@ classdef MBeautify
     
     properties(Constant)
         %testcl = testclass();
-        FormatTemplate = 'MBeautify_Format.xml';
+        RulesFile = 'MBeautyRules.xml';
         CommentTemplate = 'MBeautify_Comment.xml';
     end
     
@@ -12,16 +12,14 @@ classdef MBeautify
         tokenStructs = getTokenStruct();
         tokens = getAllTokens();
         [source, codeToFormat] = handleSource(sourceInput);
-        
-        %% ToDO: go to private
-        res = readSettingsXML();
-        
+        setup();
+         
     end
     
     methods(Static = true, Access = private )
         
         [result, nCurrentNewlines] = handleMaximalNewLines(line, nCurrentNewlines, maximalNewLines)
-        
+        res = readSettingsXML(file);
     end
     
     
