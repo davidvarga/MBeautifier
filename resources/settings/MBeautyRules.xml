@@ -135,6 +135,12 @@
             <ValueFrom>~</ValueFrom>
             <ValueTo> ~</ValueTo>
         </OperatorPaddingRule>
+		
+		        <OperatorPaddingRule>
+            <Key>Comma</Key>
+            <ValueFrom>,</ValueFrom>
+            <ValueTo>, </ValueTo>
+        </OperatorPaddingRule>
         
     </OperatorPadding>
     
