@@ -142,6 +142,21 @@
             <ValueTo>, </ValueTo>
         </OperatorPaddingRule>
         
+        
+        <OperatorPaddingRule>
+            <Key>Comma</Key>
+            <ValueFrom>,</ValueFrom>
+            <ValueTo>, </ValueTo>
+        </OperatorPaddingRule>
+        
+        <OperatorPaddingRule>
+            <Key>SemiColon</Key>
+            <ValueFrom>;</ValueFrom>
+            <ValueTo>; </ValueTo>
+        </OperatorPaddingRule>
+        
+         <!--ToDo: Colon->
+        
     </OperatorPadding>
     
     <!--Special rules-->

@@ -389,46 +389,59 @@ end
 
 function data = replaces(data)
 
+settingConf = settingsConfiguration();
+setConfField = fields(settingConf);
 
 data = regexprep(data, '\s+', ' ');
-data = fix(data, '+');
-data = fix(data, '-');
-data = fix(data, '*');
-data = fix(data, '/');
-data = fix(data, '\\');
-data = fix(data, '=');
-data = fix(data, '<');
-data = fix(data, '>');
-data = fix(data, '&');
-data = fix(data, '|');
-data = fix(data, '^');
-data = fix(data, ',');
-data = fix(data, ';');
 
-data = regexprep(data, '\. \*', '.*');
-data = fix(data, '\.\*');
-data = regexprep(data, '\. \^', '.^');
-data = fix(data, '\.\^');
 
-data = regexprep(data, '\. \/', './');
-data = fix(data, '\.\/');
+for iOpConf = 1: numel(setConfField)
+    currField = setConfField{iOpConf};
+    currOpStruct = settingConf.(currField);
+    
+    regexprrep(data, currOpStruct.ValueFrom, ['#MBeauty_OP_', currField, '#'] );
+end
 
-data = regexprep(data, '\. \\\\', '.\\');
-data = fix(data, '\.\\\\');
+disp(1);
 
-data = regexprep(data, '\~ \=', '~=');
-data = fix(data, '~=');
-data = regexprep(data, '\s+', ' ');
-
-data = regexprep(data, '= =', '==');
-data = regexprep(data, '< =', '<=');
-data = regexprep(data, '> =', '>=');
-data = regexprep(data, '\+ \=', '+=');
-data = regexprep(data, '\- \=', '-=');
-data = regexprep(data, '\& \&', '&&');
-data = regexprep(data, '\| \|', '||');
-data = regexprep(data, ' \, ', ', ');
-data = regexprep(data, ' \; ', '; ');
+% data = fix(data, '+');
+% data = fix(data, '-');
+% data = fix(data, '*');
+% data = fix(data, '/');
+% data = fix(data, '\\');
+% data = fix(data, '=');
+% data = fix(data, '<');
+% data = fix(data, '>');
+% data = fix(data, '&');
+% data = fix(data, '|');
+% data = fix(data, '^');
+% data = fix(data, ',');
+% data = fix(data, ';');
+% 
+% data = regexprep(data, '\. \*', '.*');
+% data = fix(data, '\.\*');
+% data = regexprep(data, '\. \^', '.^');
+% data = fix(data, '\.\^');
+% 
+% data = regexprep(data, '\. \/', './');
+% data = fix(data, '\.\/');
+% 
+% data = regexprep(data, '\. \\\\', '.\\');
+% data = fix(data, '\.\\\\');
+% 
+% data = regexprep(data, '\~ \=', '~=');
+% data = fix(data, '~=');
+% data = regexprep(data, '\s+', ' ');
+% 
+% data = regexprep(data, '= =', '==');
+% data = regexprep(data, '< =', '<=');
+% data = regexprep(data, '> =', '>=');
+% data = regexprep(data, '\+ \=', '+=');
+% data = regexprep(data, '\- \=', '-=');
+% data = regexprep(data, '\& \&', '&&');
+% data = regexprep(data, '\| \|', '||');
+% data = regexprep(data, ' \, ', ', ');
+% data = regexprep(data, ' \; ', '; ');
 
 data = regexprep(data, ' \)', ')');
 data = regexprep(data, ' \]', ']');

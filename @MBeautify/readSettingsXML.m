@@ -1,6 +1,9 @@
 function settingsStruct = readSettingsXML(file)
 %UNTITLED3 Summary of this function goes here
 %   Detailed explanation goes here
+
+%% ToDo: Order
+
 settingsStruct = struct('OperatorRules', struct(), 'SpecialRules', struct());
 
 xmlFile = file;
