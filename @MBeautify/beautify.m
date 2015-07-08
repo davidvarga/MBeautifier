@@ -12,8 +12,8 @@ function beautify(source)
 % a-zA-Z0-9 -> it's a simple transpose operator
 % ' -> if the previous character was traspose, it is also transpose
 %
- 
-%% ToDo: 
+
+%% ToDo:
 % ! => shall work as comment
 
 %% ToDO: done
@@ -58,12 +58,12 @@ for j = 1: numel(textArray) % in textArray)
     line = textArray{j};
     
     %% Process the maximal new-line count
-   [isAcceptable, nNewLinesFound] = MBeautify.handleMaximalNewLines(line, nNewLinesFound, nMaximalNewLines);
+    [isAcceptable, nNewLinesFound] = MBeautify.handleMaximalNewLines(line, nNewLinesFound, nMaximalNewLines);
     
     if ~isAcceptable
         continue;
     end
-
+    
     %% Determine the position where the line shall be splitted into code and comment
     [commPos, exclamationPos, isInBlockComment, blockCommentDepth] = findComment(line, isInBlockComment, blockCommentDepth);
     splittingPos = max(commPos, exclamationPos);
@@ -97,9 +97,9 @@ for j = 1: numel(textArray) % in textArray)
                 replacedLines = strConcat(replacedLines, tempRow);
                 
             end
-
+            
             replacedLines = strConcat(replacedLines, actCode);
-
+            
             actCodeFinal = performReplacements(replacedLines);
             
             splitToLine = regexp(actCodeFinal, contTokenStruct.Token, 'split');
@@ -109,22 +109,22 @@ for j = 1: numel(textArray) % in textArray)
                 line = strConcat(line, strtrim(splitToLine{iSplitLine}),  [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, newLine);
             end
             line = strConcat(line, strtrim(splitToLine{end}),  actComment, newLine);
-
+            
             [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
-
+            
             contLineArray = cell(0,2);
             
             continue;
             
-      
+            
         end
     end
     
-
+    
     actCodeFinal = performReplacements(actCode);
     line = [strtrim(actCodeFinal), ' ', actComment];
     [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
-
+    
 end
 
 h.Text = [replacedTextArray{:}];
@@ -135,16 +135,16 @@ h.makeActive();
 end
 
 function [actCode, actComment] = getCodeAndComment(line, commPos)
-    if isequal(commPos, 1)
-        actCode = '';
-        actComment = line;
-    elseif commPos == - 1
-        actCode = line;
-        actComment = '';
-    else
-        actCode = line(1: max(commPos - 1, 1));
-        actComment = strtrim(line(commPos:end));
-    end
+if isequal(commPos, 1)
+    actCode = '';
+    actComment = line;
+elseif commPos == - 1
+    actCode = line;
+    actComment = '';
+else
+    actCode = line(1: max(commPos - 1, 1));
+    actComment = strtrim(line(commPos:end));
+end
 end
 
 function actCodeFinal = performReplacements(actCode)
@@ -178,7 +178,7 @@ for iSplit = 1 : numel(splittedCode)
         strTokenStruct.StoredValue = splittedCode{iSplit};
         strTokStructs{iSplit} = strTokenStruct;
     end
-   
+    
 end
 
 strTokStructs = strTokStructs(cellfun(@(x) ~isempty(x), strTokStructs));
@@ -235,21 +235,21 @@ for iStr = 1:numel(actCode)
         else
             if isLastCharTransp
                 tempCode = strConcat(tempCode, trnspTokStruct.Token);
-               % tempCode = [tempCode, trnspTokStruct.Token]; 
-               isLastCharTransp = true;
+                % tempCode = [tempCode, trnspTokStruct.Token];
+                isLastCharTransp = true;
             else
                 
                 if numel(tempCode) && numel(regexp(tempCode(end),charsIndicateTranspose)) && ~isInStr
-                        
+                    
                     tempCode = strConcat(tempCode, trnspTokStruct.Token);
-                    % tempCode = [tempCode, trnspTokStruct.Token]; 
+                    % tempCode = [tempCode, trnspTokStruct.Token];
                     isLastCharTransp = true;
                 else
                     tempCode = strConcat(tempCode, actChar);
                     % tempCode = [tempCode, actChar];
                     isInStr = ~isInStr;
                     isLastCharTransp = false;
-                end 
+                end
             end
         end
         
@@ -262,7 +262,7 @@ for iStr = 1:numel(actCode)
     else
         isLastCharDot = false;
         tempCode = strConcat(tempCode, actChar);
-       % tempCode = [tempCode, actChar];
+        % tempCode = [tempCode, actChar];
         isLastCharTransp = false;
     end
 end
@@ -398,11 +398,20 @@ data = regexprep(data, '\s+', ' ');
 for iOpConf = 1: numel(setConfField)
     currField = setConfField{iOpConf};
     currOpStruct = settingConf.(currField);
+    valueFrom = regexptranslate('escape', currOpStruct.ValueFrom);
+    valueFrom = regexptranslate('wildcard', valueFrom);
     
-    regexprrep(data, currOpStruct.ValueFrom, ['#MBeauty_OP_', currField, '#'] );
+    data = regexprep(data, ['\s*', valueFrom, '\s*'], ['#MBeauty_OP_', currField, '#'] );
 end
 
-disp(1);
+for iOpConf = 1: numel(setConfField)
+    currField = setConfField{iOpConf};
+    currOpStruct = settingConf.(currField);
+    
+    data = regexprep(data, ['#MBeauty_OP_', currField, '#'], currOpStruct.ValueTo  );
+end
+% data = data3;
+% disp(1);
 
 % data = fix(data, '+');
 % data = fix(data, '-');
@@ -417,22 +426,22 @@ disp(1);
 % data = fix(data, '^');
 % data = fix(data, ',');
 % data = fix(data, ';');
-% 
+%
 % data = regexprep(data, '\. \*', '.*');
 % data = fix(data, '\.\*');
 % data = regexprep(data, '\. \^', '.^');
 % data = fix(data, '\.\^');
-% 
+%
 % data = regexprep(data, '\. \/', './');
 % data = fix(data, '\.\/');
-% 
+%
 % data = regexprep(data, '\. \\\\', '.\\');
 % data = fix(data, '\.\\\\');
-% 
+%
 % data = regexprep(data, '\~ \=', '~=');
 % data = fix(data, '~=');
 % data = regexprep(data, '\s+', ' ');
-% 
+%
 % data = regexprep(data, '= =', '==');
 % data = regexprep(data, '< =', '<=');
 % data = regexprep(data, '> =', '>=');
