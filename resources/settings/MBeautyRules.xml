@@ -27,18 +27,32 @@
             <ValueFrom>|</ValueFrom>
             <ValueTo> | </ValueTo>
         </OperatorPaddingRule>
+		
+				      <OperatorPaddingRule>
+            <Key>LessEquals</Key>
+            <ValueFrom>&lt;=</ValueFrom>
+            <ValueTo> &lt;= </ValueTo>
+        </OperatorPaddingRule>
+		
+        <OperatorPaddingRule>
+            <Key>Less</Key>
+            <ValueFrom>&lt;</ValueFrom>
+            <ValueTo> &lt; </ValueTo>
+        </OperatorPaddingRule>
         
+		       <OperatorPaddingRule>
+            <Key>GreaterEquals</Key>
+            <ValueFrom>&gt;=</ValueFrom>
+            <ValueTo> &gt;= </ValueTo>
+        </OperatorPaddingRule>
+		
         <OperatorPaddingRule>
             <Key>Greater</Key>
             <ValueFrom>&gt;</ValueFrom>
             <ValueTo> &gt; </ValueTo>
         </OperatorPaddingRule>
         
-        <OperatorPaddingRule>
-            <Key>GreaterEquals</Key>
-            <ValueFrom>&gt;=</ValueFrom>
-            <ValueTo> &gt;= </ValueTo>
-        </OperatorPaddingRule>
+ 
         
         <OperatorPaddingRule>
             <Key>Equals</Key>
@@ -58,17 +72,7 @@
             <ValueTo> = </ValueTo>
         </OperatorPaddingRule>
         
-        <OperatorPaddingRule>
-            <Key>Less</Key>
-            <ValueFrom>&lt;</ValueFrom>
-            <ValueTo> &lt; </ValueTo>
-        </OperatorPaddingRule>
-        
-        <OperatorPaddingRule>
-            <Key>LessEquals</Key>
-            <ValueFrom>&lt;=</ValueFrom>
-            <ValueTo> &lt;= </ValueTo>
-        </OperatorPaddingRule>
+
         
         <OperatorPaddingRule>
             <Key>Plus</Key>

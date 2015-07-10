@@ -18,13 +18,21 @@ this.LogicalOr = struct();
 this.LogicalOr.ValueFrom = '|';
 this.LogicalOr.ValueTo = ' | ';
 
-this.Greater = struct();
-this.Greater.ValueFrom = '>';
-this.Greater.ValueTo = ' > ';
+this.LessEquals = struct();
+this.LessEquals.ValueFrom = '<=';
+this.LessEquals.ValueTo = ' <= ';
+
+this.Less = struct();
+this.Less.ValueFrom = '<';
+this.Less.ValueTo = ' < ';
 
 this.GreaterEquals = struct();
 this.GreaterEquals.ValueFrom = '>=';
 this.GreaterEquals.ValueTo = ' >= ';
+
+this.Greater = struct();
+this.Greater.ValueFrom = '>';
+this.Greater.ValueTo = ' > ';
 
 this.Equals = struct();
 this.Equals.ValueFrom = '==';
@@ -37,14 +45,6 @@ this.NotEquals.ValueTo = ' ~= ';
 this.Assignment = struct();
 this.Assignment.ValueFrom = '=';
 this.Assignment.ValueTo = ' = ';
-
-this.Less = struct();
-this.Less.ValueFrom = '<';
-this.Less.ValueTo = ' < ';
-
-this.LessEquals = struct();
-this.LessEquals.ValueFrom = '<=';
-this.LessEquals.ValueTo = ' <= ';
 
 this.Plus = struct();
 this.Plus.ValueFrom = '+';
