@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MBeautifyRuleConfiguration>
+   <OperatorPadding>
+      <OperatorPaddingRule>
+         <Key>ShortCircuitAnd</Key>
+         <ValueFrom>&amp;amp;&amp;amp;</ValueFrom>
+         <ValueTo> &amp;amp;&amp;amp; </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>ShortCircuitOr</Key>
+         <ValueFrom>||</ValueFrom>
+         <ValueTo> || </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>LogicalAnd</Key>
+         <ValueFrom>&amp;amp;</ValueFrom>
+         <ValueTo> &amp;amp; </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>LogicalOr</Key>
+         <ValueFrom>|</ValueFrom>
+         <ValueTo> | </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>LessEquals</Key>
+         <ValueFrom>&amp;lt;=</ValueFrom>
+         <ValueTo> &amp;lt;= </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Less</Key>
+         <ValueFrom>&amp;lt;</ValueFrom>
+         <ValueTo> &amp;lt; </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>GreaterEquals</Key>
+         <ValueFrom>&amp;gt;=</ValueFrom>
+         <ValueTo> &amp;gt;= </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Greater</Key>
+         <ValueFrom>&amp;gt;</ValueFrom>
+         <ValueTo> &amp;gt; </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Equals</Key>
+         <ValueFrom>==</ValueFrom>
+         <ValueTo> == </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>NotEquals</Key>
+         <ValueFrom>~=</ValueFrom>
+         <ValueTo> ~= </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Assignment</Key>
+         <ValueFrom>=</ValueFrom>
+         <ValueTo> = </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Plus</Key>
+         <ValueFrom>+</ValueFrom>
+         <ValueTo> + </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Minus</Key>
+         <ValueFrom>-</ValueFrom>
+         <ValueTo> - </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>ElementWiseMultiplication</Key>
+         <ValueFrom>.*</ValueFrom>
+         <ValueTo> .* </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Multiplication</Key>
+         <ValueFrom>*</ValueFrom>
+         <ValueTo> * </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>RightArrayDivision</Key>
+         <ValueFrom>./</ValueFrom>
+         <ValueTo> ./ </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>LeftArrayDivision</Key>
+         <ValueFrom>.\</ValueFrom>
+         <ValueTo> .\ </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Division</Key>
+         <ValueFrom>/</ValueFrom>
+         <ValueTo> / </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>LeftDivision</Key>
+         <ValueFrom>\</ValueFrom>
+         <ValueTo> \ </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>ElementWisePower</Key>
+         <ValueFrom>.^</ValueFrom>
+         <ValueTo> .^ </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Power</Key>
+         <ValueFrom>^</ValueFrom>
+         <ValueTo> ^ </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Not</Key>
+         <ValueFrom>~</ValueFrom>
+         <ValueTo> ~</ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Comma</Key>
+         <ValueFrom>,</ValueFrom>
+         <ValueTo>, </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>SemiColon</Key>
+         <ValueFrom>;</ValueFrom>
+         <ValueTo>; </ValueTo>
+      </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>Colon</Key>
+         <ValueFrom>:</ValueFrom>
+         <ValueTo>:</ValueTo>
+      </OperatorPaddingRule>
+   </OperatorPadding>
+   <SpecialRules>
+      <SpecialRule>
+         <Key>MaximalNewLines</Key>
+         <Value>2</Value>
+      </SpecialRule>
+      <SpecialRule>
+         <Key>AddCommasToMatrices</Key>
+         <Value>1</Value>
+      </SpecialRule>
+   </SpecialRules>
+</MBeautifyRuleConfiguration>

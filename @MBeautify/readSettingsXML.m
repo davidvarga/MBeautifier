@@ -6,9 +6,7 @@ function settingsStruct = readSettingsXML(file)
 
 settingsStruct = struct('OperatorRules', struct(), 'SpecialRules', struct());
 
-xmlFile = file;
-
-XMLDoc = xmlread(xmlFile);
+XMLDoc = xmlread(file);
 
 allOperatorItems = XMLDoc.getElementsByTagName('OperatorPaddingRule');
 operatorNode = settingsStruct.OperatorRules;
