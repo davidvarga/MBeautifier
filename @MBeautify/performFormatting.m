@@ -277,6 +277,12 @@ if isequal(trimmedLine(1), '!')
     return
 end
 
+% If line starts with "import ", it indicates a java import, that line is treated as comment
+if numel(trimmedLine) > 7 && isequal(trimmedLine(1:7), 'import ')
+    retComm = 1;
+    return
+end
+
 %% Searh for comment signs(%) and exclamation marks(!)
 
 exclamationInd =  strfind(line, '!');
