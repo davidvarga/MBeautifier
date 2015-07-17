@@ -32,7 +32,7 @@ classdef MBeautify
         
         [result, nCurrentNewlines] = handleMaximalNewLines(line, nCurrentNewlines, maximalNewLines);
         
-        [codeToFormat, additionalInfo] = handleSource(source);
+        [codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = handleSource(source);
         formattedSource = performFormatting(source, settingConf)
         writeConfigurationFile(resStruct, fullRulesConfMFileName);
         
