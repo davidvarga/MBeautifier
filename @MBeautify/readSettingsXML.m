@@ -17,8 +17,10 @@ for iOperator = 0:allOperatorItems.getLength()-1
    
    key = char(currentOperator.getElementsByTagName('Key').item(0).getTextContent().toString());
    operatorNode.(key) = struct();
-   operatorNode.(key).ValueFrom = char(currentOperator.getElementsByTagName('ValueFrom').item(0).getTextContent().toString());
-   operatorNode.(key).ValueTo = char(currentOperator.getElementsByTagName('ValueTo').item(0).getTextContent().toString());
+   operatorNode.(key).ValueFrom = removeXMLEscaping(char(currentOperator.getElementsByTagName('ValueFrom').item(0).getTextContent().toString()));
+   operatorNode.(key).ValueTo = removeXMLEscaping(char(currentOperator.getElementsByTagName('ValueTo').item(0).getTextContent().toString()));
+   
+   
     
 end
 
@@ -37,6 +39,13 @@ for iSpecRule = 0:allSpecialItems.getLength()-1
 end
 
 settingsStruct.SpecialRules = specialRulesNode;
+
+end
+
+function escapedValue = removeXMLEscaping(value)
+escapedValue = regexprep(value, '&lt;', '<');
+escapedValue = regexprep(escapedValue, '&amp;', '&');
+escapedValue = regexprep(escapedValue, '&gt;', '>');
 
 end
 
