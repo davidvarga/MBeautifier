@@ -4,7 +4,10 @@ function writeConfigurationFile(resStruct, fullRulesConfMFileName)
 
 operetorRules = resStruct.OperatorRules;
 opFields = fields(operetorRules);
-settingMFileString = ['function this = settingsConfiguration()', sprintf('\n'), ...
+
+[pathOfMFile, nameOfMFile] = fileparts(fullRulesConfMFileName); %#ok<ASGLU>
+
+settingMFileString = ['function this = ', nameOfMFile, '()', sprintf('\n'), ...
     'this = struct();', sprintf('\n'), sprintf('\n')];
 
 settingMFileString = [settingMFileString, 'this.OperatorRules = struct();', sprintf('\n'), sprintf('\n')];
