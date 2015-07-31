@@ -1,40 +1,40 @@
-function this = settingsConfiguration()
+function this = MBeautyConfigurationRules()
 this = struct();
 
 this.OperatorRules = struct();
 
 
 this.OperatorRules.ShortCircuitAnd = struct();
-this.OperatorRules.ShortCircuitAnd.ValueFrom = '&amp;&amp;';
-this.OperatorRules.ShortCircuitAnd.ValueTo = ' &amp;&amp; ';
+this.OperatorRules.ShortCircuitAnd.ValueFrom = '&&';
+this.OperatorRules.ShortCircuitAnd.ValueTo = ' && ';
 
 this.OperatorRules.ShortCircuitOr = struct();
 this.OperatorRules.ShortCircuitOr.ValueFrom = '\|\|';
 this.OperatorRules.ShortCircuitOr.ValueTo = ' || ';
 
 this.OperatorRules.LogicalAnd = struct();
-this.OperatorRules.LogicalAnd.ValueFrom = '&amp;';
-this.OperatorRules.LogicalAnd.ValueTo = ' &amp; ';
+this.OperatorRules.LogicalAnd.ValueFrom = '&';
+this.OperatorRules.LogicalAnd.ValueTo = ' & ';
 
 this.OperatorRules.LogicalOr = struct();
 this.OperatorRules.LogicalOr.ValueFrom = '\|';
 this.OperatorRules.LogicalOr.ValueTo = ' | ';
 
 this.OperatorRules.LessEquals = struct();
-this.OperatorRules.LessEquals.ValueFrom = '&lt;=';
-this.OperatorRules.LessEquals.ValueTo = ' &lt;= ';
+this.OperatorRules.LessEquals.ValueFrom = '<=';
+this.OperatorRules.LessEquals.ValueTo = ' <= ';
 
 this.OperatorRules.Less = struct();
-this.OperatorRules.Less.ValueFrom = '&lt;';
-this.OperatorRules.Less.ValueTo = ' &lt; ';
+this.OperatorRules.Less.ValueFrom = '<';
+this.OperatorRules.Less.ValueTo = ' < ';
 
 this.OperatorRules.GreaterEquals = struct();
-this.OperatorRules.GreaterEquals.ValueFrom = '&gt;=';
-this.OperatorRules.GreaterEquals.ValueTo = ' &gt;= ';
+this.OperatorRules.GreaterEquals.ValueFrom = '>=';
+this.OperatorRules.GreaterEquals.ValueTo = ' >= ';
 
 this.OperatorRules.Greater = struct();
-this.OperatorRules.Greater.ValueFrom = '&gt;';
-this.OperatorRules.Greater.ValueTo = ' &gt; ';
+this.OperatorRules.Greater.ValueFrom = '>';
+this.OperatorRules.Greater.ValueTo = ' > ';
 
 this.OperatorRules.Equals = struct();
 this.OperatorRules.Equals.ValueFrom = '==';
