@@ -2,8 +2,8 @@ function beautify(source)
 
 
 % Handle the source
-[codeToFormat, additionalInfo] = MBeautify.handleSource(source);
-currentSelection = additionalInfo.Selection;
+[codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = MBeautify.handleSource(source);
+currentSelection = selectedPosition;
 
 % Get the current configuration
 settingConf = MBeautify.getConfigurationStruct();
@@ -16,7 +16,7 @@ formattedSource = MBeautify.performFormatting(codeToFormat, settingConf);
 
 % Save back the modified data then use Matlab samrt indent functionality
 % Set back the selection
-additionalInfo.Text = formattedSource;
+additionalInfo.Text = [codeBefore, formattedSource, codeAfter];
 if ~isempty(currentSelection)
     additionalInfo.goToLine(currentSelection(1));
 end
