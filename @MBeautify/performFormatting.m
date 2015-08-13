@@ -353,10 +353,7 @@ data = regexprep(data, '\s+', ' ');
 
 for iOpConf = 1: numel(setConfigOperatorFields)
     currField = setConfigOperatorFields{iOpConf};
-    currOpStruct = settingConf.OperatorRules.(currField);
-    %valueFrom = regexptranslate('escape', currOpStruct.ValueFrom);
-    % valueFrom = regexptranslate('wildcard', valueFrom);
-    
+    currOpStruct = settingConf.OperatorRules.(currField); 
     data = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], ['#MBeauty_OP_', currField, '#'] );
 end
 
@@ -364,7 +361,7 @@ for iOpConf = 1: numel(setConfigOperatorFields)
     currField = setConfigOperatorFields{iOpConf};
     currOpStruct = settingConf.OperatorRules.(currField);
     
-    data = regexprep(data, ['#MBeauty_OP_', currField, '#'], currOpStruct.ValueTo  );
+    data = regexprep(data, ['\s*', '#MBeauty_OP_', currField, '#', '\s*'], currOpStruct.ValueTo);
 end
 
 data = regexprep(data, ' \)', ')');
@@ -466,8 +463,10 @@ if numel(multElBracketStrs)
                         ~strcmp(currElem, contTokenStruct.Token) && ...
                         ~any(strcmp(currElem, aithmeticOpetors)) && ~any(strcmp(nextElem, aithmeticOpetors))
                     elementsCell{elemInd} = [currElem, '#MBeauty_OP_Comma#'];
+                else
+                    elementsCell{elemInd} = [elementsCell{elemInd}, ' '];
                 end
-                elementsCell{elemInd} = [elementsCell{elemInd}, ' '];
+                
             end
             str = [elementsCell{:}];
             
