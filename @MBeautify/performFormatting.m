@@ -75,7 +75,7 @@ for j = 1: numel(textArray) % in textArray)
             for iSplitLine = 1:numel(splitToLine) - 1
                 line = strConcat(line, strtrim(splitToLine{iSplitLine}),  [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, newLine);
             end
-            line = strConcat(line, strtrim(splitToLine{end}),  actComment, newLine);
+            line = strConcat(line, strtrim(splitToLine{end}),  actComment);
             
             [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
             
