@@ -37,7 +37,9 @@ end
 
 settingMFileString = strConcat(settingMFileString, 'end');
 
-
+if exist(fullRulesConfMFileName, 'file')
+    fileattrib(fullRulesConfMFileName, '+w');
+end
 fid = fopen(fullRulesConfMFileName, 'w');
 fwrite(fid, settingMFileString);
 fclose(fid);
