@@ -51,6 +51,18 @@ classdef MBeautify
         
         configurationStruct = getConfigurationStruct();
         
+        % StrConcat Util
+        function retStr = strConcat( srcStr, varargin )
+            
+            retStr = srcStr;
+            
+            if nargin > 1
+                retStr = [retStr, varargin{:}];
+            else
+                return;
+            end
+        end
+        
     end
     
     

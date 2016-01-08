@@ -61,11 +61,11 @@ for j = 1: numel(textArray) % in textArray)
                 tempRow = strtrim(contLineArray{iLine, 1});
                 tempRow = [tempRow(1:end-3), [ ' ', contTokenStruct.Token, ' ' ]];
                 tempRow = regexprep(tempRow, ['\s+', contTokenStruct.Token, '\s+'], [ ' ', contTokenStruct.Token, ' ' ]);
-                replacedLines = strConcat(replacedLines, tempRow);
+                replacedLines = MBeautify.strConcat(replacedLines, tempRow);
                 
             end
             
-            replacedLines = strConcat(replacedLines, actCode);
+            replacedLines = MBeautify.strConcat(replacedLines, actCode);
             
             actCodeFinal = performReplacements(replacedLines, settingConf);
             
@@ -73,9 +73,9 @@ for j = 1: numel(textArray) % in textArray)
             
             line = '';
             for iSplitLine = 1:numel(splitToLine) - 1
-                line = strConcat(line, strtrim(splitToLine{iSplitLine}),  [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, newLine);
+                line = MBeautify.strConcat(line, strtrim(splitToLine{iSplitLine}),  [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine,2}, newLine);
             end
-            line = strConcat(line, strtrim(splitToLine{end}),  actComment);
+            line = MBeautify.strConcat(line, strtrim(splitToLine{end}),  actComment);
             
             [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
             
@@ -156,7 +156,7 @@ splitByStrTok = regexp(actCodeTemp, strTokenStruct.Token, 'split');
 if numel(strTokStructs)
     actCodeFinal = '';
     for iSplit = 1:numel(strTokStructs)
-        actCodeFinal = strConcat(actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, '''');
+        actCodeFinal = MBeautify.strConcat(actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, '''');
         %actCodeFinal = [actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, '''' ];
     end
     
@@ -193,23 +193,23 @@ for iStr = 1:numel(actCode)
         % .' => NonConj transpose
         if isLastCharDot
             tempCode = tempCode(1:end-1);
-            tempCode = strConcat(tempCode, nonConjTrnspTokStruct.Token);
+            tempCode = MBeautify.strConcat(tempCode, nonConjTrnspTokStruct.Token);
             % tempCode = [tempCode, nonConjTrnspTokStruct.Token];
             isLastCharTransp = true;
         else
             if isLastCharTransp
-                tempCode = strConcat(tempCode, trnspTokStruct.Token);
+                tempCode = MBeautify.strConcat(tempCode, trnspTokStruct.Token);
                 % tempCode = [tempCode, trnspTokStruct.Token];
                 isLastCharTransp = true;
             else
                 
                 if numel(tempCode) && numel(regexp(tempCode(end),charsIndicateTranspose)) && ~isInStr
                     
-                    tempCode = strConcat(tempCode, trnspTokStruct.Token);
+                    tempCode = MBeautify.strConcat(tempCode, trnspTokStruct.Token);
                     % tempCode = [tempCode, trnspTokStruct.Token];
                     isLastCharTransp = true;
                 else
-                    tempCode = strConcat(tempCode, actChar);
+                    tempCode = MBeautify.strConcat(tempCode, actChar);
                     % tempCode = [tempCode, actChar];
                     isInStr = ~isInStr;
                     isLastCharTransp = false;
@@ -220,12 +220,12 @@ for iStr = 1:numel(actCode)
         isLastCharDot = false;
     elseif isequal(actChar,'.') && ~isInStr
         isLastCharDot = true;
-        tempCode = strConcat(tempCode, actChar);
+        tempCode = MBeautify.strConcat(tempCode, actChar);
         % tempCode = [tempCode, actChar];
         isLastCharTransp = false;
     else
         isLastCharDot = false;
-        tempCode = strConcat(tempCode, actChar);
+        tempCode = MBeautify.strConcat(tempCode, actChar);
         % tempCode = [tempCode, actChar];
         isLastCharTransp = false;
     end

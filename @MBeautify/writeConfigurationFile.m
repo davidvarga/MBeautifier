@@ -14,13 +14,13 @@ settingMFileString = [settingMFileString, 'this.OperatorRules = struct();', spri
 
 for iOp = 1:numel(opFields)
     
-    settingMFileString = strConcat(settingMFileString,sprintf('\n'));
-    settingMFileString = strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, ' = struct();'], sprintf('\n'));
+    settingMFileString = MBeautify.strConcat(settingMFileString,sprintf('\n'));
+    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, ' = struct();'], sprintf('\n'));
     
     valueFrom = regexptranslate('escape', operetorRules.(opFields{iOp}).ValueFrom);
     
-    settingMFileString = strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueFrom = ''', valueFrom, ''';'], sprintf('\n'));
-    settingMFileString = strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueTo = ''', operetorRules.(opFields{iOp}).ValueTo, ''';'], sprintf('\n'));   
+    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueFrom = ''', valueFrom, ''';'], sprintf('\n'));
+    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueTo = ''', operetorRules.(opFields{iOp}).ValueTo, ''';'], sprintf('\n'));   
 end
 
 
@@ -30,12 +30,12 @@ specialRules = resStruct.SpecialRules;
 spFields = fields(specialRules);
 
 for iSp = 1:numel(spFields)
-    settingMFileString = strConcat(settingMFileString,sprintf('\n'));
-    settingMFileString = strConcat(settingMFileString, ['this.SpecialRules.', spFields{iSp}, ' = struct();'], sprintf('\n'));
-    settingMFileString = strConcat(settingMFileString, ['this.SpecialRules.', spFields{iSp}, 'Value = ''', specialRules.(spFields{iSp}).Value, ''';'], sprintf('\n'));
+    settingMFileString = MBeautify.strConcat(settingMFileString,sprintf('\n'));
+    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.SpecialRules.', spFields{iSp}, ' = struct();'], sprintf('\n'));
+    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.SpecialRules.', spFields{iSp}, 'Value = ''', specialRules.(spFields{iSp}).Value, ''';'], sprintf('\n'));
 end
 
-settingMFileString = strConcat(settingMFileString, 'end');
+settingMFileString = MBeautify.strConcat(settingMFileString, 'end');
 
 if exist(fullRulesConfMFileName, 'file')
     fileattrib(fullRulesConfMFileName, '+w');
