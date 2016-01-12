@@ -2,7 +2,10 @@ function beautify(source)
 
 
 % Handle the source
-[codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = MBeautify.handleSource(source);
+[isSourceAvailable, codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = MBeautify.handleSource(source);
+if ~isSourceAvailable
+   return; 
+end
 currentSelection = selectedPosition;
 
 % Get the current configuration
