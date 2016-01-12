@@ -417,7 +417,9 @@ aithmeticOpetors = {'+','-','&','&&','|','||','/', '*'};
 contTokenStruct = tokStruct('ContinueToken');
 if numel(multElBracketStrs)
     
-    parts = cell(1, numel(multElBracketStrs) + 3);
+    % parts contains the input string as a cell like:
+    %   - {'a = ', '[1, 2, 3]', ' + ', '[4, 5 6]', ' + ', '[6    7 8]'}
+    parts = cell(1, numel(multElBracketStrs)*2 + 1);
     
     if multElBracketBegInds(1) == 1
         parts{1} = '';
