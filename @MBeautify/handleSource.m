@@ -1,8 +1,9 @@
-function [codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = handleSource(source)
+function [isSourceAvailable, codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = handleSource(source)
 
 codeToFormat = '';
 additionalInfo = [];
-
+isSourceAvailable = true;
+selectedPosition = '';
 sourceType = '';
 
 if nargin < 1
@@ -31,11 +32,13 @@ switch sourceType
         
         
         currentEditorPage = matlab.desktop.editor.getActive();
-        selectedPosition = currentEditorPage.Selection;
-        
         if isempty(currentEditorPage)
+            isSourceAvailable = false;
             return;
         end
+        selectedPosition = currentEditorPage.Selection;
+        
+       
         additionalInfo = currentEditorPage;
         codeToFormat = currentEditorPage.Text;
         
@@ -46,6 +49,7 @@ switch sourceType
         if isempty(currentEditorPage)
             codeToFormat = '';
             additionalInfo = [];
+            isSourceAvailable = false;
             return;
         end
         
