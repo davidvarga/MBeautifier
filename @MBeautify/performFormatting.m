@@ -408,7 +408,7 @@ end
 
 function data = processBracket(data, settingConf)
 tokStruct = MBeautify.getTokenStruct();
-aithmeticOpetors = {'+','-','&','&&','|','||','/', '*'};
+arithmeticOperators = {'+','-','&','&&','|','||','/', '*'};
 
 % [sad asd asd] => [sad, asd, asd]
 % [hello, thisisfcn(a1, a2, a3) 3rd sin(12, 12)] =>[hello, thisisfcn(a1, a2, a3), 3rd, sin(12, 12)]
@@ -460,10 +460,12 @@ if numel(multElBracketStrs)
                 hasClosingBrckt = numel(strfind(currElem, ')'))|| numel(strfind(currElem, '}'));
                 isInCurlyBracket = isInCurlyBracket && ~hasClosingBrckt;
                 
+                currElemStripped = regexprep(currElem, '[[]{}]', '');
+                nextElemStripped = regexprep(nextElem, '[[]{}]', '');
                 
                 if numel(currElem) && ~(strcmp(currElem(end), ',') || strcmp(currElem(end), ';')) && ~isInCurlyBracket && ...
                         ~strcmp(currElem, contTokenStruct.Token) && ...
-                        ~any(strcmp(currElem, aithmeticOpetors)) && ~any(strcmp(nextElem, aithmeticOpetors))
+                        ~any(strcmp(currElemStripped, arithmeticOperators)) && ~any(strcmp(nextElemStripped, arithmeticOperators))
                     elementsCell{elemInd} = [currElem, '#MBeauty_OP_Comma#'];
                 else
                     elementsCell{elemInd} = [elementsCell{elemInd}, ' '];
