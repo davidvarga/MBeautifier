@@ -401,11 +401,12 @@ for iOpConf = 1: numel(setConfigOperatorFields)
         replaceTokens = {};
         for iSplit = 1:numel(splittedData)-1
            beforeItem = strtrim(splittedData{iSplit});
-           if ~isempty(beforeItem) && numel(regexp(beforeItem(end), '[0-9a-zA-Z_)}\]\.]'))
+           if ~isempty(beforeItem) && numel(regexp(beforeItem, '([0-9a-zA-Z_)}\]\.]|#MBeutyTransp#)$'))
                % + or - is a binary operator after:
                % numbers [0-9.],
                % variable names [a-zA-Z0-9_] or
                % closing brackets )}]
+               % transpose signs ', here represented as #MBeutyTransp#
                replaceTokens{end+1} = opToken;
            else
                replaceTokens{end+1} = unaryOpToken;
@@ -425,9 +426,12 @@ for iOpConf = 1: numel(setConfigOperatorFields)
     end
 end
 
+% At this point the data is in a completely tokenized representation, e.g.
+% 'x#MBeauty_OP_Plus#y' instead of the original 'x + y'.
+% Now go backwards and replace the tokens by the real operators
+
 data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryPlus#', '\s*'], '+');
 data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryMinus#', '\s*'], '-');     
-
 
 % replace all other operators
 for iOpConf = 1: numel(setConfigOperatorFields)
