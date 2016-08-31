@@ -358,9 +358,43 @@ for iOpConf = 1: numel(setConfigOperatorFields)
 end
 
 for iOpConf = 1: numel(setConfigOperatorFields)
-    currField = setConfigOperatorFields{iOpConf};
-    currOpStruct = settingConf.OperatorRules.(currField);
     
+    
+    currField = setConfigOperatorFields{iOpConf};
+    
+    % Handle unary plus and unary minus
+    opToken = ['#MBeauty_OP_', currField, '#'];
+    unaryOpToken = ['#MBeauty_OP_Unary', currField, '#'];
+    
+    if (strcmp(opToken, '#MBeauty_OP_Plus#') || strcmp(opToken, '#MBeauty_OP_Minus#')) && numel(regexp(data, opToken))
+        
+        splittedData = regexp(data, opToken, 'split');
+        
+        replaceTokens = {};
+        for iSplit = 1:numel(splittedData)-1
+           beforeItem = strtrim(splittedData{iSplit});
+           if ~isempty(beforeItem) && numel(regexp(beforeItem(end), '[0-9a-zA-Z_)}\]]'))
+               replaceTokens{end+1} = opToken;
+           else
+               replaceTokens{end+1} = unaryOpToken;
+           end
+        end
+        
+        replacedSplittedData = cell(1, numel(replaceTokens) + numel(splittedData));
+        tokenIndex = 1;
+        for iSplit = 1:numel(splittedData)
+            replacedSplittedData{iSplit*2-1} = splittedData{iSplit};
+            if iSplit < numel(splittedData)
+                replacedSplittedData{iSplit*2} = replaceTokens{tokenIndex};
+            end
+            tokenIndex = tokenIndex + 1;
+        end
+         data = regexprep([replacedSplittedData{:}], ['\s*', '#MBeauty_OP_UnaryPlus#', '\s*'], '+');
+         data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryMinus#', '\s*'], '-');
+        
+    end
+    
+    currOpStruct = settingConf.OperatorRules.(currField);
     data = regexprep(data, ['\s*', '#MBeauty_OP_', currField, '#', '\s*'], currOpStruct.ValueTo);
 end
 
