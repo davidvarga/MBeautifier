@@ -347,22 +347,50 @@ end
 function data = performReplacementsSingleLine(data, settingConf)
 
 setConfigOperatorFields = fields(settingConf.OperatorRules);
+% at this point, the data contains one line of code, but all user-defined strings enclosed in ''
+% were replaced by #MBeutyString#
 
-data = regexprep(data, '\s+', ' ');
+% old-style function calls, such as
+% 'subplot 211' or 'disp Hello World'
+% -> return unchanged
+if numel(regexp(data,'^[a-zA-Z0-9_]+\s+[^(=]'))
+    % TODO: fix whitespace after function name, semicolon at end etc.
+    return
+end
 
-
+% replace all control flow keywords (if, for, ...) by #MBeauty_KW_...#
+keywords=iskeyword();
+for i=1:length(keywords)
+    keyword=keywords{i};
+    if strcmp(keyword,'end')
+        % special handling for 'end':
+        % in 'A(1:end)', it can be treated as a variable.
+        % in 'for ...' 'end', it is a control flow keyword, but in this
+        % case only whitespace and semicolon and nothing else may be on
+        % the line.W
+        if ~numel(regexp(data, '^\s*end[\s;]*$'))
+            continue
+        end
+    end
+    data = regexprep(data, ['(?<![a-zA-Z0-9_])', keyword, '(?![a-zA-Z0-9_])'], ['#MBeauty_KW_',keyword,'#'] );
+end
+% convert all operators like + * == etc to #MBeauty_OP_whatever# tokens
 for iOpConf = 1: numel(setConfigOperatorFields)
     currField = setConfigOperatorFields{iOpConf};
     currOpStruct = settingConf.OperatorRules.(currField); 
     data = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], ['#MBeauty_OP_', currField, '#'] );
 end
 
+% remove all duplicate space
+data = regexprep(data, '\s+', ' ');
+
+% find unary plus/minus, such as in (+1), but not in (1+2)
+% if found, replace #MBeauty_OP_Plus# by #MBeauty_OP_UnaryPlus#
+% Then convert UnaryPlus tokens to '+' signs
+% (same for minus)
 for iOpConf = 1: numel(setConfigOperatorFields)
-    
-    
     currField = setConfigOperatorFields{iOpConf};
     
-    % Handle unary plus and unary minus
     opToken = ['#MBeauty_OP_', currField, '#'];
     unaryOpToken = ['#MBeauty_OP_Unary', currField, '#'];
     
@@ -373,7 +401,12 @@ for iOpConf = 1: numel(setConfigOperatorFields)
         replaceTokens = {};
         for iSplit = 1:numel(splittedData)-1
            beforeItem = strtrim(splittedData{iSplit});
-           if ~isempty(beforeItem) && numel(regexp(beforeItem(end), '[0-9a-zA-Z_)}\]]'))
+           if ~isempty(beforeItem) && numel(regexp(beforeItem, '([0-9a-zA-Z_)}\]\.]|#MBeutyTransp#)$'))
+               % + or - is a binary operator after:
+               % numbers [0-9.],
+               % variable names [a-zA-Z0-9_] or
+               % closing brackets )}]
+               % transpose signs ', here represented as #MBeutyTransp#
                replaceTokens{end+1} = opToken;
            else
                replaceTokens{end+1} = unaryOpToken;
@@ -389,11 +422,20 @@ for iOpConf = 1: numel(setConfigOperatorFields)
             end
             tokenIndex = tokenIndex + 1;
         end
-         data = regexprep([replacedSplittedData{:}], ['\s*', '#MBeauty_OP_UnaryPlus#', '\s*'], '+');
-         data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryMinus#', '\s*'], '-');
-        
+        data = [replacedSplittedData{:}];   
     end
-    
+end
+
+% At this point the data is in a completely tokenized representation, e.g.
+% 'x#MBeauty_OP_Plus#y' instead of the original 'x + y'.
+% Now go backwards and replace the tokens by the real operators
+
+data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryPlus#', '\s*'], '+');
+data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryMinus#', '\s*'], '-');     
+
+% replace all other operators
+for iOpConf = 1: numel(setConfigOperatorFields)
+    currField = setConfigOperatorFields{iOpConf};
     currOpStruct = settingConf.OperatorRules.(currField);
     data = regexprep(data, ['\s*', '#MBeauty_OP_', currField, '#', '\s*'], currOpStruct.ValueTo);
 end
@@ -403,9 +445,15 @@ data = regexprep(data, ' \]', ']');
 data = regexprep(data, '\( ', '(');
 data = regexprep(data, '\[ ', '[');
 
+% restore keywords
+keywords=iskeyword();
+for i=1:length(keywords)
+    keyword=keywords{i};
+    data = regexprep(data, ['\s*', '#MBeauty_KW_',keyword,'#', '\s*'], [' ', keyword, ' '] );
+end
 
-data = regexprep(data, 'if(', 'if (');
-data = regexprep(data, 'while(', 'while (');
+% fix semicolon whitespace at end of line
+data = regexprep(data, '\s+;\s*$', ';');
 
 %% Process Brackets
 if str2double(settingConf.SpecialRules.AddCommasToMatricesValue)
