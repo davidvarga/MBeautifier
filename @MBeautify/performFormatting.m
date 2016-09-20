@@ -556,6 +556,11 @@ contTokenStruct = tokStruct('ContinueToken');
 id = 0;
 
 while maxDepth > 0
+    
+    if isempty(containerBorderIndexes)
+       break; 
+    end
+    
     indexes = find([containerBorderIndexes{:, 2}] == maxDepth, 2);
     
     if ~numel(indexes)
