@@ -1,6 +1,5 @@
 function beautify(source)
 
-
 % Handle the source
 [isSourceAvailable, codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = MBeautify.handleSource(source);
 if ~isSourceAvailable

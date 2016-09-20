@@ -1,7 +1,6 @@
 function formattedSource = performFormatting(source, settingConf)
 
 
-
 nMaximalNewLines = str2double(settingConf.SpecialRules.MaximalNewLinesValue);
 newLine = sprintf('\n');
 
@@ -189,24 +188,23 @@ isInStr = false;
 for iStr = 1:numel(actCode)
     actChar = actCode(iStr);
     
-    if isequal(actChar, '''')
+    if strcmp(actChar, '''')
         % .' => NonConj transpose
         if isLastCharDot
             tempCode = tempCode(1:end - 1);
-            tempCode = MBeautify.strConcat(tempCode, nonConjTrnspTokStruct.Token);
+            tempCode = [tempCode, nonConjTrnspTokStruct.Token];
             isLastCharTransp = true;
         else
             if isLastCharTransp
-                tempCode = MBeautify.strConcat(tempCode, trnspTokStruct.Token);
+                tempCode = [tempCode, trnspTokStruct.Token];
                 isLastCharTransp = true;
             else
                 
                 if numel(tempCode) && numel(regexp(tempCode(end), charsIndicateTranspose)) && ~isInStr
-                    
-                    tempCode = MBeautify.strConcat(tempCode, trnspTokStruct.Token);
+                    tempCode = [tempCode, trnspTokStruct.Token];
                     isLastCharTransp = true;
                 else
-                    tempCode = MBeautify.strConcat(tempCode, actChar);
+                    tempCode = [tempCode, actChar];
                     isInStr = ~isInStr;
                     isLastCharTransp = false;
                 end
@@ -216,7 +214,6 @@ for iStr = 1:numel(actCode)
         isLastCharDot = false;
     elseif isequal(actChar, '.') && ~isInStr
         isLastCharDot = true;
-%         tempCode = MBeautify.strConcat(tempCode, actChar);
         tempCode = [tempCode, actChar];
         isLastCharTransp = false;
     else
@@ -254,7 +251,7 @@ else
 end
 
 % In block comment, return
-if isequal(retComm, 1), return ; end
+if isequal(retComm, 1), return; end
 
 % Empty line, simply return
 if isempty(trimmedLine)
@@ -338,6 +335,10 @@ end
 
 function data = performReplacementsSingleLine(data, settingConf)
 
+if isempty(data)
+    return;
+end
+
 tokStruct = MBeautify.getTokenStruct();
 
 setConfigOperatorFields = fields(settingConf.OperatorRules);
@@ -346,7 +347,7 @@ setConfigOperatorFields = fields(settingConf.OperatorRules);
 keywords = iskeyword();
 
 % Old-style function calls, such as 'subplot 211' or 'disp Hello World' -> return unchanged
-if numel(regexp(data,'^[a-zA-Z0-9_]+\s+[^(=]'))
+if numel(regexp(data, '^[a-zA-Z0-9_]+\s+[^(=]'))
     
     splitData = regexp(strtrim(data), ' ', 'split');
     % The first elemen is not a keyword and does not exist (function on the path)
@@ -361,26 +362,36 @@ end
 % inserted to the original data
 [data, arrayMapCell] = processContainer(data, settingConf);
 
-% Replace all control flow keywords (if, for, ...) by #MBeauty_KW_...#
-for i = 1:length(keywords)
-    keyword = keywords{i};
-    if strcmp(keyword, 'end')
-        % special handling for 'end':
-        %   - in 'A(1:end)', it can be treated as a variable.
-        %   - in 'for ...' 'end', it is a control flow keyword, but in this case only whitespace and semicolon and nothing
-        %       else may be on the line.W
-        if ~numel(regexp(data, '^\s*end[\s;]*$'))
-            continue
-        end
-    end
-    data = regexprep(data, ['(?<![a-zA-Z0-9_])', keyword, '(?![a-zA-Z0-9_])'], ['#MBeauty_KW_', keyword, '#']);
-end
+% % Replace all control flow keywords (if, for, ...) by #MBeauty_KW_...#
+% for i = 1:length(keywords)
+%     keyword = keywords{i};
+%     if strcmp(keyword, 'end')
+%         % special handling for 'end':
+%         %   - in 'A(1:end)', it can be treated as a variable.
+%         %   - in 'for ...' 'end', it is a control flow keyword, but in this case only whitespace and semicolon and nothing
+%         %       else may be on the line.W
+%         if ~numel(regexp(data, '^\s*end[\s;]*$'))
+%             continue
+%         end
+%     end
+%     data = regexprep(data, ['(?<![a-zA-Z0-9_])', keyword, '(?![a-zA-Z0-9_])'], ['#MBeauty_KW_', keyword, '#']);
+% end
 
 % Convert all operators like + * == etc to #MBeauty_OP_whatever# tokens
-for iOpConf = 1:numel(setConfigOperatorFields)
-    currField = setConfigOperatorFields{iOpConf};
-    currOpStruct = settingConf.OperatorRules.(currField);
-    data = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], ['#MBeauty_OP_', currField, '#']);
+opBuffer = {};
+operatorList = MBeautify.getAllOperators();
+operatorAppearance = regexp(data, operatorList);
+% operatorAppearance(cellfun(@(x) isempty(x), operatorAppearance)) = [];
+if ~isempty([operatorAppearance{:}])
+    for iOpConf = 1:numel(setConfigOperatorFields)
+        currField = setConfigOperatorFields{iOpConf};
+        currOpStruct = settingConf.OperatorRules.(currField);
+        dataNew = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], ['#MBeauty_OP_', currField, '#']);
+        if ~strcmp(data, dataNew)
+            opBuffer{end + 1} = ['#MBeauty_OP_', currField, '#'];
+        end
+        data = dataNew;
+    end
 end
 
 % Remove all duplicate space
@@ -414,7 +425,7 @@ for iOpConf = 1:numel(setConfigOperatorFields)
                 
                 % Special treatment for E: 7E-3 or 7e+4 normalized notation
                 % In this case the + and - signs are not operators so shoud be skipped
-                if strcmpi(beforeItem(end), 'e')
+                if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end - 1), '[0-9]'))
                     replaceTokens{end + 1} = normalizedNotationToken;
                 else
                     replaceTokens{end + 1} = opToken;
@@ -447,23 +458,28 @@ data = regexprep(data, ['\s*', '#MBeauty_OP_NormNotation_Plus#', '\s*'], '+');
 data = regexprep(data, ['\s*', '#MBeauty_OP_NormNotation_Minus#', '\s*'], '-');
 
 % Replace all other operators
+
 for iOpConf = 1:numel(setConfigOperatorFields)
+    
     currField = setConfigOperatorFields{iOpConf};
-    currOpStruct = settingConf.OperatorRules.(currField);
-    data = regexprep(data, ['\s*', '#MBeauty_OP_', currField, '#', '\s*'], currOpStruct.ValueTo);
+    if any(strcmp(['#MBeauty_OP_', currField, '#'], opBuffer))
+        currOpStruct = settingConf.OperatorRules.(currField);
+        data = regexprep(data, ['\s*', '#MBeauty_OP_', currField, '#', '\s*'], currOpStruct.ValueTo);
+    end
 end
+
 
 data = regexprep(data, ' \)', ')');
 data = regexprep(data, ' \]', ']');
 data = regexprep(data, '\( ', '(');
 data = regexprep(data, '\[ ', '[');
 
-% Restore keywords
-keywords = iskeyword();
-for i = 1:length(keywords)
-    keyword = keywords{i};
-    data = regexprep(data, ['\s*', '#MBeauty_KW_', keyword, '#', '\s*'], [' ', keyword, ' ']);
-end
+% % Restore keywords
+% keywords = iskeyword();
+% for i = 1:length(keywords)
+%     keyword = keywords{i};
+%     data = regexprep(data, ['\s*', '#MBeauty_KW_', keyword, '#', '\s*'], [' ', keyword, ' ']);
+% end
 
 % Restore containers
 data = decodeArrayTokens(data, arrayMapCell, settingConf);
@@ -558,7 +574,7 @@ id = 0;
 while maxDepth > 0
     
     if isempty(containerBorderIndexes)
-       break; 
+        break;
     end
     
     indexes = find([containerBorderIndexes{:, 2}] == maxDepth, 2);
@@ -578,7 +594,6 @@ while maxDepth > 0
     str = regexprep(str, ['\s+', closingBracket], closingBracket);
     
     elementsCell = regexp(str, ' ', 'split');
-    
     
     firstElem = strtrim(elementsCell{1});
     lastElem = strtrim(elementsCell{end});
@@ -609,7 +624,6 @@ while maxDepth > 0
             continue;
         end
         
-        
         hasOpeningBrckt = numel(strfind(currElem, openingBracket));
         isInCurlyBracket = isInCurlyBracket || hasOpeningBrckt;
         hasClosingBrckt = numel(strfind(currElem, closingBracket));
@@ -631,7 +645,6 @@ while maxDepth > 0
                 ~(strcmp(currElem(end), ',') || strcmp(currElem(end), ';')) && ~isInCurlyBracket && ...
                 ~strcmp(currElem, contTokenStruct.Token) && ...
                 ~any(strcmp(currElemStripped, operatorArray)) && ~any(strcmp(nextElemStripped, operatorArray))
-            
             
             elementsCell{elemInd} = [currElem, '#MBeauty_OP_Comma#'];
         else
@@ -663,7 +676,7 @@ while maxDepth > 0
     datacell{2} = tokenOfCUrElem;
     data = [datacell{:}];
     
-    containerBorderIndexes = calculateContainerDepths(data, openingBrackets, closingBrackets); 
+    containerBorderIndexes = calculateContainerDepths(data, openingBrackets, closingBrackets);
 end
 end
 

@@ -1,11 +1,22 @@
 function configurationStruct = getConfigurationStruct()
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
+% Gets the configuration struct from the rules file
 
-currCD = cd();
-cd(MBeautify.SettingDirectory);
-configurationStruct = eval(MBeautify.RulesMFile(1:end-2));
-cd(currCD);
+% Persistent variable to store the returned rules
+% If MBeatify.setup was not called, the stored struct should be returned
+persistent configurationStructStored;
+
+if isempty(configurationStructStored) || ~MBeautify.parsingUpToDate()
+    
+    
+    currCD = cd();
+    cd(MBeautify.SettingDirectory);
+    configurationStruct = eval(MBeautify.RulesMFile(1:end-2));
+    cd(currCD)
+    configurationStructStored = configurationStruct;
+    MBeautify.parsingUpToDate(true);
+else
+    configurationStruct = configurationStructStored;
+end
 
 end
 

@@ -10,9 +10,27 @@ classdef MBeautify
         CommentTemplate = 'MBeautify_Comment.xml';
     end
     
+    properties(Access = private)
+        ParsingUpToDate = false;
+    end
+    
+    methods (Static = true, Access = private)
+        % Method to mimic a static data member
+        % Indicates that the token parsing is up to date or the rules file should be reparsed
+        function val = parsingUpToDate(val)
+            persistent currentval;
+            if isempty(currentval)
+                currentval = true;
+            end
+            if nargin >= 1
+                currentval = val;
+            end
+            
+            val = currentval;
+        end
+    end
+
     methods(Static = true)
-        
-        
         
         % Function to set-up MBeautifier for use
         %   - (optional) Writes the default settings XML file
@@ -30,7 +48,10 @@ classdef MBeautify
     
     methods(Static = true, Access = private )
         
+
+        
         [result, nCurrentNewlines] = handleMaximalNewLines(line, nCurrentNewlines, maximalNewLines);
+        operators = getAllOperators();
         
         [isSourceAvailable, codeBefore, codeToFormat, codeAfter, selectedPosition, additionalInfo] = handleSource(source);
         formattedSource = performFormatting(source, settingConf)
