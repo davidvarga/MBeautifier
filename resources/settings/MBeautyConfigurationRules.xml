@@ -136,5 +136,9 @@
          <Key>AddCommasToMatrices</Key>
          <Value>1</Value>
       </SpecialRule>
+      <SpecialRule>
+         <Key>AddCommasToCellArrays</Key>
+      <Value>1</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>

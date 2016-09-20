@@ -111,4 +111,7 @@ this.SpecialRules.MaximalNewLinesValue = '2';
 
 this.SpecialRules.AddCommasToMatrices = struct();
 this.SpecialRules.AddCommasToMatricesValue = '1';
+
+this.SpecialRules.AddCommasToCellArrays = struct();
+this.SpecialRules.AddCommasToCellArraysValue = '1';
 end
