@@ -579,7 +579,7 @@ while maxDepth > 0
     
     indexes = find([containerBorderIndexes{:, 2}] == maxDepth, 2);
     
-    if ~numel(indexes)
+    if ~numel(indexes) || mod(numel(indexes), 2) ~= 0
         maxDepth = maxDepth - 1;
         continue;
     end
