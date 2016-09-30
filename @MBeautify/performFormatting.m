@@ -41,7 +41,7 @@ for j = 1:numel(textArray) % in textArray)
     trimmedCode = strtrim(actCode);
     if numel(trimmedCode)
 
-        containerDepth = containerDepth + isContainerStarts(trimmedCode) -isContainerEnds(trimmedCode);
+        containerDepth = containerDepth + calculateContainerDepthDeltaOfLine(trimmedCode);
         
         if containerDepth && ~(numel(trimmedCode) >= 3 && strcmp(trimmedCode(end - 2:end), '...'))
             postfix = '; ...';
@@ -112,25 +112,17 @@ formattedSource = [replacedTextArray{:}];
 
 end
 
-function ret = isContainerStarts(trimmedCode)
+function ret = calculateContainerDepthDeltaOfLine(code)
 ret = 0;
-if numel(regexp(trimmedCode, '{|['))
-    actCodeTemp = replaceTransponations(trimmedCode);
+if numel(regexp(code, '{|[')) || numel(regexp(code, '}|]'))
+    actCodeTemp = replaceTransponations(code);
     actCodeTemp = replaceStrings(actCodeTemp);
+    
     ret = numel(regexp(actCodeTemp, '{|[')) - numel(regexp(actCodeTemp, '}|]'));
  
 end
 end
 
-function ret = isContainerEnds(trimmedCode)
-ret = 0;
-if numel(regexp(trimmedCode, '}|]'))
-    actCodeTemp = replaceTransponations(trimmedCode);
-    actCodeTemp = replaceStrings(actCodeTemp);
-    ret = numel(regexp(actCodeTemp, '}|]')) - numel(regexp(actCodeTemp, '{|['));
-end
-
-end
 
 function [actCode, actComment] = getCodeAndComment(line, commPos)
 if isequal(commPos, 1)
