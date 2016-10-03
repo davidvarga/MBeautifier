@@ -140,5 +140,13 @@
          <Key>AddCommasToCellArrays</Key>
       <Value>1</Value>
       </SpecialRule>
+      <SpecialRule>
+         <Key>CellArrayIndexing_ArithmeticOperatorPadding</Key>
+      <Value>0</Value>
+      </SpecialRule>
+      <SpecialRule>
+         <Key>MatrixIndexing_ArithmeticOperatorPadding</Key>
+      <Value>0</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>

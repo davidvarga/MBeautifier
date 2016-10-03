@@ -114,4 +114,10 @@ this.SpecialRules.AddCommasToMatricesValue = '1';
 
 this.SpecialRules.AddCommasToCellArrays = struct();
 this.SpecialRules.AddCommasToCellArraysValue = '1';
+
+this.SpecialRules.CellArrayIndexing_ArithmeticOperatorPadding = struct();
+this.SpecialRules.CellArrayIndexing_ArithmeticOperatorPaddingValue = '0';
+
+this.SpecialRules.MatrixIndexing_ArithmeticOperatorPadding = struct();
+this.SpecialRules.MatrixIndexing_ArithmeticOperatorPaddingValue = '0';
 end

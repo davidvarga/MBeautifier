@@ -1,5 +1,7 @@
 function formattedSource = performFormatting(source, settingConf)
 
+
+
 nMaximalNewLines = str2double(settingConf.SpecialRules.MaximalNewLinesValue);
 newLine = sprintf('\n');
 
@@ -13,7 +15,6 @@ textArray = regexp(source, newLine, 'split');
 
 replacedTextArray = cell(1, numel(textArray) * 4);
 isInContinousLine = 0;
-containerDepth = 0;
 contLineArray = cell(0, 2);
 
 isInBlockComment = false;
@@ -39,70 +40,55 @@ for j = 1:numel(textArray) % in textArray)
     
     %% Check for line continousment (...)
     trimmedCode = strtrim(actCode);
-    if numel(trimmedCode)
-
-        containerDepth = containerDepth + calculateContainerDepthDeltaOfLine(trimmedCode);
-        
-        if containerDepth && ~(numel(trimmedCode) >= 3 && strcmp(trimmedCode(end - 2:end), '...'))
-            postfix = '; ...';
-            if strcmp(trimmedCode(end), ',') || strcmp(trimmedCode(end), ';')
-                actCode = trimmedCode(1:end-1);
-            end
-            actCode = [actCode, postfix];
-        end
-        
-        trimmedCode = strtrim(actCode);
-        
-        % Line ends with "..."
-        if (numel(trimmedCode) >= 3 && strcmp(trimmedCode(end - 2:end), '...')) ...
-                || (isequal(splittingPos, 1) && isInContinousLine)
-            isInContinousLine = true;
+    % Line ends with "..."
+    if (numel(trimmedCode) >= 3 && strcmp(trimmedCode(end - 2:end), '...')) ...
+            || (isequal(splittingPos, 1) && isInContinousLine)
+        isInContinousLine = true;
+        contLineArray{end + 1, 1} = actCode;
+        contLineArray{end, 2} = actComment;
+        % Step to next line
+        continue;
+    else
+        % End of cont line
+        if isInContinousLine
+            isInContinousLine = 0;
             contLineArray{end + 1, 1} = actCode;
             contLineArray{end, 2} = actComment;
-            % Step to next line
-            continue;
-        else
-            % End of cont line
-            if isInContinousLine
-                isInContinousLine = 0;
-                contLineArray{end + 1, 1} = actCode;
-                contLineArray{end, 2} = actComment;
+            
+            %% ToDo: Process
+            replacedLines = '';
+            for iLine = 1:size(contLineArray, 1) - 1
+                tempRow = strtrim(contLineArray{iLine, 1});
+                tempRow = [tempRow(1:end - 3), [' ', contTokenStruct.Token, ' ']];
+                tempRow = regexprep(tempRow, ['\s+', contTokenStruct.Token, '\s+'], [' ', contTokenStruct.Token, ' ']);
+                replacedLines = MBeautify.strConcat(replacedLines, tempRow);
                 
-                %% ToDo: Process
-                replacedLines = '';
-                for iLine = 1:size(contLineArray, 1) - 1
-                    tempRow = strtrim(contLineArray{iLine, 1});
-                    tempRow = [tempRow(1:end - 3), [' ', contTokenStruct.Token, ' ']];
-                    tempRow = regexprep(tempRow, ['\s+', contTokenStruct.Token, '\s+'], [' ', contTokenStruct.Token, ' ']);
-                    replacedLines = MBeautify.strConcat(replacedLines, tempRow);
-                end
-                
-                replacedLines = MBeautify.strConcat(replacedLines, actCode);
-                
-                actCodeFinal = performReplacements(replacedLines, settingConf);
-                
-                splitToLine = regexp(actCodeFinal, contTokenStruct.Token, 'split');
-                
-                line = '';
-                for iSplitLine = 1:numel(splitToLine) - 1
-                    line = MBeautify.strConcat(line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine, 2}, newLine);
-                end
-                line = MBeautify.strConcat(line, strtrim(splitToLine{end}), actComment);
-                
-                [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
-                
-                contLineArray = cell(0, 2);
-                
-                continue;
             end
             
+            replacedLines = MBeautify.strConcat(replacedLines, actCode);
+            
+            actCodeFinal = performReplacements(replacedLines, settingConf);
+            
+            splitToLine = regexp(actCodeFinal, contTokenStruct.Token, 'split');
+            
+            line = '';
+            for iSplitLine = 1:numel(splitToLine) - 1
+                line = MBeautify.strConcat(line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine, 2}, newLine);
+            end
+            line = MBeautify.strConcat(line, strtrim(splitToLine{end}), actComment);
+            
+            [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
+            
+            contLineArray = cell(0, 2);
+            
+            continue;
+            
+            
         end
-        
-        actCodeFinal = performReplacements(actCode, settingConf);
-    else
-        actCodeFinal = '';
     end
     
+    
+    actCodeFinal = performReplacements(actCode, settingConf);
     line = [strtrim(actCodeFinal), ' ', actComment];
     [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
     
@@ -111,18 +97,6 @@ end
 formattedSource = [replacedTextArray{:}];
 
 end
-
-function ret = calculateContainerDepthDeltaOfLine(code)
-ret = 0;
-if numel(regexp(code, '{|[')) || numel(regexp(code, '}|]'))
-    actCodeTemp = replaceTransponations(code);
-    actCodeTemp = replaceStrings(actCodeTemp);
-    
-    ret = numel(regexp(actCodeTemp, '{|[')) - numel(regexp(actCodeTemp, '}|]'));
- 
-end
-end
-
 
 function [actCode, actComment] = getCodeAndComment(line, commPos)
 if isequal(commPos, 1)
@@ -137,12 +111,18 @@ else
 end
 end
 
-function [actCodeTemp, strTokStructs] = replaceStrings(actCode)
+function actCodeFinal = performReplacements(actCode, settingConf)
+
 tokStruct = MBeautify.getTokenStruct();
+%% Transpose
+actCode = replaceTransponations(actCode);
+trnspTokStruct = tokStruct('TransposeToken');
+nonConjTrnspTokStruct = tokStruct('NonConjTransposeToken');
+
 
 %% Strings
 splittedCode = regexp(actCode, '''', 'split');
-
+strTokenStruct = tokStruct('StringToken');
 
 strTokStructs = cell(1, ceil(numel(splittedCode) / 2));
 
@@ -168,12 +148,9 @@ end
 strTokStructs = strTokStructs(cellfun(@(x) ~isempty(x), strTokStructs));
 
 actCodeTemp = [strArray{:}];
+actCodeTemp = performReplacementsSingleLine(actCodeTemp, settingConf);
 
-end
 
-function actCodeFinal = restoreStrings(actCodeTemp, strTokStructs)
-tokStruct = MBeautify.getTokenStruct();
-strTokenStruct = tokStruct('StringToken');
 splitByStrTok = regexp(actCodeTemp, strTokenStruct.Token, 'split');
 
 if numel(strTokStructs)
@@ -191,8 +168,10 @@ else
     actCodeFinal = actCodeTemp;
 end
 
-% actCodeFinal = regexprep(actCodeFinal, trnspTokStruct.Token, trnspTokStruct.StoredValue);
-% actCodeFinal = regexprep(actCodeFinal, nonConjTrnspTokStruct.Token, nonConjTrnspTokStruct.StoredValue);
+actCodeFinal = regexprep(actCodeFinal, trnspTokStruct.Token, trnspTokStruct.StoredValue);
+actCodeFinal = regexprep(actCodeFinal, nonConjTrnspTokStruct.Token, nonConjTrnspTokStruct.StoredValue);
+
+
 end
 
 function actCode = replaceTransponations(actCode)
@@ -247,26 +226,6 @@ end
 actCode = tempCode;
 end
 
-function actCodeFinal = restoreTransponations(actCodeFinal)
-tokStruct = MBeautify.getTokenStruct();
-trnspTokStruct = tokStruct('TransposeToken');
-nonConjTrnspTokStruct = tokStruct('NonConjTransposeToken');
-
-actCodeFinal = regexprep(actCodeFinal, trnspTokStruct.Token, trnspTokStruct.StoredValue);
-actCodeFinal = regexprep(actCodeFinal, nonConjTrnspTokStruct.Token, nonConjTrnspTokStruct.StoredValue);
-end
-
-function actCodeFinal = performReplacements(actCode, settingConf)
-actCode = replaceTransponations(actCode);
-[actCode, strTokenStruct] = replaceStrings(actCode);
-
-actCodeTemp = performReplacementsSingleLine(actCode, settingConf);
-
-actCodeFinal = restoreStrings(actCodeTemp, strTokenStruct);
-actCodeFinal = restoreTransponations(actCodeFinal);
-
-end
-
 function [retComm, exclamationPos, isInBlockComment, blockCommentDepth] = findComment(line, isInBlockComment, blockCommentDepth)
 %% Set the variables
 retComm = -1;
@@ -293,7 +252,7 @@ else
 end
 
 % In block comment, return
-if isequal(retComm, 1), return; end
+if isequal(retComm, 1), return ; end
 
 % Empty line, simply return
 if isempty(trimmedLine)
@@ -374,6 +333,7 @@ end
 
 end
 
+
 function data = performReplacementsSingleLine(data, settingConf)
 
 if isempty(data)
@@ -388,7 +348,7 @@ setConfigOperatorFields = fields(settingConf.OperatorRules);
 keywords = iskeyword();
 
 % Old-style function calls, such as 'subplot 211' or 'disp Hello World' -> return unchanged
-if numel(regexp(data, '^[a-zA-Z0-9_]+\s+[^(=]'))
+if numel(regexp(data,'^[a-zA-Z0-9_]+\s+[^(=]'))
     
     splitData = regexp(strtrim(data), ' ', 'split');
     % The first elemen is not a keyword and does not exist (function on the path)
@@ -429,7 +389,7 @@ if ~isempty([operatorAppearance{:}])
         currOpStruct = settingConf.OperatorRules.(currField);
         dataNew = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], ['#MBeauty_OP_', currField, '#']);
         if ~strcmp(data, dataNew)
-            opBuffer{end + 1} = ['#MBeauty_OP_', currField, '#'];
+            opBuffer{end+1} = ['#MBeauty_OP_', currField, '#'];
         end
         data = dataNew;
     end
@@ -466,7 +426,7 @@ for iOpConf = 1:numel(setConfigOperatorFields)
                 
                 % Special treatment for E: 7E-3 or 7e+4 normalized notation
                 % In this case the + and - signs are not operators so shoud be skipped
-                if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end - 1), '[0-9]'))
+                if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end-1), '[0-9]'))
                     replaceTokens{end + 1} = normalizedNotationToken;
                 else
                     replaceTokens{end + 1} = opToken;
@@ -500,14 +460,14 @@ data = regexprep(data, ['\s*', '#MBeauty_OP_NormNotation_Minus#', '\s*'], '-');
 
 % Replace all other operators
 
-for iOpConf = 1:numel(setConfigOperatorFields)
-    
-    currField = setConfigOperatorFields{iOpConf};
-    if any(strcmp(['#MBeauty_OP_', currField, '#'], opBuffer))
+    for iOpConf = 1:numel(setConfigOperatorFields)
+       
+        currField = setConfigOperatorFields{iOpConf};
+     if any(strcmp( ['#MBeauty_OP_', currField, '#'], opBuffer))
         currOpStruct = settingConf.OperatorRules.(currField);
         data = regexprep(data, ['\s*', '#MBeauty_OP_', currField, '#', '\s*'], currOpStruct.ValueTo);
+        end
     end
-end
 
 
 data = regexprep(data, ' \)', ')');
@@ -569,6 +529,7 @@ end
 
 end
 
+
 function [containerBorderIndexes, maxDepth] = calculateContainerDepths(data, openingBrackets, closingBrackets)
 containerBorderIndexes = {};
 depth = 1;
@@ -599,7 +560,6 @@ arrayMap = containers.Map();
 if isempty(data)
     return
 end
-data = regexprep(data, '\s+;', ';');
 openingBrackets = {'[', '{'};
 closingBrackets = {']', '}'};
 
@@ -613,14 +573,9 @@ contTokenStruct = tokStruct('ContinueToken');
 id = 0;
 
 while maxDepth > 0
-    
-    if isempty(containerBorderIndexes)
-        break;
-    end
-    
     indexes = find([containerBorderIndexes{:, 2}] == maxDepth, 2);
     
-    if ~numel(indexes) || mod(numel(indexes), 2) ~= 0
+    if ~numel(indexes)
         maxDepth = maxDepth - 1;
         continue;
     end
@@ -635,6 +590,7 @@ while maxDepth > 0
     str = regexprep(str, ['\s+', closingBracket], closingBracket);
     
     elementsCell = regexp(str, ' ', 'split');
+    
     
     firstElem = strtrim(elementsCell{1});
     lastElem = strtrim(elementsCell{end});
@@ -665,6 +621,7 @@ while maxDepth > 0
             continue;
         end
         
+        
         hasOpeningBrckt = numel(strfind(currElem, openingBracket));
         isInCurlyBracket = isInCurlyBracket || hasOpeningBrckt;
         hasClosingBrckt = numel(strfind(currElem, closingBracket));
@@ -686,6 +643,7 @@ while maxDepth > 0
                 ~(strcmp(currElem(end), ',') || strcmp(currElem(end), ';')) && ~isInCurlyBracket && ...
                 ~strcmp(currElem, contTokenStruct.Token) && ...
                 ~any(strcmp(currElemStripped, operatorArray)) && ~any(strcmp(nextElemStripped, operatorArray))
+            
             
             elementsCell{elemInd} = [currElem, '#MBeauty_OP_Comma#'];
         else
@@ -717,7 +675,7 @@ while maxDepth > 0
     datacell{2} = tokenOfCUrElem;
     data = [datacell{:}];
     
-    containerBorderIndexes = calculateContainerDepths(data, openingBrackets, closingBrackets);
+    containerBorderIndexes = calculateContainerDepths(data, openingBrackets, closingBrackets); 
 end
 end
 
