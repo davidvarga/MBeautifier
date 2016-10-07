@@ -1,4 +1,5 @@
-function formattedSource = performFormatting(source, settingConf)
+function formattedSource = performFormatting(source)
+settingConf = MBeautify.getConfigurationStruct();
 
 nMaximalNewLines = str2double(settingConf.SpecialRules.MaximalNewLinesValue);
 newLine = sprintf('\n');
@@ -615,6 +616,19 @@ while maxDepth > 0
     closingBracket = data(containerBorderIndexes{indexes(2), 1});
     
     isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), ['[a-zA-Z0-9_]\s*[', openingBracket, ']']));
+    preceedingKeyWord = false;
+    if isContainerIndexing
+        keywords = iskeyword();
+        prevStr = strtrim(data(1:containerBorderIndexes{indexes(1), 1}-1));
+        for i=1 :numel(keywords)
+            if numel(regexp(prevStr, ['(?<=\s|^)', keywords{i}, '$']))
+                isContainerIndexing = false;
+                preceedingKeyWord = true;
+                break;
+            end
+        end
+    end
+    
     doIndexing = isContainerIndexing;
     if doIndexing
         
@@ -631,6 +645,8 @@ while maxDepth > 0
     str = regexprep(str, '\s+', ' ');
     str = regexprep(str, [openingBracket, '\s+'], openingBracket);
     str = regexprep(str, ['\s+', closingBracket], closingBracket);
+    
+
     
     if ~strcmp(openingBracket, '(')
         if doIndexing
@@ -711,6 +727,9 @@ while maxDepth > 0
         datacell{1} = data(1:containerBorderIndexes{indexes(1), 1}-1);
         if isContainerIndexing
             datacell{1} = strtrim(datacell{1});
+        elseif preceedingKeyWord
+            datacell{1} = strtrim(datacell{1});
+            datacell{1} = [datacell{1}, ' '];
         end
     end
     
@@ -719,6 +738,9 @@ while maxDepth > 0
     else
         datacell{end} = data(containerBorderIndexes{indexes(2), 1}+1:end);
     end
+    
+    
+
     
     idStr = [repmat('0', 1, 5-numel(num2str(id))), num2str(id)];
     tokenOfCUrElem = ['#MBeauty_ArrayToken_', idStr, '#'];
