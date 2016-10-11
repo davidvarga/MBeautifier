@@ -11,6 +11,11 @@ if isempty(tokenStructStored)
     tokenStructs('ArrayElementToken') = newStruct('', '#MBeutyArrayElement#');
     tokenStructs('TransposeToken') = newStruct('''', '#MBeutyTransp#');
     tokenStructs('NonConjTransposeToken') = newStruct('.''', '#MBeutyNonConjTransp#');
+    tokenStructs('NormNotationPlus') = newStruct('+', '#MBeauty_OP_NormNotationPlus');
+    tokenStructs('NormNotationMinus') = newStruct('-', '#MBeauty_OP_NormNotationMinus');
+    tokenStructs('UnaryPlus') = newStruct('+', '#MBeauty_OP_UnaryPlus');
+    tokenStructs('UnaryMinus') = newStruct('-', '#MBeauty_OP_UnaryMinus');
+    
     tokenStructStored = tokenStructs;
 else
     tokenStructs = tokenStructStored;

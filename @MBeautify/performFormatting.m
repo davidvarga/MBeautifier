@@ -19,12 +19,11 @@ contLineArray = cell(0, 2);
 
 isInBlockComment = false;
 blockCommentDepth = 0;
-lastIndexUsed = 0;
 nNewLinesFound = 0;
 for j = 1:numel(textArray) % in textArray)
     line = textArray{j};
     
-    %% Process the maximal new-line count 
+    %% Process the maximal new-line count
     isAcceptable = true;
     
     if isempty(strtrim(line))
@@ -64,7 +63,7 @@ for j = 1:numel(textArray) % in textArray)
         trimmedCode = strtrim(actCode);
         
         % Line ends with "..."
-        if(numel(trimmedCode) >= 3 && strcmp(trimmedCode(end-2:end), '...')) ...
+        if (numel(trimmedCode) >= 3 && strcmp(trimmedCode(end-2:end), '...')) ...
                 || (isequal(splittingPos, 1) && isInContinousLine)
             isInContinousLine = true;
             contLineArray{end+1, 1} = actCode;
@@ -99,7 +98,7 @@ for j = 1:numel(textArray) % in textArray)
                 end
                 line = [line, strtrim(splitToLine{end}), actComment]; %#ok<*AGROW>
                 
-                [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
+                replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
                 
                 contLineArray = cell(0, 2);
                 
@@ -114,8 +113,7 @@ for j = 1:numel(textArray) % in textArray)
     end
     
     line = [strtrim(actCodeFinal), ' ', actComment];
-    [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
-    
+    replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
 end
 
 formattedSource = [replacedTextArray{:}];
@@ -339,7 +337,7 @@ end
 
 
 % Make the union of indexes of '%' and '!' symbols then sort them
-indexUnion = {commentSignIndexes{:}, exclamationInd{:}, contIndexes{:}};
+indexUnion = [commentSignIndexes, exclamationInd, contIndexes];
 indexUnion = sortrows(indexUnion(:))';
 
 % Iterate through the union
@@ -378,6 +376,10 @@ end
 
 end
 
+function token = generateOperatorToken(operatorName)
+token = ['#MBeauty_OP_', operatorName, '#'];
+end
+
 function data = performReplacementsSingleLine(data, settingConf, doIndexing)
 
 if isempty(data)
@@ -400,7 +402,7 @@ if numel(regexp(data, '^[a-zA-Z0-9_]+\s+[^(=]'))
     
     splitData = regexp(strtrim(data), ' ', 'split');
     % The first elemen is not a keyword and does not exist (function on the path)
-    if numel(splitData) && ~any(strcmp(splitData{1}, keywords)) && exist(splitData{1})
+    if numel(splitData) && ~any(strcmp(splitData{1}, keywords)) && exist(splitData{1}) %#ok<EXIST>
         return
     end
 end
@@ -419,9 +421,9 @@ if ~isempty([operatorAppearance{:}])
     for iOpConf = 1:numel(setConfigOperatorFields)
         currField = setConfigOperatorFields{iOpConf};
         currOpStruct = settingConf.OperatorRules.(currField);
-        dataNew = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], ['#MBeauty_OP_', currField, '#']);
+        dataNew = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], generateOperatorToken(currField));
         if ~strcmp(data, dataNew)
-            opBuffer{end+1} = ['#MBeauty_OP_', currField, '#'];
+            opBuffer{end+1} = generateOperatorToken(currField);
         end
         data = dataNew;
     end
@@ -437,11 +439,13 @@ data = regexprep(data, '\s+', ' ');
 for iOpConf = 1:numel(setConfigOperatorFields)
     currField = setConfigOperatorFields{iOpConf};
     
-    opToken = ['#MBeauty_OP_', currField, '#'];
-    unaryOpToken = ['#MBeauty_OP_Unary', currField, '#'];
-    normalizedNotationToken = ['#MBeauty_OP_NormNotation_', currField, '#'];
+    opToken = generateOperatorToken(currField);
     
-    if(strcmp(opToken, '#MBeauty_OP_Plus#') || strcmp(opToken, '#MBeauty_OP_Minus#')) && numel(regexp(data, opToken))
+    
+    isPlus = strcmp(opToken, generateOperatorToken('Plus'));
+    isMinus = strcmp(opToken, generateOperatorToken('Minus'));
+    
+    if (isPlus || isMinus) && numel(regexp(data, opToken))
         
         splittedData = regexp(data, opToken, 'split');
         
@@ -459,12 +463,21 @@ for iOpConf = 1:numel(setConfigOperatorFields)
                 % Special treatment for E: 7E-3 or 7e+4 normalized notation
                 % In this case the + and - signs are not operators so shoud be skipped
                 if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end-1), '[0-9]'))
-                    replaceTokens{end+1} = normalizedNotationToken;
+                    if isPlus
+                        replaceTokens{end+1} = tokStruct('NormNotationPlus').Token;
+                    elseif isMinus
+                        replaceTokens{end+1} = tokStruct('NormNotationMinus').Token;
+                    end
+                    
                 else
                     replaceTokens{end+1} = opToken;
                 end
             else
-                replaceTokens{end+1} = unaryOpToken;
+                if isPlus
+                    replaceTokens{end+1} = tokStruct('UnaryPlus').Token;
+                elseif isMinus
+                    replaceTokens{end+1} = tokStruct('UnaryMinus').Token;
+                end
             end
         end
         
@@ -485,24 +498,24 @@ end
 % Now go backwards and replace the tokens by the real operators
 
 % Special tokens: Unary Plus/Minus, Normalized Number Format
-data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryPlus#', '\s*'], '+');
-data = regexprep(data, ['\s*', '#MBeauty_OP_UnaryMinus#', '\s*'], '-');
-data = regexprep(data, ['\s*', '#MBeauty_OP_NormNotation_Plus#', '\s*'], '+');
-data = regexprep(data, ['\s*', '#MBeauty_OP_NormNotation_Minus#', '\s*'], '-');
+data = regexprep(data, ['\s*', tokStruct('UnaryPlus').Token, '\s*'], tokStruct('UnaryPlus').StoredValue);
+data = regexprep(data, ['\s*', tokStruct('UnaryMinus').Token, '\s*'], tokStruct('UnaryMinus').StoredValue);
+data = regexprep(data, ['\s*', tokStruct('NormNotationPlus').Token, '\s*'], tokStruct('NormNotationPlus').StoredValue);
+data = regexprep(data, ['\s*', tokStruct('NormNotationMinus').Token, '\s*'], tokStruct('NormNotationMinus').StoredValue);
 
 % Replace all other operators
 
 for iOpConf = 1:numel(setConfigOperatorFields)
     
     currField = setConfigOperatorFields{iOpConf};
-    if any(strcmp(['#MBeauty_OP_', currField, '#'], opBuffer))
+    if any(strcmp(generateOperatorToken(currField), opBuffer))
         currOpStruct = settingConf.OperatorRules.(currField);
         
         replaceTo = currOpStruct.ValueTo;
         if doIndexing && numel(regexp(currOpStruct.ValueFrom, '\+|\-|\/|\*|\:'))
             replaceTo = strtrim(replaceTo);
         end
-        data = regexprep(data, ['\s*', '#MBeauty_OP_', currField, '#', '\s*'], replaceTo);
+        data = regexprep(data, ['\s*', generateOperatorToken(currField), '\s*'], replaceTo);
     end
 end
 
@@ -529,32 +542,7 @@ for iKey = numel(arrayTokenList):- 1:1
     data = regexprep(data, arrayTokenList{iKey}, map(arrayTokenList{iKey}));
 end
 
-data = regexprep(data, '#MBeauty_OP_Comma#', settingConf.OperatorRules.Comma.ValueTo);
-end
-
-function [array, lastUsedIndex] = arrayAppend(array, toAppend, lastUsedIndex)
-cellLength = numel(array);
-
-if cellLength <= lastUsedIndex
-    error();
-end
-
-if ischar(toAppend)
-    array{lastUsedIndex+1} = toAppend;
-    lastUsedIndex = lastUsedIndex + 1;
-elseif iscell(toAppend)
-    %% ToDo: Additional check
-    
-    for i = 1:numel(toAppend)
-        array{lastUsedIndex+1} = toAppend{i};
-        lastUsedIndex = lastUsedIndex + 1;
-    end
-    
-else
-    error();
-end
-
-
+data = regexprep(data, generateOperatorToken('Comma'), settingConf.OperatorRules.Comma.ValueTo);
 end
 
 function [containerBorderIndexes, maxDepth] = calculateContainerDepths(data, openingBrackets, closingBrackets)
@@ -588,9 +576,7 @@ if isempty(data)
     return
 end
 
-
 data = regexprep(data, '\s+;', ';');
-
 
 openingBrackets = {'[', '{', '('};
 closingBrackets = {']', '}', ')'};
@@ -619,7 +605,6 @@ while maxDepth > 0
     
     str = data(containerBorderIndexes{indexes(1), 1}:containerBorderIndexes{indexes(2), 1});
     
-    
     openingBracket = data(containerBorderIndexes{indexes(1), 1});
     closingBracket = data(containerBorderIndexes{indexes(2), 1});
     
@@ -628,7 +613,7 @@ while maxDepth > 0
     if isContainerIndexing
         keywords = iskeyword();
         prevStr = strtrim(data(1:containerBorderIndexes{indexes(1), 1}-1));
-        for i=1 :numel(keywords)
+        for i = 1:numel(keywords)
             if numel(regexp(prevStr, ['(?<=\s|^)', keywords{i}, '$']))
                 isContainerIndexing = false;
                 preceedingKeyWord = true;
@@ -654,7 +639,6 @@ while maxDepth > 0
     str = regexprep(str, [openingBracket, '\s+'], openingBracket);
     str = regexprep(str, ['\s+', closingBracket], closingBracket);
     
-
     
     if ~strcmp(openingBracket, '(')
         if doIndexing
@@ -747,8 +731,6 @@ while maxDepth > 0
         datacell{end} = data(containerBorderIndexes{indexes(2), 1}+1:end);
     end
     
-    
-
     
     idStr = [repmat('0', 1, 5-numel(num2str(id))), num2str(id)];
     tokenOfCUrElem = ['#MBeauty_ArrayToken_', idStr, '#'];
