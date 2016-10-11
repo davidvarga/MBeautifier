@@ -24,8 +24,17 @@ nNewLinesFound = 0;
 for j = 1:numel(textArray) % in textArray)
     line = textArray{j};
     
-    %% Process the maximal new-line count
-    [isAcceptable, nNewLinesFound] = MBeautify.handleMaximalNewLines(line, nNewLinesFound, nMaximalNewLines);
+    %% Process the maximal new-line count 
+    isAcceptable = true;
+    
+    if isempty(strtrim(line))
+        if ~(nNewLinesFound < nMaximalNewLines)
+            isAcceptable = false;
+        end
+        nNewLinesFound = nNewLinesFound + 1;
+    else
+        nNewLinesFound = 0;
+    end
     
     if ~isAcceptable
         continue;
@@ -75,10 +84,10 @@ for j = 1:numel(textArray) % in textArray)
                     tempRow = strtrim(contLineArray{iLine, 1});
                     tempRow = [tempRow(1:end-3), [' ', contTokenStruct.Token, ' ']];
                     tempRow = regexprep(tempRow, ['\s+', contTokenStruct.Token, '\s+'], [' ', contTokenStruct.Token, ' ']);
-                    replacedLines = MBeautify.strConcat(replacedLines, tempRow);
+                    replacedLines = [replacedLines, tempRow];
                 end
                 
-                replacedLines = MBeautify.strConcat(replacedLines, actCode);
+                replacedLines = [replacedLines, actCode];
                 
                 actCodeFinal = performReplacements(replacedLines, settingConf);
                 
@@ -86,9 +95,9 @@ for j = 1:numel(textArray) % in textArray)
                 
                 line = '';
                 for iSplitLine = 1:numel(splitToLine) - 1
-                    line = MBeautify.strConcat(line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine, 2}, newLine);
+                    line = [line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine, 2}, newLine];
                 end
-                line = MBeautify.strConcat(line, strtrim(splitToLine{end}), actComment);
+                line = [line, strtrim(splitToLine{end}), actComment]; %#ok<*AGROW>
                 
                 [replacedTextArray, lastIndexUsed] = arrayAppend(replacedTextArray, {line, sprintf('\n')}, lastIndexUsed);
                 
@@ -178,8 +187,7 @@ if numel(strTokStructs)
     actCodeFinal = '';
     for iSplit = 1:numel(strTokStructs)
         
-        actCodeFinal = MBeautify.strConcat(actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, '''');
-        %         disp(actCodeFinal)
+        actCodeFinal = [actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, ''''];
     end
     
     if numel(splitByStrTok) > numel(strTokStructs)

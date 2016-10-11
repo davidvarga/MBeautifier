@@ -1,11 +1,10 @@
-function writeConfigurationFile(resStruct, fullRulesConfMFileName)
-%UNTITLED Summary of this function goes here
-%   Detailed explanation goes here
+function writeConfigurationFile(resStruct)
+% MBeautify.writeConfigurationFile creates the configuration M file from the structure of the configuration XML file.
 
 operetorRules = resStruct.OperatorRules;
 opFields = fields(operetorRules);
 
-[pathOfMFile, nameOfMFile] = fileparts(fullRulesConfMFileName); %#ok<ASGLU>
+[pathOfMFile, nameOfMFile] = fileparts(MBeautify.RulesMFileFull); %#ok<ASGLU>
 
 settingMFileString = ['function this = ', nameOfMFile, '()', sprintf('\n'), ...
     'this = struct();', sprintf('\n'), sprintf('\n')];
@@ -14,13 +13,13 @@ settingMFileString = [settingMFileString, 'this.OperatorRules = struct();', spri
 
 for iOp = 1:numel(opFields)
     
-    settingMFileString = MBeautify.strConcat(settingMFileString,sprintf('\n'));
-    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, ' = struct();'], sprintf('\n'));
+    settingMFileString = [settingMFileString, sprintf('\n')];
+    settingMFileString = [settingMFileString, ['this.OperatorRules.', opFields{iOp}, ' = struct();'], sprintf('\n')];
     
     valueFrom = regexptranslate('escape', operetorRules.(opFields{iOp}).ValueFrom);
     
-    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueFrom = ''', valueFrom, ''';'], sprintf('\n'));
-    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueTo = ''', operetorRules.(opFields{iOp}).ValueTo, ''';'], sprintf('\n'));   
+    settingMFileString = [settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueFrom = ''', valueFrom, ''';'], sprintf('\n')];
+    settingMFileString = [settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueTo = ''', operetorRules.(opFields{iOp}).ValueTo, ''';'], sprintf('\n')];
 end
 
 
@@ -30,19 +29,20 @@ specialRules = resStruct.SpecialRules;
 spFields = fields(specialRules);
 
 for iSp = 1:numel(spFields)
-    settingMFileString = MBeautify.strConcat(settingMFileString,sprintf('\n'));
-    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.SpecialRules.', spFields{iSp}, ' = struct();'], sprintf('\n'));
-    settingMFileString = MBeautify.strConcat(settingMFileString, ['this.SpecialRules.', spFields{iSp}, 'Value = ''', specialRules.(spFields{iSp}).Value, ''';'], sprintf('\n'));
+    settingMFileString = [settingMFileString, sprintf('\n')]; %#ok<*AGROW>
+    settingMFileString = [settingMFileString, ['this.SpecialRules.', spFields{iSp}, ' = struct();'], sprintf('\n')];
+    settingMFileString = [settingMFileString, ['this.SpecialRules.', spFields{iSp}, 'Value = ''', specialRules.(spFields{iSp}).Value, ''';'], sprintf('\n')];
 end
 
-settingMFileString = MBeautify.strConcat(settingMFileString, 'end');
+settingMFileString = [settingMFileString, 'end'];
 
-if exist(fullRulesConfMFileName, 'file')
-    fileattrib(fullRulesConfMFileName, '+w');
+if exist(MBeautify.RulesMFileFull, 'file')
+    fileattrib(MBeautify.RulesMFileFull, '+w');
 end
-fid = fopen(fullRulesConfMFileName, 'w');
+fid = fopen(MBeautify.RulesMFileFull, 'w');
 fwrite(fid, settingMFileString);
 fclose(fid);
 
 end
+
 

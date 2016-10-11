@@ -1,5 +1,5 @@
 function tokenStructs = getTokenStruct()
-% Returns the tokens used in replacement
+% MBeautify.getTokenStruct returns the tokens used in replacement
 
 % Persistent variable to serve as cache
 persistent tokenStructStored;

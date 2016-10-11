@@ -6,8 +6,6 @@ classdef MBeautify
         SettingDirectory = [fileparts(fileparts(mfilename('fullpath'))), filesep, 'resources', filesep, 'settings'];
         RulesMFileFull = [fileparts(fileparts(mfilename('fullpath'))), filesep, 'resources', filesep, 'settings', filesep, 'MBeautyConfigurationRules.m'];
         RulesXMLFileFull = [fileparts(fileparts(mfilename('fullpath'))), filesep, 'resources', filesep, 'settings', filesep, 'MBeautyConfigurationRules.xml'];
-        
-        CommentTemplate = 'MBeautify_Comment.xml';
     end
     
     properties(Access = private)
@@ -30,16 +28,32 @@ classdef MBeautify
         end
     end
     
+    %% Public API
+    
     methods(Static = true)
         
-        % Function to set-up MBeautifier for use
-        %   - (optional) Writes the default settings XML file
-        %   - Reads in the settings XML file
-        %   - Writes the configuration M-file
-        setup();
-               
+        function setup()
+            % MBeautify.setup() initializes MBeautifier for first use and usable to update the formatting configuration.
+            % It optionally writes the default settings XML file, reads in the settings XML file and then writes the
+            % configuration M-file which will be used in runtime.
+            
+            
+            if ~exist(MBeautify.RulesXMLFileFull, 'file')
+                MBeautify.writeSettingsXML();
+            end
+            
+            resStruct = MBeautify.readSettingsXML();
+            
+            MBeautify.writeConfigurationFile(resStruct);
+            
+            fprintf('Configuration was successfully exported to:\n%s\n', MBeautify.RulesMFileFull);
+            MBeautify.parsingUpToDate(false);
+        end
+        
         function createDefaultConfiguration()
-            MBeautify.writeSettingsXML(MBeautify.RulesXMLFileFull); 
+            % Writes the default configuration XML file.
+            
+            MBeautify.writeSettingsXML();
         end
         
         function formatFile(file, outFile)
@@ -50,7 +64,7 @@ classdef MBeautify
                 return;
             end
             
-            document = matlab.desktop.editor.openDocument(file);         
+            document = matlab.desktop.editor.openDocument(file);
             % Format the code
             document.Text = MBeautify.performFormatting(document.Text);
             document.smartIndentContents();
@@ -69,7 +83,7 @@ classdef MBeautify
             % Performs formatting on selection of the currently active Matlab Editor page.
             % The selection is automatically extended until the first empty line above and below.
             % This method can be useful for large files, but using "formatCurrentEditorPage" is always suggested.
-            % Optionally saves the file (if it is possible) and it is forced on the first argument (true). By default 
+            % Optionally saves the file (if it is possible) and it is forced on the first argument (true). By default
             % the file is not saved.
             
             currentEditorPage = matlab.desktop.editor.getActive();
@@ -85,7 +99,7 @@ classdef MBeautify
             end
             
             if nargin == 0
-               doSave = false; 
+                doSave = false;
             end
             
             % Expand the selection from the beginnig of the first line to the end of the last line
@@ -169,7 +183,7 @@ classdef MBeautify
         
         function formatCurrentEditorPage(doSave)
             % Performs formatting on the currently active Matlab Editor page.
-            % Optionally saves the file (if it is possible) and it is forced on the first argument (true). By default 
+            % Optionally saves the file (if it is possible) and it is forced on the first argument (true). By default
             % the file is not saved.
             
             currentEditorPage = matlab.desktop.editor.getActive();
@@ -178,7 +192,7 @@ classdef MBeautify
             end
             
             if nargin == 0
-               doSave = false; 
+                doSave = false;
             end
             
             selectedPosition = currentEditorPage.Selection;
@@ -202,44 +216,29 @@ classdef MBeautify
                 end
             end
         end
- 
+        
     end
     
+    %% Private helpers
+    
     methods(Static = true, Access = private)
-        
-        [result, nCurrentNewlines] = handleMaximalNewLines(line, nCurrentNewlines, maximalNewLines);
+     
         operators = getAllOperators();
-
-        formattedSource = performFormatting(source)
-        writeConfigurationFile(resStruct, fullRulesConfMFileName);
         
+        formattedSource = performFormatting(source);
+        writeConfigurationFile(resStruct);
         
         % Gets the structure of tokens used during the formatting
         tokenStructs = getTokenStruct();
         
-        setDir = getSettingsDirectory()
-        
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Writes the default settings XML file
-        writeSettingsXML(fullFilePath);
+        writeSettingsXML();
         
         % Reads the settings XML file to a structure
-        res = readSettingsXML(file);
+        res = readSettingsXML();
         
         configurationStruct = getConfigurationStruct();
-        
-        % StrConcat Util
-        function retStr = strConcat(srcStr, varargin)
-            
-            retStr = srcStr;
-            
-            if nargin > 1
-                retStr = [retStr, varargin{:}];
-            else
-                return;
-            end
-        end
-        
     end
     
     
