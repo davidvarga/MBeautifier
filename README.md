@@ -1,7 +1,6 @@
 # MBeautifier
 
-MBeautifier is a lightweight M-Script based tool that can be usable to format Matlab M-Code directly in the Matlab Editor.
-
+MBeautifier is a lightweight M-Script based tool usable to format Matlab M-Code directly in the Matlab Editor.
 
 
 Main features
@@ -16,7 +15,7 @@ Main features
 
 Deployment and Configuration
 ----------------------------
-Add container directory to the Matlab path, then execute: `MBeautify.setup`.
+Add containing directory to the Matlab path, then execute: `MBeautify.setup()`.
 
 This command will create the standard configuration of formatting stored in `MBeautifier\resources\settings\MBeautyConfigurationRules.m`.
 
@@ -65,4 +64,9 @@ Currently there are three approaches supported:
  - Perform formatting on the currently active page of Matlab Editor. Command: `MBeautify.formatCurrentEditorPage()`. By default the file is not saved, but it remains opened modified in the editor. Optionally the formatted file can be saved using the `MBeautify.formatCurrentEditorPage(true)` syntax.
  - Perform formatting on the currently selected text of the active page of Matlab Editor. Command: `MBeautify.formatEditorSelection()`. An optional saving mechanism as above exists also in this case. Useful in case of large files, but in any case `MBeautify.formatCurrentEditorPage()` is suggested.
  - Perfrom formatting on a file. Command: `MBeautify.formatFile(file)`. Can be used with (1)one argument: the input file is formatted and remains open in the Matlab editor unsaved; (2)two arguments as `MBeautify.formatFile(file, outFile)`: the formatted file is saved to the specified output file if possible. Output can be the same as input. 
+ 
+ Supported Matlab versions
+ -------------------------
+ 
+ As MBeautifier uses the built-in Matlab Editor functionality, it supports Matlab versions from R2011a.
  
