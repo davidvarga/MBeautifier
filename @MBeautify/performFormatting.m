@@ -608,7 +608,7 @@ while maxDepth > 0
     openingBracket = data(containerBorderIndexes{indexes(1), 1});
     closingBracket = data(containerBorderIndexes{indexes(2), 1});
     
-    isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), ['[a-zA-Z0-9_]\s*[', openingBracket, ']']));
+    isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), ['[a-zA-Z0-9_]\s*[', openingBracket, ']$']));
     preceedingKeyWord = false;
     if isContainerIndexing
         keywords = iskeyword();
