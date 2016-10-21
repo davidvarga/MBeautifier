@@ -583,7 +583,7 @@ closingBrackets = {']', '}', ')'};
 
 tokStruct = MBeautify.getTokenStruct();
 
-operatorArray = {'+', '-', '&', '&&', '|', '||', '/', '*', ':'};
+operatorArray = {'+', '-', '&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^', '~'};
 contTokenStruct = tokStruct('ContinueToken');
 
 [containerBorderIndexes, maxDepth] = calculateContainerDepths(data, openingBrackets, closingBrackets);
