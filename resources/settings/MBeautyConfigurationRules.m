@@ -10,7 +10,7 @@ this.OperatorRules.ShortCircuitAnd.ValueTo = ' && ';
 
 this.OperatorRules.ShortCircuitOr = struct();
 this.OperatorRules.ShortCircuitOr.ValueFrom = '\|\|';
-this.OperatorRules.ShortCircuitOr.ValueTo = ' || ';
+this.OperatorRules.ShortCircuitOr.ValueTo = ' \|\| ';
 
 this.OperatorRules.LogicalAnd = struct();
 this.OperatorRules.LogicalAnd.ValueFrom = '&';
@@ -18,7 +18,7 @@ this.OperatorRules.LogicalAnd.ValueTo = ' & ';
 
 this.OperatorRules.LogicalOr = struct();
 this.OperatorRules.LogicalOr.ValueFrom = '\|';
-this.OperatorRules.LogicalOr.ValueTo = ' | ';
+this.OperatorRules.LogicalOr.ValueTo = ' \| ';
 
 this.OperatorRules.LessEquals = struct();
 this.OperatorRules.LessEquals.ValueFrom = '<=';
@@ -50,27 +50,27 @@ this.OperatorRules.Assignment.ValueTo = ' = ';
 
 this.OperatorRules.Plus = struct();
 this.OperatorRules.Plus.ValueFrom = '\+';
-this.OperatorRules.Plus.ValueTo = ' + ';
+this.OperatorRules.Plus.ValueTo = ' \+ ';
 
 this.OperatorRules.Minus = struct();
 this.OperatorRules.Minus.ValueFrom = '\-';
-this.OperatorRules.Minus.ValueTo = ' - ';
+this.OperatorRules.Minus.ValueTo = ' \- ';
 
 this.OperatorRules.ElementWiseMultiplication = struct();
 this.OperatorRules.ElementWiseMultiplication.ValueFrom = '\.\*';
-this.OperatorRules.ElementWiseMultiplication.ValueTo = ' .* ';
+this.OperatorRules.ElementWiseMultiplication.ValueTo = ' \.\* ';
 
 this.OperatorRules.Multiplication = struct();
 this.OperatorRules.Multiplication.ValueFrom = '\*';
-this.OperatorRules.Multiplication.ValueTo = ' * ';
+this.OperatorRules.Multiplication.ValueTo = ' \* ';
 
 this.OperatorRules.RightArrayDivision = struct();
 this.OperatorRules.RightArrayDivision.ValueFrom = '\./';
-this.OperatorRules.RightArrayDivision.ValueTo = ' ./ ';
+this.OperatorRules.RightArrayDivision.ValueTo = ' \./ ';
 
 this.OperatorRules.LeftArrayDivision = struct();
 this.OperatorRules.LeftArrayDivision.ValueFrom = '\.\\';
-this.OperatorRules.LeftArrayDivision.ValueTo = ' .\ ';
+this.OperatorRules.LeftArrayDivision.ValueTo = ' \.\\ ';
 
 this.OperatorRules.Division = struct();
 this.OperatorRules.Division.ValueFrom = '/';
@@ -78,15 +78,15 @@ this.OperatorRules.Division.ValueTo = ' / ';
 
 this.OperatorRules.LeftDivision = struct();
 this.OperatorRules.LeftDivision.ValueFrom = '\\';
-this.OperatorRules.LeftDivision.ValueTo = ' \ ';
+this.OperatorRules.LeftDivision.ValueTo = ' \\ ';
 
 this.OperatorRules.ElementWisePower = struct();
 this.OperatorRules.ElementWisePower.ValueFrom = '\.\^';
-this.OperatorRules.ElementWisePower.ValueTo = ' .^ ';
+this.OperatorRules.ElementWisePower.ValueTo = ' \.\^ ';
 
 this.OperatorRules.Power = struct();
 this.OperatorRules.Power.ValueFrom = '\^';
-this.OperatorRules.Power.ValueTo = ' ^ ';
+this.OperatorRules.Power.ValueTo = ' \^ ';
 
 this.OperatorRules.Not = struct();
 this.OperatorRules.Not.ValueFrom = '~';

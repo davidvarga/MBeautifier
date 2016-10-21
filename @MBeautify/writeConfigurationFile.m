@@ -17,9 +17,10 @@ for iOp = 1:numel(opFields)
     settingMFileString = [settingMFileString, ['this.OperatorRules.', opFields{iOp}, ' = struct();'], sprintf('\n')];
     
     valueFrom = regexptranslate('escape', operetorRules.(opFields{iOp}).ValueFrom);
+    valueTo = regexptranslate('escape', operetorRules.(opFields{iOp}).ValueTo);
     
     settingMFileString = [settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueFrom = ''', valueFrom, ''';'], sprintf('\n')];
-    settingMFileString = [settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueTo = ''', operetorRules.(opFields{iOp}).ValueTo, ''';'], sprintf('\n')];
+    settingMFileString = [settingMFileString, ['this.OperatorRules.', opFields{iOp}, '.ValueTo = ''', valueTo, ''';'], sprintf('\n')];
 end
 
 
