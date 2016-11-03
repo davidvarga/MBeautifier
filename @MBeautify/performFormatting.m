@@ -539,7 +539,7 @@ if isempty(arrayTokenList)
 end
 
 for iKey = numel(arrayTokenList):- 1:1
-    data = regexprep(data, arrayTokenList{iKey}, map(arrayTokenList{iKey}));
+    data = regexprep(data, arrayTokenList{iKey}, regexptranslate('escape', map(arrayTokenList{iKey})));
 end
 
 data = regexprep(data, generateOperatorToken('Comma'), settingConf.OperatorRules.Comma.ValueTo);
