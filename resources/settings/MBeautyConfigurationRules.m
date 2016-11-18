@@ -82,11 +82,11 @@ this.OperatorRules.LeftDivision.ValueTo = ' \\ ';
 
 this.OperatorRules.ElementWisePower = struct();
 this.OperatorRules.ElementWisePower.ValueFrom = '\.\^';
-this.OperatorRules.ElementWisePower.ValueTo = ' \.\^ ';
+this.OperatorRules.ElementWisePower.ValueTo = '\.\^';
 
 this.OperatorRules.Power = struct();
 this.OperatorRules.Power.ValueFrom = '\^';
-this.OperatorRules.Power.ValueTo = ' \^ ';
+this.OperatorRules.Power.ValueTo = '\^';
 
 this.OperatorRules.Not = struct();
 this.OperatorRules.Not.ValueFrom = '~';

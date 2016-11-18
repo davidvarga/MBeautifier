@@ -99,12 +99,12 @@
       <OperatorPaddingRule>
          <Key>ElementWisePower</Key>
          <ValueFrom>.^</ValueFrom>
-         <ValueTo> .^ </ValueTo>
+         <ValueTo>.^</ValueTo>
       </OperatorPaddingRule>
       <OperatorPaddingRule>
          <Key>Power</Key>
          <ValueFrom>^</ValueFrom>
-         <ValueTo> ^ </ValueTo>
+         <ValueTo>^</ValueTo>
       </OperatorPaddingRule>
       <OperatorPaddingRule>
          <Key>Not</Key>
