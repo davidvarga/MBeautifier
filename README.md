@@ -2,6 +2,8 @@
 
 MBeautifier is a lightweight M-Script based tool usable to format Matlab M-Code directly in the Matlab Editor.
 
+![Basic working](https://cloud.githubusercontent.com/assets/12681120/20592407/904cb1d6-b22d-11e6-93dd-1637c3738e50.png)
+
 
 Main features
 -------------
