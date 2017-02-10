@@ -12,7 +12,7 @@ contTokenStruct = tokStruct('ContinueToken');
 %%
 textArray = regexp(source, newLine, 'split');
 
-replacedTextArray = cell(1, numel(textArray)*4);
+replacedTextArray = {};
 isInContinousLine = 0;
 containerDepth = 0;
 contLineArray = cell(0, 2);
@@ -20,7 +20,7 @@ contLineArray = cell(0, 2);
 isInBlockComment = false;
 blockCommentDepth = 0;
 nNewLinesFound = 0;
-for j = 1:numel(textArray) % in textArray)
+for j = 1:numel(textArray)
     line = textArray{j};
     
     %% Process the maximal new-line count
@@ -47,6 +47,9 @@ for j = 1:numel(textArray) % in textArray)
     [actCode, actComment] = getCodeAndComment(line, splittingPos);
     
     %% Check for line continousment (...)
+  % Continous lines have to be converted into one single code line to perform replacement on it
+    % The continousment characters have to be replaced by tokens and the comments of the lines must be stored
+    % After replacement, the continuosment has to be re-created along with the comments.
     trimmedCode = strtrim(actCode);
     if numel(trimmedCode)
         
@@ -115,6 +118,10 @@ for j = 1:numel(textArray) % in textArray)
     line = [strtrim(actCodeFinal), ' ', actComment];
     replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
 end
+% The last new-line must be removed: inner new-lines are removed by the split, the last one is an additional one
+if numel(replacedTextArray)
+   replacedTextArray(end) = []; 
+end
 
 formattedSource = [replacedTextArray{:}];
 
@@ -122,6 +129,8 @@ end
 
 function ret = calculateContainerDepthDeltaOfLine(code)
 ret = 0;
+% Pre-check for opening and closing brackets: the final delta has to be calculated after the transponations and the
+% strings are replaced, which are time consuming actions
 if numel(regexp(code, '{|[')) || numel(regexp(code, '}|]'))
     actCodeTemp = replaceTransponations(code);
     actCodeTemp = replaceStrings(actCodeTemp);
