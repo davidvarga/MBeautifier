@@ -8,7 +8,6 @@ tokStruct = MBeautify.getTokenStruct();
 
 contTokenStruct = tokStruct('ContinueToken');
 
-
 %%
 textArray = regexp(source, newLine, 'split');
 
@@ -24,43 +23,34 @@ for j = 1:numel(textArray)
     line = textArray{j};
     
     %% Process the maximal new-line count
-    isAcceptable = true;
-    
     if isempty(strtrim(line))
-        if ~(nNewLinesFound < nMaximalNewLines)
-            isAcceptable = false;
+        if nNewLinesFound >= nMaximalNewLines
+            continue;
         end
         nNewLinesFound = nNewLinesFound + 1;
     else
         nNewLinesFound = 0;
     end
     
-    if ~isAcceptable
-        continue;
-    end
-    
     %% Determine the position where the line shall be splitted into code and comment
-    [commPos, exclamationPos, isInBlockComment, blockCommentDepth] = findComment(line, isInBlockComment, blockCommentDepth);
-    splittingPos = max(commPos, exclamationPos);
-    
-    %% Split the line into two parts: code and comment
-    [actCode, actComment] = getCodeAndComment(line, splittingPos);
+    [actCode, actComment, splittingPos, isInBlockComment, blockCommentDepth] = findComment(line, isInBlockComment, blockCommentDepth);
     
     %% Check for line continousment (...)
-  % Continous lines have to be converted into one single code line to perform replacement on it
+    % Continous lines have to be converted into one single code line to perform replacement on it
     % The continousment characters have to be replaced by tokens and the comments of the lines must be stored
     % After replacement, the continuosment has to be re-created along with the comments.
+    
     trimmedCode = strtrim(actCode);
-    if numel(trimmedCode)
-        
+    if ~numel(trimmedCode)
+        actCodeFinal = '';
+    else
         containerDepth = containerDepth + calculateContainerDepthDeltaOfLine(trimmedCode);
         
         if containerDepth && ~(numel(trimmedCode) >= 3 && strcmp(trimmedCode(end-2:end), '...'))
-            postfix = '; ...';
             if strcmp(trimmedCode(end), ',') || strcmp(trimmedCode(end), ';')
                 actCode = trimmedCode(1:end-1);
             end
-            actCode = [actCode, postfix];
+            actCode = [actCode, '; ...'];
         end
         
         trimmedCode = strtrim(actCode);
@@ -76,11 +66,11 @@ for j = 1:numel(textArray)
         else
             % End of cont line
             if isInContinousLine
-                isInContinousLine = 0;
+                isInContinousLine = false;
                 contLineArray{end+1, 1} = actCode;
                 contLineArray{end, 2} = actComment;
                 
-                %% ToDo: Process
+                % Build the line for replacement
                 replacedLines = '';
                 for iLine = 1:size(contLineArray, 1) - 1
                     tempRow = strtrim(contLineArray{iLine, 1});
@@ -88,11 +78,12 @@ for j = 1:numel(textArray)
                     tempRow = regexprep(tempRow, ['\s+', contTokenStruct.Token, '\s+'], [' ', contTokenStruct.Token, ' ']);
                     replacedLines = [replacedLines, tempRow];
                 end
-                
                 replacedLines = [replacedLines, actCode];
                 
+                % Replace
                 actCodeFinal = performReplacements(replacedLines, settingConf);
                 
+                % Re-create the original structure
                 splitToLine = regexp(actCodeFinal, contTokenStruct.Token, 'split');
                 
                 line = '';
@@ -111,8 +102,7 @@ for j = 1:numel(textArray)
         end
         
         actCodeFinal = performReplacements(actCode, settingConf);
-    else
-        actCodeFinal = '';
+        
     end
     
     line = [strtrim(actCodeFinal), ' ', actComment];
@@ -120,7 +110,7 @@ for j = 1:numel(textArray)
 end
 % The last new-line must be removed: inner new-lines are removed by the split, the last one is an additional one
 if numel(replacedTextArray)
-   replacedTextArray(end) = []; 
+    replacedTextArray(end) = [];
 end
 
 formattedSource = [replacedTextArray{:}];
@@ -136,20 +126,6 @@ if numel(regexp(code, '{|[')) || numel(regexp(code, '}|]'))
     actCodeTemp = replaceStrings(actCodeTemp);
     
     ret = numel(regexp(actCodeTemp, '{|[')) - numel(regexp(actCodeTemp, '}|]'));
-end
-end
-
-
-function [actCode, actComment] = getCodeAndComment(line, commPos)
-if isequal(commPos, 1)
-    actCode = '';
-    actComment = line;
-elseif commPos == -1
-    actCode = line;
-    actComment = '';
-else
-    actCode = line(1:max(commPos-1, 1));
-    actComment = strtrim(line(commPos:end));
 end
 end
 
@@ -230,7 +206,7 @@ for iStr = 1:numel(actCode)
         else
             if isLastCharTransp
                 tempCode = [tempCode, trnspTokStruct.Token];
-                isLastCharTransp = true;
+                isLastCharTransp = true; % TODO: Isn't necessary
             else
                 
                 if numel(tempCode) && numel(regexp(tempCode(end), charsIndicateTranspose)) && ~isInStr
@@ -278,16 +254,20 @@ actCodeFinal = restoreTransponations(actCodeFinal);
 
 end
 
-function [retComm, exclamationPos, isInBlockComment, blockCommentDepth] = findComment(line, isInBlockComment, blockCommentDepth)
+function [actCode, actComment, splittingPos, isInBlockComment, blockCommentDepth] = findComment(line, isInBlockComment, blockCommentDepth)
 %% Set the variables
 retComm = -1;
 exclamationPos = -1;
+actCode = line;
+actComment = '';
+splittingPos = -1;
 
 trimmedLine = strtrim(line);
 
 %% Handle some special cases
-
-if strcmp(trimmedLine, '%{')
+if isempty(trimmedLine)
+    return;
+elseif strcmp(trimmedLine, '%{')
     retComm = 1;
     isInBlockComment = true;
     blockCommentDepth = blockCommentDepth + 1;
@@ -303,28 +283,17 @@ else
     end
 end
 
-% In block comment, return
-if isequal(retComm, 1), return; end
-
-% Empty line, simply return
-if isempty(trimmedLine)
-    return;
-end
-
-
-if isequal(trimmedLine, '%')
+if isequal(trimmedLine, '%') || (numel(trimmedLine) > 7 && isequal(trimmedLine(1:7), 'import '))
     retComm = 1;
-    return;
-end
-
-if isequal(trimmedLine(1), '!')
+elseif isequal(trimmedLine(1), '!')
     exclamationPos = 1;
-    return
 end
 
-% If line starts with "import ", it indicates a java import, that line is treated as comment
-if numel(trimmedLine) > 7 && isequal(trimmedLine(1:7), 'import ')
-    retComm = 1;
+splittingPos = max(retComm, exclamationPos);
+
+if isequal(splittingPos, 1)
+    actCode = '';
+    actComment = line;
     return
 end
 
@@ -351,21 +320,20 @@ indexUnion = sortrows(indexUnion(:))';
 
 % Iterate through the union
 commentSignCount = numel(indexUnion);
-if commentSignCount
+if ~commentSignCount
+    retComm = -1;
+    exclamationPos = -1;
+else
     
     for iCommSign = 1:commentSignCount
         currentIndex = indexUnion{iCommSign};
         
         % Check all leading parts that can be "code"
         % Replace transponation (and noin-conjugate transponations) to avoid not relevant matches
-        possibleCode = line(1:currentIndex-1);
-        possibleCode = replaceTransponations(possibleCode);
-        
-        copSignIndexes = strfind(possibleCode, '''');
-        copSignCount = numel(copSignIndexes);
+        possibleCode = replaceTransponations(line(1:currentIndex-1));
         
         % The line is currently "not in string"
-        if isequal(mod(copSignCount, 2), 0)
+        if isequal(mod(numel(strfind(possibleCode, '''')), 2), 0)
             if ismember(currentIndex, [commentSignIndexes{:}])
                 retComm = currentIndex;
             elseif ismember(currentIndex, [exclamationInd{:}])
@@ -377,11 +345,23 @@ if commentSignCount
             
             break;
         end
-        
     end
-else
-    retComm = -1;
 end
+
+
+splittingPos = max(retComm, exclamationPos);
+
+if isequal(splittingPos, 1)
+    actCode = '';
+    actComment = line;
+elseif splittingPos == -1
+    actCode = line;
+    actComment = '';
+else
+    actCode = line(1:max(splittingPos-1, 1));
+    actComment = strtrim(line(splittingPos:end));
+end
+
 
 end
 
@@ -612,7 +592,6 @@ while maxDepth > 0
         continue;
     end
     
-    str = data(containerBorderIndexes{indexes(1), 1}:containerBorderIndexes{indexes(2), 1});
     
     openingBracket = data(containerBorderIndexes{indexes(1), 1});
     closingBracket = data(containerBorderIndexes{indexes(2), 1});
@@ -633,8 +612,6 @@ while maxDepth > 0
     
     doIndexing = isContainerIndexing;
     if doIndexing
-        
-        
         if strcmp(openingBracket, '(')
             doIndexing = ~str2double(settingConf.SpecialRules.MatrixIndexing_ArithmeticOperatorPaddingValue);
         elseif strcmp(openingBracket, '{')
@@ -644,6 +621,7 @@ while maxDepth > 0
         end
     end
     
+    str = data(containerBorderIndexes{indexes(1), 1}:containerBorderIndexes{indexes(2), 1});
     str = regexprep(str, '\s+', ' ');
     str = regexprep(str, [openingBracket, '\s+'], openingBracket);
     str = regexprep(str, ['\s+', closingBracket], closingBracket);
@@ -751,5 +729,4 @@ while maxDepth > 0
     containerBorderIndexes = calculateContainerDepths(data, openingBrackets, closingBrackets);
 end
 end
-
 
