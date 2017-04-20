@@ -5,28 +5,17 @@ classdef MBeautify
         RulesMFile = 'MBeautyConfigurationRules.m'
         SettingDirectory = [fileparts(fileparts(mfilename('fullpath'))), filesep, 'resources', filesep, 'settings'];
         RulesMFileFull = [fileparts(fileparts(mfilename('fullpath'))), filesep, 'resources', filesep, 'settings', filesep, 'MBeautyConfigurationRules.m'];
-        RulesXMLFileFull = [fileparts(fileparts(mfilename('fullpath'))), filesep, 'resources', filesep, 'settings', filesep, 'MBeautyConfigurationRules.xml'];
+        RulesXMLFileFull = [fileparts(fileparts(mfilename('fullpath'))), filesep, 'resources', filesep, 'settings', filesep, 'MBeautyConfigurationRules.xml']; 
+    end
+    
+    properties(Access = private, Constant)
+        TokenStruct = MBeautify.getTokenStruct();
     end
     
     properties(Access = private)
         ParsingUpToDate = false;
     end
     
-    methods(Static = true, Access = private)
-        % Method to mimic a static data member
-        % Indicates that the token parsing is up to date or the rules file should be reparsed
-        function val = parsingUpToDate(val)
-            persistent currentval;
-            if isempty(currentval)
-                currentval = true;
-            end
-            if nargin >= 1
-                currentval = val;
-            end
-            
-            val = currentval;
-        end
-    end
     
     %% Public API
     
@@ -36,15 +25,12 @@ classdef MBeautify
             % MBeautify.setup() initializes MBeautifier for first use and usable to update the formatting configuration.
             % It optionally writes the default settings XML file, reads in the settings XML file and then writes the
             % configuration M-file which will be used in runtime.
-            
-            
+                     
             if ~exist(MBeautify.RulesXMLFileFull, 'file')
                 MBeautify.writeSettingsXML();
             end
-            
-            resStruct = MBeautify.readSettingsXML();
-            
-            MBeautify.writeConfigurationFile(resStruct);
+
+            MBeautify.writeConfigurationFile(MBeautify.readSettingsXML());
             
             fprintf('Configuration was successfully exported to:\n%s\n', MBeautify.RulesMFileFull);
             MBeautify.parsingUpToDate(false);
@@ -222,14 +208,77 @@ classdef MBeautify
     %% Private helpers
     
     methods(Static = true, Access = private)
-     
-        operators = getAllOperators();
+        
+        % Method to mimic a static data member
+        % Indicates that the token parsing is up to date or the rules file should be reparsed
+        function val = parsingUpToDate(val)
+            persistent currentval;
+            if isempty(currentval)
+                currentval = true;
+            end
+            if nargin >= 1
+                currentval = val;
+            end
+            
+            val = currentval;
+        end
+        
+        
+        function tokenStructs = getTokenStruct()
+            % MBeautify.getTokenStruct returns the tokens used in replacement
+            
+            tokenStructs = containers.Map;
+            tokenStructs('ContinueToken') = newStruct('...', '#MBeutyCont#');
+            tokenStructs('StringToken') = newStruct('', '#MBeutyString#');
+            tokenStructs('ArrayElementToken') = newStruct('', '#MBeutyArrayElement#');
+            tokenStructs('TransposeToken') = newStruct('''', '#MBeutyTransp#');
+            tokenStructs('NonConjTransposeToken') = newStruct('.''', '#MBeutyNonConjTransp#');
+            tokenStructs('NormNotationPlus') = newStruct('+', '#MBeauty_OP_NormNotationPlus');
+            tokenStructs('NormNotationMinus') = newStruct('-', '#MBeauty_OP_NormNotationMinus');
+            tokenStructs('UnaryPlus') = newStruct('+', '#MBeauty_OP_UnaryPlus');
+            tokenStructs('UnaryMinus') = newStruct('-', '#MBeauty_OP_UnaryMinus');
+            
+            function retStruct = newStruct(storedValue, replacementString)
+                retStruct = struct('StoredValue', storedValue, 'Token', replacementString);
+            end
+        end
+        
+        
+        function operators = getAllOperators()
+            % MBeautify.getAllOperators returns all operators in a cell array
+            
+            confStruct = MBeautify.getConfigurationStruct();
+            fieldList = fields(confStruct.OperatorRules);
+            operators = cell(numel(fieldList), 1);
+            
+            for i = 1:numel(fieldList)
+                operators{i} = confStruct.OperatorRules.(fieldList{i}).ValueFrom;
+            end
+            
+        end
+        
+        function configurationStruct = getConfigurationStruct()
+            % MBeautify.getConfigurationStruct returns the configuration struct from the rules file
+            
+            % Persistent variable to store the returned rules
+            % If MBeautify.setup was not called, the stored struct should be returned
+            persistent configurationStructStored;
+            
+            if isempty(configurationStructStored) || ~MBeautify.parsingUpToDate()
+                currCD = cd();
+                cd(MBeautify.SettingDirectory);
+                configurationStruct = eval(MBeautify.RulesMFile(1:end-2));
+                cd(currCD)
+                configurationStructStored = configurationStruct;
+                MBeautify.parsingUpToDate(true);
+            else
+                configurationStruct = configurationStructStored;
+            end
+            
+        end
         
         formattedSource = performFormatting(source);
         writeConfigurationFile(resStruct);
-        
-        % Gets the structure of tokens used during the formatting
-        tokenStructs = getTokenStruct();
         
         %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
         % Writes the default settings XML file
@@ -237,11 +286,8 @@ classdef MBeautify
         
         % Reads the settings XML file to a structure
         res = readSettingsXML();
-        
-        configurationStruct = getConfigurationStruct();
-    end
-    
-    
+
+    end 
 end
 
 

@@ -4,11 +4,8 @@ settingConf = MBeautify.getConfigurationStruct();
 nMaximalNewLines = str2double(settingConf.SpecialRules.MaximalNewLinesValue);
 newLine = sprintf('\n');
 
-tokStruct = MBeautify.getTokenStruct();
+contTokenStruct = MBeautify.TokenStruct('ContinueToken');
 
-contTokenStruct = tokStruct('ContinueToken');
-
-%%
 textArray = regexp(source, newLine, 'split');
 
 replacedTextArray = {};
@@ -90,10 +87,9 @@ for j = 1:numel(textArray)
                 for iSplitLine = 1:numel(splitToLine) - 1
                     line = [line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine, 2}, newLine];
                 end
+                
                 line = [line, strtrim(splitToLine{end}), actComment]; %#ok<*AGROW>
-                
                 replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
-                
                 contLineArray = cell(0, 2);
                 
                 continue;
@@ -102,7 +98,6 @@ for j = 1:numel(textArray)
         end
         
         actCodeFinal = performReplacements(actCode, settingConf);
-        
     end
     
     line = [strtrim(actCodeFinal), ' ', actComment];
@@ -114,11 +109,9 @@ if numel(replacedTextArray)
 end
 
 formattedSource = [replacedTextArray{:}];
-
 end
 
 function ret = calculateContainerDepthDeltaOfLine(code)
-ret = 0;
 % Pre-check for opening and closing brackets: the final delta has to be calculated after the transponations and the
 % strings are replaced, which are time consuming actions
 if numel(regexp(code, '{|[')) || numel(regexp(code, '}|]'))
@@ -126,28 +119,24 @@ if numel(regexp(code, '{|[')) || numel(regexp(code, '}|]'))
     actCodeTemp = replaceStrings(actCodeTemp);
     
     ret = numel(regexp(actCodeTemp, '{|[')) - numel(regexp(actCodeTemp, '}|]'));
+else
+    ret = 0;
 end
 end
 
 function [actCodeTemp, strTokStructs] = replaceStrings(actCode)
-tokStruct = MBeautify.getTokenStruct();
-
 %% Strings
 splittedCode = regexp(actCode, '''', 'split');
 
 strTokStructs = cell(1, ceil(numel(splittedCode)/2));
-
 strArray = cell(1, numel(splittedCode));
 
 for iSplit = 1:numel(splittedCode)
     % Not string
     if ~isequal(mod(iSplit, 2), 0)
-        
-        mstr = splittedCode{iSplit};
-        
-        strArray{iSplit} = mstr;
+        strArray{iSplit} = splittedCode{iSplit};
     else % String
-        strTokenStruct = tokStruct('StringToken');
+        strTokenStruct = MBeautify.TokenStruct('StringToken');
         
         strArray{iSplit} = strTokenStruct.Token;
         strTokenStruct.StoredValue = splittedCode{iSplit};
@@ -156,20 +145,16 @@ for iSplit = 1:numel(splittedCode)
 end
 
 strTokStructs = strTokStructs(cellfun(@(x) ~isempty(x), strTokStructs));
-
 actCodeTemp = [strArray{:}];
-
 end
 
 function actCodeFinal = restoreStrings(actCodeTemp, strTokStructs)
-tokStruct = MBeautify.getTokenStruct();
-strTokenStruct = tokStruct('StringToken');
-splitByStrTok = regexp(actCodeTemp, strTokenStruct.Token, 'split');
+
+splitByStrTok = regexp(actCodeTemp, MBeautify.TokenStruct('StringToken').Token, 'split');
 
 if numel(strTokStructs)
     actCodeFinal = '';
     for iSplit = 1:numel(strTokStructs)
-        
         actCodeFinal = [actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, ''''];
     end
     
@@ -183,10 +168,8 @@ end
 end
 
 function actCode = replaceTransponations(actCode)
-tokStruct = MBeautify.getTokenStruct();
-trnspTokStruct = tokStruct('TransposeToken');
-nonConjTrnspTokStruct = tokStruct('NonConjTransposeToken');
-
+trnspTokStruct = MBeautify.TokenStruct('TransposeToken');
+nonConjTrnspTokStruct = MBeautify.TokenStruct('NonConjTransposeToken');
 
 charsIndicateTranspose = '[a-zA-Z0-9\)\]\}\.]';
 
@@ -200,15 +183,12 @@ for iStr = 1:numel(actCode)
     if strcmp(actChar, '''')
         % .' => NonConj transpose
         if isLastCharDot
-            tempCode = tempCode(1:end-1);
-            tempCode = [tempCode, nonConjTrnspTokStruct.Token];
+            tempCode = [tempCode(1:end-1), nonConjTrnspTokStruct.Token];
             isLastCharTransp = true;
         else
             if isLastCharTransp
                 tempCode = [tempCode, trnspTokStruct.Token];
-                isLastCharTransp = true; % TODO: Isn't necessary
             else
-                
                 if numel(tempCode) && numel(regexp(tempCode(end), charsIndicateTranspose)) && ~isInStr
                     tempCode = [tempCode, trnspTokStruct.Token];
                     isLastCharTransp = true;
@@ -235,17 +215,16 @@ actCode = tempCode;
 end
 
 function actCodeFinal = restoreTransponations(actCodeFinal)
-tokStruct = MBeautify.getTokenStruct();
-trnspTokStruct = tokStruct('TransposeToken');
-nonConjTrnspTokStruct = tokStruct('NonConjTransposeToken');
+trnspTokStruct = MBeautify.TokenStruct('TransposeToken');
+nonConjTrnspTokStruct = MBeautify.TokenStruct('NonConjTransposeToken');
 
 actCodeFinal = regexprep(actCodeFinal, trnspTokStruct.Token, trnspTokStruct.StoredValue);
 actCodeFinal = regexprep(actCodeFinal, nonConjTrnspTokStruct.Token, nonConjTrnspTokStruct.StoredValue);
 end
 
 function actCodeFinal = performReplacements(actCode, settingConf)
-actCode = replaceTransponations(actCode);
-[actCode, strTokenStruct] = replaceStrings(actCode);
+
+[actCode, strTokenStruct] = replaceStrings(replaceTransponations(actCode));
 
 actCodeTemp = performReplacementsSingleLine(actCode, settingConf);
 
@@ -379,19 +358,15 @@ if nargin < 3
     doIndexing = false;
 end
 
-tokStruct = MBeautify.getTokenStruct();
-
 setConfigOperatorFields = fields(settingConf.OperatorRules);
 % At this point, the data contains one line of code, but all user-defined strings enclosed in '' are replaced by #MBeutyString#
-
-keywords = iskeyword();
 
 % Old-style function calls, such as 'subplot 211' or 'disp Hello World' -> return unchanged
 if numel(regexp(data, '^[a-zA-Z0-9_]+\s+[^(=]'))
     
     splitData = regexp(strtrim(data), ' ', 'split');
     % The first elemen is not a keyword and does not exist (function on the path)
-    if numel(splitData) && ~any(strcmp(splitData{1}, keywords)) && exist(splitData{1}) %#ok<EXIST>
+    if numel(splitData) && ~any(strcmp(splitData{1}, iskeyword())) && exist(splitData{1}) %#ok<EXIST>
         return
     end
 end
@@ -430,7 +405,6 @@ for iOpConf = 1:numel(setConfigOperatorFields)
     
     opToken = generateOperatorToken(currField);
     
-    
     isPlus = strcmp(opToken, generateOperatorToken('Plus'));
     isMinus = strcmp(opToken, generateOperatorToken('Minus'));
     
@@ -442,7 +416,7 @@ for iOpConf = 1:numel(setConfigOperatorFields)
         for iSplit = 1:numel(splittedData) - 1
             beforeItem = strtrim(splittedData{iSplit});
             if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
-                    ['([0-9a-zA-Z_)}\]\.]|', tokStruct('TransposeToken').Token, '|#MBeauty_ArrayToken_.*#)$']))
+                    ['([0-9a-zA-Z_)}\]\.]|', MBeautify.TokenStruct('TransposeToken').Token, '|#MBeauty_ArrayToken_.*#)$']))
                 % + or - is a binary operator after:
                 %    - numbers [0-9.],
                 %    - variable names [a-zA-Z0-9_] or
@@ -453,9 +427,9 @@ for iOpConf = 1:numel(setConfigOperatorFields)
                 % In this case the + and - signs are not operators so shoud be skipped
                 if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end-1), '[0-9]'))
                     if isPlus
-                        replaceTokens{end+1} = tokStruct('NormNotationPlus').Token;
+                        replaceTokens{end+1} = MBeautify.TokenStruct('NormNotationPlus').Token;
                     elseif isMinus
-                        replaceTokens{end+1} = tokStruct('NormNotationMinus').Token;
+                        replaceTokens{end+1} = MBeautify.TokenStruct('NormNotationMinus').Token;
                     end
                     
                 else
@@ -463,9 +437,9 @@ for iOpConf = 1:numel(setConfigOperatorFields)
                 end
             else
                 if isPlus
-                    replaceTokens{end+1} = tokStruct('UnaryPlus').Token;
+                    replaceTokens{end+1} = MBeautify.TokenStruct('UnaryPlus').Token;
                 elseif isMinus
-                    replaceTokens{end+1} = tokStruct('UnaryMinus').Token;
+                    replaceTokens{end+1} = MBeautify.TokenStruct('UnaryMinus').Token;
                 end
             end
         end
@@ -487,10 +461,10 @@ end
 % Now go backwards and replace the tokens by the real operators
 
 % Special tokens: Unary Plus/Minus, Normalized Number Format
-data = regexprep(data, ['\s*', tokStruct('UnaryPlus').Token, '\s*'], tokStruct('UnaryPlus').StoredValue);
-data = regexprep(data, ['\s*', tokStruct('UnaryMinus').Token, '\s*'], tokStruct('UnaryMinus').StoredValue);
-data = regexprep(data, ['\s*', tokStruct('NormNotationPlus').Token, '\s*'], tokStruct('NormNotationPlus').StoredValue);
-data = regexprep(data, ['\s*', tokStruct('NormNotationMinus').Token, '\s*'], tokStruct('NormNotationMinus').StoredValue);
+data = regexprep(data, ['\s*', MBeautify.TokenStruct('UnaryPlus').Token, '\s*'], MBeautify.TokenStruct('UnaryPlus').StoredValue);
+data = regexprep(data, ['\s*', MBeautify.TokenStruct('UnaryMinus').Token, '\s*'], MBeautify.TokenStruct('UnaryMinus').StoredValue);
+data = regexprep(data, ['\s*', MBeautify.TokenStruct('NormNotationPlus').Token, '\s*'], MBeautify.TokenStruct('NormNotationPlus').StoredValue);
+data = regexprep(data, ['\s*', MBeautify.TokenStruct('NormNotationMinus').Token, '\s*'], MBeautify.TokenStruct('NormNotationMinus').StoredValue);
 
 % Replace all other operators
 
@@ -570,10 +544,8 @@ data = regexprep(data, '\s+;', ';');
 openingBrackets = {'[', '{', '('};
 closingBrackets = {']', '}', ')'};
 
-tokStruct = MBeautify.getTokenStruct();
-
 operatorArray = {'+', '-', '&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^', '~'};
-contTokenStruct = tokStruct('ContinueToken');
+contTokenStruct = MBeautify.TokenStruct('ContinueToken');
 
 [containerBorderIndexes, maxDepth] = calculateContainerDepths(data, openingBrackets, closingBrackets);
 
@@ -662,10 +634,8 @@ while maxDepth > 0
                     continue;
                 end
                 
-                hasOpeningBrckt = numel(strfind(currElem, openingBracket));
-                isInCurlyBracket = isInCurlyBracket || hasOpeningBrckt;
-                hasClosingBrckt = numel(strfind(currElem, closingBracket));
-                isInCurlyBracket = isInCurlyBracket && ~hasClosingBrckt;
+                isInCurlyBracket = isInCurlyBracket || numel(strfind(currElem, openingBracket));
+                isInCurlyBracket = isInCurlyBracket && ~numel(strfind(currElem, closingBracket));
                 
                 currElemStripped = regexprep(currElem, ['[', openingBracket, closingBracket, ']'], '');
                 nextElemStripped = regexprep(nextElem, ['[', openingBracket, closingBracket, ']'], '');
