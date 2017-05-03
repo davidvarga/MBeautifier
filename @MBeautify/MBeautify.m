@@ -65,6 +65,20 @@ classdef MBeautify
             end
         end
         
+        function formatFiles(directory, fileFilter)
+            % Formats the files in-place (files are overwritten) in the specified directory, collected by the specified filter.
+            % The file filter is a wildcard expression used by the dir command.
+            
+            files = dir(fullfile(directory, fileFilter));
+            
+            for iF = 1:numel(files)
+                file = fullfile(directory, files(iF).name);
+                MBeautify.formatFile(file, file);
+            end
+        end
+        
+        
+        
         function formatEditorSelection(doSave)
             % Performs formatting on selection of the currently active Matlab Editor page.
             % The selection is automatically extended until the first empty line above and below.
