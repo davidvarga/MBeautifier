@@ -19,12 +19,13 @@ x = 1
 x = -1
 x = +1
 x = +.1
-if +1 > +2
-    +(-[-.1])
-    z = [1, 2, 3, 4]
++(-[-.1])
+z = [1, 2, 3, 4]
+
+if 1 > +2
     return
 end; % comment +-+-+- +++ 123 ***
-if -1 > -2
+if 1 > -2
 end
 % different meanings of 'end'
 if any(z == -[-1, -2, -3, -4])
@@ -42,4 +43,5 @@ end;
 
 % transpose
 -x' + +1 + x'' + 2 * x''' * 1
-
+a = eye(27)
+a(3, 4:5) = [3, 1]
