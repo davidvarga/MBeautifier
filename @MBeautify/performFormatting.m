@@ -395,6 +395,7 @@ end
 
 % Remove all duplicate space
 data = regexprep(data, '\s+', ' ');
+keywords = iskeyword();
 
 % Handle special + and - cases:
 % 	- unary plus/minus, such as in (+1): replace #MBeauty_OP_Plus/Minus# by #MBeauty_OP_UnaryPlus/Minus#
