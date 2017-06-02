@@ -416,12 +416,14 @@ for iOpConf = 1:numel(setConfigOperatorFields)
         for iSplit = 1:numel(splittedData) - 1
             beforeItem = strtrim(splittedData{iSplit});
             if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
-                    ['([0-9a-zA-Z_)}\]\.]|', MBeautify.TokenStruct('TransposeToken').Token, '|#MBeauty_ArrayToken_.*#)$']))
+                    ['([0-9a-zA-Z_)}\]\.]|', MBeautify.TokenStruct('TransposeToken').Token, '|#MBeauty_ArrayToken_.*#)$'])) && ...
+                    ~numel(regexp(beforeItem, ['(?=^|\s)(', strjoin(keywords','|') ')']))
                 % + or - is a binary operator after:
                 %    - numbers [0-9.],
                 %    - variable names [a-zA-Z0-9_] or
                 %    - closing brackets )}]
                 %    - transpose signs ', here represented as #MBeutyTransp#
+				%    - keywords
                 
                 % Special treatment for E: 7E-3 or 7e+4 normalized notation
                 % In this case the + and - signs are not operators so shoud be skipped
@@ -461,8 +463,8 @@ end
 % Now go backwards and replace the tokens by the real operators
 
 % Special tokens: Unary Plus/Minus, Normalized Number Format
-data = regexprep(data, ['\s*', MBeautify.TokenStruct('UnaryPlus').Token, '\s*'], MBeautify.TokenStruct('UnaryPlus').StoredValue);
-data = regexprep(data, ['\s*', MBeautify.TokenStruct('UnaryMinus').Token, '\s*'], MBeautify.TokenStruct('UnaryMinus').StoredValue);
+data = regexprep(data, ['\s*', MBeautify.TokenStruct('UnaryPlus').Token, '\s*'], [' ', MBeautify.TokenStruct('UnaryPlus').StoredValue]);
+data = regexprep(data, ['\s*', MBeautify.TokenStruct('UnaryMinus').Token, '\s*'], [' ', MBeautify.TokenStruct('UnaryMinus').StoredValue]);
 data = regexprep(data, ['\s*', MBeautify.TokenStruct('NormNotationPlus').Token, '\s*'], MBeautify.TokenStruct('NormNotationPlus').StoredValue);
 data = regexprep(data, ['\s*', MBeautify.TokenStruct('NormNotationMinus').Token, '\s*'], MBeautify.TokenStruct('NormNotationMinus').StoredValue);
 
