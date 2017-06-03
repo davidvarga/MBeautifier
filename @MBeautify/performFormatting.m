@@ -43,7 +43,7 @@ for j = 1:numel(textArray)
     else
         containerDepth = containerDepth + calculateContainerDepthDeltaOfLine(trimmedCode);
         
-        if containerDepth && ~(numel(trimmedCode) >= 3 && strcmp(trimmedCode(end-2:end), '...'))
+        if containerDepth && ~(numel(trimmedCode) >= 3 && strcmp(trimmedCode(end -2:end), '...'))
             if strcmp(trimmedCode(end), ',') || strcmp(trimmedCode(end), ';')
                 actCode = trimmedCode(1:end-1);
             end
@@ -53,10 +53,10 @@ for j = 1:numel(textArray)
         trimmedCode = strtrim(actCode);
         
         % Line ends with "..."
-        if (numel(trimmedCode) >= 3 && strcmp(trimmedCode(end-2:end), '...')) ...
+        if (numel(trimmedCode) >= 3 && strcmp(trimmedCode(end -2:end), '...')) ...
                 || (isequal(splittingPos, 1) && isInContinousLine)
             isInContinousLine = true;
-            contLineArray{end+1, 1} = actCode;
+            contLineArray{end +1, 1} = actCode;
             contLineArray{end, 2} = actComment;
             % Step to next line
             continue;
@@ -64,12 +64,12 @@ for j = 1:numel(textArray)
             % End of cont line
             if isInContinousLine
                 isInContinousLine = false;
-                contLineArray{end+1, 1} = actCode;
+                contLineArray{end +1, 1} = actCode;
                 contLineArray{end, 2} = actComment;
                 
                 % Build the line for replacement
                 replacedLines = '';
-                for iLine = 1:size(contLineArray, 1) - 1
+                for iLine = 1:size(contLineArray, 1) -1
                     tempRow = strtrim(contLineArray{iLine, 1});
                     tempRow = [tempRow(1:end-3), [' ', contTokenStruct.Token, ' ']];
                     tempRow = regexprep(tempRow, ['\s+', contTokenStruct.Token, '\s+'], [' ', contTokenStruct.Token, ' ']);
@@ -84,7 +84,7 @@ for j = 1:numel(textArray)
                 splitToLine = regexp(actCodeFinal, contTokenStruct.Token, 'split');
                 
                 line = '';
-                for iSplitLine = 1:numel(splitToLine) - 1
+                for iSplitLine = 1:numel(splitToLine) -1
                     line = [line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine, 2}, newLine];
                 end
                 
@@ -387,7 +387,7 @@ if ~isempty([operatorAppearance{:}])
         currOpStruct = settingConf.OperatorRules.(currField);
         dataNew = regexprep(data, ['\s*', currOpStruct.ValueFrom, '\s*'], generateOperatorToken(currField));
         if ~strcmp(data, dataNew)
-            opBuffer{end+1} = generateOperatorToken(currField);
+            opBuffer{end +1} = generateOperatorToken(currField);
         end
         data = dataNew;
     end
@@ -414,35 +414,35 @@ for iOpConf = 1:numel(setConfigOperatorFields)
         splittedData = regexp(data, opToken, 'split');
         
         replaceTokens = {};
-        for iSplit = 1:numel(splittedData) - 1
+        for iSplit = 1:numel(splittedData) -1
             beforeItem = strtrim(splittedData{iSplit});
             if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
                     ['([0-9a-zA-Z_)}\]\.]|', MBeautify.TokenStruct('TransposeToken').Token, '|#MBeauty_ArrayToken_.*#)$'])) && ...
-                    ~numel(regexp(beforeItem, ['(?=^|\s)(', strjoin(keywords','|') ')']))
+                    ~numel(regexp(beforeItem, ['(?=^|\s)(', strjoin(keywords', '|'), ')']))
                 % + or - is a binary operator after:
                 %    - numbers [0-9.],
                 %    - variable names [a-zA-Z0-9_] or
                 %    - closing brackets )}]
                 %    - transpose signs ', here represented as #MBeutyTransp#
-				%    - keywords
+                %    - keywords
                 
                 % Special treatment for E: 7E-3 or 7e+4 normalized notation
                 % In this case the + and - signs are not operators so shoud be skipped
-                if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end-1), '[0-9]'))
+                if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end -1), '[0-9]'))
                     if isPlus
-                        replaceTokens{end+1} = MBeautify.TokenStruct('NormNotationPlus').Token;
+                        replaceTokens{end +1} = MBeautify.TokenStruct('NormNotationPlus').Token;
                     elseif isMinus
-                        replaceTokens{end+1} = MBeautify.TokenStruct('NormNotationMinus').Token;
+                        replaceTokens{end +1} = MBeautify.TokenStruct('NormNotationMinus').Token;
                     end
                     
                 else
-                    replaceTokens{end+1} = opToken;
+                    replaceTokens{end +1} = opToken;
                 end
             else
                 if isPlus
-                    replaceTokens{end+1} = MBeautify.TokenStruct('UnaryPlus').Token;
+                    replaceTokens{end +1} = MBeautify.TokenStruct('UnaryPlus').Token;
                 elseif isMinus
-                    replaceTokens{end+1} = MBeautify.TokenStruct('UnaryMinus').Token;
+                    replaceTokens{end +1} = MBeautify.TokenStruct('UnaryMinus').Token;
                 end
             end
         end
@@ -471,6 +471,9 @@ data = regexprep(data, ['\s*', MBeautify.TokenStruct('NormNotationMinus').Token,
 
 % Replace all other operators
 
+whiteSpaceToken = '#MBeauty_WhiteSpace_Token';
+wsTokenLength = numel(whiteSpaceToken);
+
 for iOpConf = 1:numel(setConfigOperatorFields)
     
     currField = setConfigOperatorFields{iOpConf};
@@ -481,9 +484,35 @@ for iOpConf = 1:numel(setConfigOperatorFields)
         if doIndexing && numel(regexp(currOpStruct.ValueFrom, '\+|\-|\/|\*|\:'))
             replaceTo = strtrim(replaceTo);
         end
-        data = regexprep(data, ['\s*', generateOperatorToken(currField), '\s*'], replaceTo);
+        
+        % To properly support operator padding, the previously replaced white-spaces should not be lost.
+        % See: https://github.com/davidvarga/MBeautifier/issues/36
+        
+        % In the replacement string, all the white-spaces are tokenized
+        tokenizedReplaceString = strrep(replaceTo, ' ', whiteSpaceToken);
+        
+        % Calculate the starting WS count
+        leadingWSNum = 0;
+        matchCell = regexp(tokenizedReplaceString, ['^(', whiteSpaceToken, ')+'], 'match');
+        if numel(matchCell)
+            leadingWSNum = numel(matchCell{1}) / wsTokenLength;
+        end
+        
+        % Calculate ending whitespace count
+        endingWSNum = 0;
+        matchCell = regexp(tokenizedReplaceString, ['(', whiteSpaceToken, ')+$'], 'match');
+        if numel(matchCell)
+            endingWSNum = numel(matchCell{1}) / wsTokenLength;
+        end
+        
+        % Replace only the amount of whitespace tokens that are actually needed by the operator rule
+        data = regexprep(data, ['\s*(', whiteSpaceToken, '){0,', num2str(leadingWSNum), '}', ...
+            generateOperatorToken(currField), '(', whiteSpaceToken, '){0,', num2str(endingWSNum), '}\s*'], ...
+            tokenizedReplaceString);
     end
 end
+
+data = regexprep(data, whiteSpaceToken, ' ');
 
 
 data = regexprep(data, ' \)', ')');
@@ -504,7 +533,7 @@ if isempty(arrayTokenList)
     return;
 end
 
-for iKey = numel(arrayTokenList):- 1:1
+for iKey = numel(arrayTokenList):-1:1
     data = regexprep(data, arrayTokenList{iKey}, regexptranslate('escape', map(arrayTokenList{iKey})));
 end
 
@@ -528,7 +557,7 @@ for i = 1:numel(data)
     end
     
     if borderFound
-        containerBorderIndexes{end+1, 1} = i;
+        containerBorderIndexes{end +1, 1} = i;
         containerBorderIndexes{end, 2} = depth;
         depth = newDepth;
     end
@@ -628,7 +657,7 @@ while maxDepth > 0
             end
             
             isInCurlyBracket = 0;
-            for elemInd = 1:numel(elementsCell) - 1
+            for elemInd = 1:numel(elementsCell) -1
                 
                 currElem = strtrim(elementsCell{elemInd});
                 nextElem = strtrim(elementsCell{elemInd+1});
