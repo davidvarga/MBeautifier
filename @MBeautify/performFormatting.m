@@ -348,7 +348,7 @@ function token = generateOperatorToken(operatorName)
 token = ['#MBeauty_OP_', operatorName, '#'];
 end
 
-function data = performReplacementsSingleLine(data, settingConf, doIndexing)
+function data = performReplacementsSingleLine(data, settingConf, doIndexing, contType)
 
 if isempty(data)
     return;
@@ -358,6 +358,9 @@ if nargin < 3
     doIndexing = false;
 end
 
+if nargin < 4
+    contType = '';
+end
 setConfigOperatorFields = fields(settingConf.OperatorRules);
 % At this point, the data contains one line of code, but all user-defined strings enclosed in '' are replaced by #MBeutyString#
 
@@ -418,7 +421,7 @@ for iOpConf = 1:numel(setConfigOperatorFields)
             beforeItem = strtrim(splittedData{iSplit});
             if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
                     ['([0-9a-zA-Z_)}\]\.]|', MBeautify.TokenStruct('TransposeToken').Token, '|#MBeauty_ArrayToken_.*#)$'])) && ...
-                    ~numel(regexp(beforeItem, ['(?=^|\s)(', strjoin(keywords', '|'), ')']))
+                    (~numel(regexp(beforeItem, ['(?=^|\s)(', strjoin(keywords', '|'), ')'])) || doIndexing)
                 % + or - is a binary operator after:
                 %    - numbers [0-9.],
                 %    - variable names [a-zA-Z0-9_] or
@@ -481,8 +484,13 @@ for iOpConf = 1:numel(setConfigOperatorFields)
         currOpStruct = settingConf.OperatorRules.(currField);
         
         replaceTo = currOpStruct.ValueTo;
-        if doIndexing && numel(regexp(currOpStruct.ValueFrom, '\+|\-|\/|\*|\:'))
-            replaceTo = strtrim(replaceTo);
+        if doIndexing && ~isempty(contType)&& numel(regexp(currOpStruct.ValueFrom, '\+|\-|\/|\*'))
+            if strcmp(contType, 'matrix') && str2double(settingConf.SpecialRules.MatrixIndexing_ArithmeticOperatorPaddingValue)
+                replaceTo = strtrim(replaceTo);
+            elseif strcmp(contType, 'cell') && ~str2double(settingConf.SpecialRules.CellArrayIndexing_ArithmeticOperatorPaddingValue)
+                replaceTo = strtrim(replaceTo);
+            end
+            
         end
         
         % To properly support operator padding, the previously replaced white-spaces should not be lost.
@@ -615,11 +623,14 @@ while maxDepth > 0
     end
     
     doIndexing = isContainerIndexing;
+    contType = '';
     if doIndexing
         if strcmp(openingBracket, '(')
-            doIndexing = ~str2double(settingConf.SpecialRules.MatrixIndexing_ArithmeticOperatorPaddingValue);
+            doIndexing = true;
+            contType = 'matrix';
         elseif strcmp(openingBracket, '{')
-            doIndexing = ~str2double(settingConf.SpecialRules.CellArrayIndexing_ArithmeticOperatorPaddingValue);
+            doIndexing = true;
+            contType = 'cell';
         else
             doIndexing = false;
         end
@@ -633,8 +644,8 @@ while maxDepth > 0
     
     if ~strcmp(openingBracket, '(')
         if doIndexing
-            strNew = strtrim(str);
-            strNew = [strNew(1), strtrim(performReplacementsSingleLine(strNew(2:end-1), settingConf, doIndexing)), strNew(end)];
+      strNew = strtrim(str);
+            strNew = [strNew(1), strtrim(performReplacementsSingleLine(strNew(2:end-1), settingConf, doIndexing, contType)), strNew(end)];
         else
             elementsCell = regexp(str, ' ', 'split');
             
