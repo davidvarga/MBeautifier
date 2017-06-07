@@ -142,11 +142,11 @@
       </SpecialRule>
       <SpecialRule>
          <Key>CellArrayIndexing_ArithmeticOperatorPadding</Key>
-         <Value>1</Value>
+         <Value>0</Value>
       </SpecialRule>
       <SpecialRule>
          <Key>MatrixIndexing_ArithmeticOperatorPadding</Key>
-         <Value>1</Value>
+         <Value>0</Value>
       </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>
