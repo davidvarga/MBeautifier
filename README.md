@@ -8,12 +8,12 @@ MBeautifier is a lightweight M-Script based Matlab source code formatter usable 
 Main features
 -------------
 
- - Padding operators with white spaces based on the configuration.
- - Fixing white space padding of keywords
+ - Padding operators with white spaces based on the XML configuration file.
+ - Correction white space padding of keywords
  - Correction of indentation using the Smart Indent functionality of the Matlab Editor
  - Removal of continuous empty lines (the number can be configured)
- - Optionally inserting missing element separators (commas) in matrix and cell array declarations
- - Different working modes: format the current page of the Matlab editor, format only a selection in the Matlab Editor or format files
+ - Optionally inserting missing element separators (commas) in matrix and cell array initializations
+ - Different working modes: format the current page of the Matlab editor, format only a selection in the Matlab Editor or format file(s) 
 
 Deployment and Configuration
 ----------------------------
@@ -21,7 +21,7 @@ Add containing directory to the Matlab path, then execute: `MBeautify.setup()`.
 
 This command will create the standard configuration of formatting stored in `MBeautifier\resources\settings\MBeautyConfigurationRules.m`.
 
-This file is used in run-time to gather the configuration rules, therefore when the configuration has been modified, executing this function again will make the rules active.
+This file is used in run-time to gather the configuration rules, therefore when the configuration XML file has been modified, executing this function again will make the rules active.
 
 ### Configuration
 
@@ -41,7 +41,7 @@ Each `OperatorPaddingRule` represents the formatting rules for one single operat
         <ValueTo> ~= </ValueTo>
     </OperatorPaddingRule>
 	
-The above example shows the rules for the "not equals" operator. The `ValueFrom` node stores the operator `~=` and the `ValueTo` node stores the expected formatting: the operator should be preceded and followed by a white-space character.
+The above example shows the rule for the "not equals" operator. The `ValueFrom` node stores the operator `~=` and the `ValueTo` node stores the expected format: the operator should be preceded and followed by a white-space character.
 
 All of the operator padding rules are collected dynamically, therefore adding a new node to this list then executing the `setup` command will result in that MBeautifier will replace the currently added node also.
 
@@ -65,10 +65,18 @@ Currently there are three approaches supported:
 
  - Perform formatting on the currently active page of Matlab Editor. Command: `MBeautify.formatCurrentEditorPage()`. By default the file is not saved, but it remains opened modified in the editor. Optionally the formatted file can be saved using the `MBeautify.formatCurrentEditorPage(true)` syntax.
  - Perform formatting on the currently selected text of the active page of Matlab Editor. Command: `MBeautify.formatEditorSelection()`. An optional saving mechanism as above exists also in this case. Useful in case of large files, but in any case `MBeautify.formatCurrentEditorPage()` is suggested.
- - Perfrom formatting on a file. Command: `MBeautify.formatFile(file)`. Can be used with (1)one argument: the input file is formatted and remains open in the Matlab editor unsaved; (2)two arguments as `MBeautify.formatFile(file, outFile)`: the formatted file is saved to the specified output file if possible. Output can be the same as input. 
+ - Perform formatting on a file. Command: `MBeautify.formatFile(file)`. Can be used with (1)one argument: the input file is formatted and remains open in the Matlab editor unsaved; (2)two arguments as `MBeautify.formatFile(file, outFile)`: the formatted file is saved to the specified output file if possible. Output can be the same as input.
+ - Perform formatting on several files in a directory. Command: `MBeautify.formatFiles(directory, fileFilter)`. The first argument is an absolute path to a directory, the second one is a wildcard expression (used for `dir` command) to filter files in the target directory. The files will be formatted in-place (overwritten). 
  
  Supported Matlab versions
  -------------------------
  
  As MBeautifier uses the built-in Matlab Editor functionality, it supports Matlab versions from R2011a.
+ 
+ Planned future versions
+ -----------------------
+ 
+ As Matlab does not contain any formatter even in R2017 releases, this project will be maintained until at least R2018 (if that release will contain a formatter).
+ 
+ As it is planned at the moment, the current release is the last one which is M-Script based, and the next release is planned to be implemented in Java with Matlab interface. This is the first step to make MBeautifier also usable in Octave.
  
