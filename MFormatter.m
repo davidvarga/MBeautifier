@@ -215,7 +215,7 @@ classdef MFormatter < handle
                 outStr = [outStr, cellStr{i}, delim];
             end
             
-            outStr(end) = '';
+            outStr(end-numel(delim)+1:end) = '';
             
         end
         
