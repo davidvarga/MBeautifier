@@ -208,6 +208,17 @@ classdef MFormatter < handle
        
     methods (Access = private, Static)
         
+        function outStr = joinString(cellStr, delim)
+            
+            outStr = '';
+            for i = 1:numel(cellStr)
+                outStr = [outStr, cellStr{i}, delim];
+            end
+            
+            outStr(end) = '';
+            
+        end
+        
         function tokenStructs = getTokenStruct()
             % Returns the tokens used in replacement.
             
@@ -544,7 +555,7 @@ classdef MFormatter < handle
                         beforeItem = strtrim(splittedData{iSplit});
                         if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
                                 ['([0-9a-zA-Z_)}\]\.]|', MFormatter.TokenStruct.TransposeToken.Token, '|#MBeauty_ArrayToken_.*#)$'])) && ...
-                                (~numel(regexp(beforeItem, ['(?=^|\s)(', strjoin(keywords', '|'), ')'])) || doIndexing)
+                                (~numel(regexp(beforeItem, ['(?=^|\s)(', MFormatter.joinString(keywords', '|'), ')'])) || doIndexing)
                             % + or - is a binary operator after:
                             %    - numbers [0-9.],
                             %    - variable names [a-zA-Z0-9_] or
