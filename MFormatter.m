@@ -565,7 +565,7 @@ classdef MFormatter < handle
                             
                             % Special treatment for E: 7E-3 or 7e+4 normalized notation
                             % In this case the + and - signs are not operators so shoud be skipped
-                            if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end - 1), '[0-9]'))
+                            if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end - 1), '[0-9.]'))
                                 if isPlus
                                     replaceTokens{end + 1} = MFormatter.TokenStruct.NormNotationPlus.Token;
                                     normPlusOperatorPresent = true;
