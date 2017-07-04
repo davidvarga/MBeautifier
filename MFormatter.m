@@ -9,6 +9,9 @@ classdef MFormatter < handle
         StringTokenStructs;
         BlockCommentDepth;
         IsInBlockComment;
+        
+        MatrixIndexingOperatorPadding;
+        CellArrayIndexingOperatorPadding;
     end
     
     properties(Access = private, Constant)
@@ -24,6 +27,9 @@ classdef MFormatter < handle
             % Creates a new formatter using the passed configuration.
             
             obj.SettingConfiguration = settingConfiguration;
+            
+            obj.MatrixIndexingOperatorPadding = str2double(obj.SettingConfiguration.SpecialRules.MatrixIndexing_ArithmeticOperatorPaddingValue);
+            obj.CellArrayIndexingOperatorPadding = str2double(obj.SettingConfiguration.SpecialRules.CellArrayIndexing_ArithmeticOperatorPaddingValue);
             
             % Init run-time members
             obj.StringTokenStructs = {};
@@ -555,7 +561,7 @@ classdef MFormatter < handle
                         beforeItem = strtrim(splittedData{iSplit});
                         if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
                                 ['([0-9a-zA-Z_)}\]\.]|', MFormatter.TokenStruct.TransposeToken.Token, '|#MBeauty_ArrayToken_.*#)$'])) && ...
-                                (~numel(regexp(beforeItem, ['(?=^|\s)(', MFormatter.joinString(keywords', '|'), ')'])) || doIndexing)
+                                (~numel(regexp(beforeItem, ['(?=^|\s)(', MFormatter.joinString(keywords', '|'), ')$'])) || doIndexing)
                             % + or - is a binary operator after:
                             %    - numbers [0-9.],
                             %    - variable names [a-zA-Z0-9_] or
@@ -619,6 +625,8 @@ classdef MFormatter < handle
                 data = regexprep(data, ['\s*', MFormatter.TokenStruct.NormNotationMinus.Token, '\s*'], MFormatter.TokenStruct.NormNotationMinus.StoredValue);
             end
             
+            
+            
             % Replace all other operators
             for iOpConf = 1:numel(setConfigOperatorFields)
                 
@@ -628,18 +636,26 @@ classdef MFormatter < handle
                     
                     currOpStruct = obj.SettingConfiguration.OperatorRules.(currField);
                     
+                    valTo = currOpStruct.ValueTo;
                     if doIndexing && ~isempty(contType) && numel(regexp(currOpStruct.ValueFrom, '\+|\-|\/|\*'))
                         if strcmp(contType, 'matrix')
                             replacementPattern = currOpStruct.MatrixIndexingReplacementPattern;
+                            if ~obj.MatrixIndexingOperatorPadding
+                                valTo = strrep(valTo, ' ', '');
+                            end
+                            
                         elseif strcmp(contType, 'cell')
                             replacementPattern = currOpStruct.CellArrayIndexingReplacementPattern;
+                            if ~obj.CellArrayIndexingOperatorPadding
+                                valTo = strrep(valTo, ' ', '');
+                            end
                         end
                     else
                         
                         replacementPattern = currOpStruct.ReplacementPattern;
                     end
                     
-                    tokenizedReplaceString = strrep(currOpStruct.ValueTo, ' ', obj.WhiteSpaceToken);
+                    tokenizedReplaceString = strrep(valTo, ' ', obj.WhiteSpaceToken);
                     
                     % Replace only the amount of whitespace tokens that are actually needed by the operator rule
                     data = regexprep(data, replacementPattern, tokenizedReplaceString);
@@ -836,7 +852,7 @@ classdef MFormatter < handle
                     end
                 else
                     strNew = strtrim(str);
-                    strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end - 1), doIndexing)), strNew(end)];
+                    strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end - 1), doIndexing, contType)), strNew(end)];
                 end
                 
                 datacell = cell(1, 3);
