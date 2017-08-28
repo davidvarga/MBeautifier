@@ -143,11 +143,14 @@ classdef MFormatter < handle
                 else
                     containerDepth = containerDepth + obj.calculateContainerDepthDeltaOfLine(trimmedCode);
                     
+                    % Auto append "..." to the lines of continuous containers 
                     if containerDepth && ~(numel(trimmedCode) >= 3 && strcmp(trimmedCode(end - 2:end), '...'))
                         if strcmp(trimmedCode(end), ',') || strcmp(trimmedCode(end), ';')
-                            actCode = trimmedCode(1:end - 1);
+                            actCode = [trimmedCode, ' ...'];
+                        else
+                            actCode = [actCode, '; ...'];
                         end
-                        actCode = [actCode, '; ...'];
+                        
                     end
                     
                     trimmedCode = strtrim(actCode);
