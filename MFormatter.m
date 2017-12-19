@@ -203,7 +203,11 @@ classdef MFormatter < handle
                     actCodeFinal = obj.performReplacements(actCode);
                 end
                 
-                line = [strtrim(actCodeFinal), ' ', actComment];
+                if ~obj.IsInBlockComment
+                    line = [strtrim(actCodeFinal), ' ', actComment];
+                else
+                    line = [strtrim(actCodeFinal), actComment];
+                end
                 replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
             end
             % The last new-line must be removed: inner new-lines are removed by the split, the last one is an additional one
