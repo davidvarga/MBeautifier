@@ -16,6 +16,13 @@ classdef MBeautify
     %   MBeautify.formatFile('D:\testFile.m', 'D:\testFileNew.m'); % Formats the first file into the second file
     %   MBeautify.formatFile('D:\testFile.m', 'D:\testFile.m'); % Formats the first file in-place
     %   MBeautify.formatFiles('D:\mydir', '*.m'); % Formats all files in the specified diretory in-place
+    %
+    %   Shortcuts:
+    %
+    %   Shortcuts can be automatically created for "formatCurrentEditorPage", "formatEditorSelection" and 
+    %   "formatFile" methods by executing MBeautify.createShortcut() in order with the parameter 'editorpage', 
+    %   'editorselection' or 'file'.
+    %   The created shortcuts add MBeauty to the Matlab path also (therefore no preparation of the path is needed additionally).
     
     properties(Access = private, Constant)
         RulesXMLFile = 'MBeautyConfigurationRules.xml';
@@ -226,6 +233,16 @@ classdef MBeautify
                     currentEditorPage.saveAs(currentEditorPage.Filename)
                 end
             end
+        end
+        
+        function createShortcut(mode)
+            % Creates a shortcut with the selected mode: 'editorpage', 'editorselection', 'file'. The shortcut adds
+            % MBeauty to the Matlab path and executes the following command:
+            %   'editorpage' - MBeauty.formatCurrentEditorPage
+            %   'editorselection' - MBeauty.formatEditorSelection
+            %   'file' - MBeauty.formatFile
+            
+            MBeautyShortcuts.createShortcut(mode);
         end
         
     end
@@ -454,6 +471,8 @@ classdef MBeautify
             end
             
         end
+        
+      
     end
 end
 
