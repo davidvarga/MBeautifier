@@ -41,7 +41,7 @@ Each `OperatorPaddingRule` represents the formatting rules for one single operat
         <ValueTo> ~= </ValueTo>
     </OperatorPaddingRule>
 	
-The above example shows the rule for the "not equals" operator. The `ValueFrom` node stores the operator `~=` and the `ValueTo` node stores the expected format: the operator should be preceded and followed by a white-space character.
+The example above shows the rule for the "not equals" operator. The `ValueFrom` node stores the operator `~=` and the `ValueTo` node stores the expected format: the operator should be preceded and followed by a white-space character.
 
 All of the operator padding rules are collected dynamically, therefore adding a new node to this list then executing the `setup` command will result in that MBeautifier will replace the currently added node also.
 
@@ -61,12 +61,26 @@ The current list of special rules:
 Usage
 -----
 
-Currently there are three approaches supported:
+### From Matlab Command Window
+
+Currently four approaches are supported:
 
  - Perform formatting on the currently active page of Matlab Editor. Command: `MBeautify.formatCurrentEditorPage()`. By default the file is not saved, but it remains opened modified in the editor. Optionally the formatted file can be saved using the `MBeautify.formatCurrentEditorPage(true)` syntax.
  - Perform formatting on the currently selected text of the active page of Matlab Editor. Command: `MBeautify.formatEditorSelection()`. An optional saving mechanism as above exists also in this case. Useful in case of large files, but in any case `MBeautify.formatCurrentEditorPage()` is suggested.
  - Perform formatting on a file. Command: `MBeautify.formatFile(file)`. Can be used with (1)one argument: the input file is formatted and remains open in the Matlab editor unsaved; (2)two arguments as `MBeautify.formatFile(file, outFile)`: the formatted file is saved to the specified output file if possible. Output can be the same as input.
  - Perform formatting on several files in a directory. Command: `MBeautify.formatFiles(directory, fileFilter)`. The first argument is an absolute path to a directory, the second one is a wildcard expression (used for `dir` command) to filter files in the target directory. The files will be formatted in-place (overwritten). 
+ 
+### Shortcuts
+ 
+ There is a possibility to create shortcuts for the first three approaches above, which shortcut buttons will appear under the "Shortcuts" tab of Matlab's main window.
+ 
+ To create these buttons, the following commands can be used:
+ 
+  - `MBeautify.createShortcut('editorpage')`: Creates a shortcut for `MBeautify.formatCurrentEditorPage()`  
+  - `MBeautify.createShortcut('editorselection')`: Creates a shortcut for `MBeautify.formatEditorSelection()`
+  - `MBeautify.createShortcut('file')`: Creates a shortcut for `MBeautify.formatFile(sourceFile, destFile)`
+  
+ These shortcuts will add the MBeautifier root directory to the Matlab path too, therefore no Matlab path preparation is needed to use MBeauty next time when a new Matlab instance is opened.
  
  Supported Matlab versions
  -------------------------
@@ -76,7 +90,7 @@ Currently there are three approaches supported:
  Planned future versions
  -----------------------
  
- As Matlab does not contain any formatter even in R2017 releases, this project will be maintained until at least R2018 (if that release will contain a formatter).
+ As Matlab does not contain any formatter even in R2017 releases, and will not contain in R2018 releases this project will be at least maintained until R2019a (if live editor will contain a formatter).
  
  As it is planned at the moment, the current release is the last one which is M-Script based, and the next release is planned to be implemented in Java with Matlab interface. This is the first step to make MBeautifier also usable in Octave.
  
