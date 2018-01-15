@@ -676,6 +676,9 @@ classdef MFormatter < handle
             data = regexprep(data, '\( ', '(');
             data = regexprep(data, '\[ ', '[');
             
+            % TODO: keyword formatting here could be done
+            data = regexprep(data, '^function(?=#MBeauty_ArrayToken_\d+#)', 'function ');
+            
             % Restore containers
             data = obj.restoreContainers(data, arrayMapCell);
             
