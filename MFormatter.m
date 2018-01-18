@@ -104,6 +104,10 @@ classdef MFormatter < handle
             obj.IsInBlockComment = false;
             
             nMaximalNewLines = str2double(obj.SettingConfiguration.SpecialRules.MaximalNewLinesValue);
+            nSectionPrecedingNewlines = str2double(obj.SettingConfiguration.SpecialRules.SectionPrecedingNewlineCountValue);
+            formatSectionPrecedingNewlines = nSectionPrecedingNewlines >= 0;
+            nSectionTrailingNewlines = str2double(obj.SettingConfiguration.SpecialRules.SectionTrailingNewlineCountValue);
+            formatSectionTrailingNewlines = nSectionTrailingNewlines >= 0;
             newLine = sprintf('\n');
             
             contTokenStruct = MFormatter.TokenStruct.ContinueToken;
@@ -114,6 +118,7 @@ classdef MFormatter < handle
             isInContinousLine = 0;
             containerDepth = 0;
             contLineArray = cell(0, 2);
+            isSectionSeparator = false;
             
             nNewLinesFound = 0;
             for j = 1:numel(textArray)
@@ -121,16 +126,35 @@ classdef MFormatter < handle
                 
                 %% Process the maximal new-line count
                 if isempty(strtrim(line))
-                    if nNewLinesFound >= nMaximalNewLines
+                    nNewLinesFound = nNewLinesFound + 1;
+                    
+                    if nNewLinesFound > nMaximalNewLines || ...
+                            (formatSectionTrailingNewlines && isSectionSeparator && nNewLinesFound > nSectionTrailingNewlines)
                         continue;
                     end
-                    nNewLinesFound = nNewLinesFound + 1;
+                    
+                    replacedTextArray = [replacedTextArray, sprintf('\n')];
+                    continue;
+                    
                 else
+                    if isSectionSeparator && formatSectionTrailingNewlines && (nNewLinesFound - nSectionTrailingNewlines < 0)
+                        for i = 1:abs(nNewLinesFound - nSectionTrailingNewlines)
+                            replacedTextArray = [replacedTextArray, sprintf('\n')];
+                        end
+                    end
+                
                     nNewLinesFound = 0;
                 end
                 
+                
+                
                 %% Determine the position where the line shall be splitted into code and comment
-                [actCode, actComment, splittingPos] = obj.findComment(line);
+                [actCode, actComment, splittingPos, isSectionSeparator] = obj.findComment(line);
+                
+                if isSectionSeparator && formatSectionPrecedingNewlines
+                    replacedTextArray = MFormatter.handleTrailingEmptyLines(replacedTextArray, nSectionPrecedingNewlines);      
+                end
+                
                 
                 %% Check for line continousment (...)
                 % Continous lines have to be converted into one single code line to perform replacement on it
@@ -208,11 +232,20 @@ classdef MFormatter < handle
                 else
                     line = [strtrim(actCodeFinal), actComment];
                 end
-                replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
+                replacedTextArray = [replacedTextArray, [line, sprintf('\n')]];
             end
             % The last new-line must be removed: inner new-lines are removed by the split, the last one is an additional one
-            if numel(replacedTextArray)
-                replacedTextArray(end) = [];
+            if numel(replacedTextArray) && numel(strtrim(replacedTextArray{end}))
+                replacedTextArray{end} = strtrim(replacedTextArray{end});
+            end
+            
+            nEndingNewlines = str2double(obj.SettingConfiguration.SpecialRules.EndingNewlineCountValue);
+            formatEndingNewlines = nEndingNewlines >= 0;
+            if formatEndingNewlines
+                
+                replacedTextArray = MFormatter.handleTrailingEmptyLines(replacedTextArray, nEndingNewlines);
+                
+                replacedTextArray{end} = strtrim(replacedTextArray{end});
             end
             
             formattedSource = [replacedTextArray{:}];
@@ -220,6 +253,35 @@ classdef MFormatter < handle
     end
        
     methods (Access = private, Static)
+        
+        function textArray = handleTrailingEmptyLines(textArray, neededEmptyLineCount)
+            precedingNewLines = MFormatter.getPrecedingNewlineCount(textArray);
+            
+            newLineDelta = neededEmptyLineCount - precedingNewLines;
+            
+            if newLineDelta < 0
+                for i = 1:abs(newLineDelta)
+                    textArray(end) = [];
+                end
+            elseif newLineDelta > 0
+                for i = 1:newLineDelta
+                    textArray = [textArray, sprintf('\n')];
+                end
+                
+            end
+            
+        end
+        
+        function count = getPrecedingNewlineCount(textArray)
+            count = 0;
+            for i = numel(textArray):-1:1
+                if isempty(strtrim(textArray{i}))
+                    count = count + 1;
+                else
+                    return;
+                end
+            end
+        end
         
         function outStr = joinString(cellStr, delim)
             
@@ -378,7 +440,7 @@ classdef MFormatter < handle
             code = obj.restoreTransponations(obj.restoreStrings(code));
         end
         
-        function [actCode, actComment, splittingPos] = findComment(obj, line)
+        function [actCode, actComment, splittingPos, isSectionSeparator] = findComment(obj, line)
             % Splits a continous line into code and comment parts.
             
             %% Set the variables
@@ -387,6 +449,7 @@ classdef MFormatter < handle
             actCode = line;
             actComment = '';
             splittingPos = -1;
+            isSectionSeparator = false;
             
             trimmedLine = strtrim(line);
             
@@ -409,7 +472,7 @@ classdef MFormatter < handle
                 end
             end
             
-            if isequal(trimmedLine, '%') || (numel(trimmedLine) > 7 && isequal(trimmedLine(1:7), 'import '))
+            if isequal(trimmedLine(1), '%') || (numel(trimmedLine) > 7 && isequal(trimmedLine(1:7), 'import '))
                 retComm = 1;
             elseif isequal(trimmedLine(1), '!')
                 exclamationPos = 1;
@@ -420,6 +483,11 @@ classdef MFormatter < handle
             if isequal(splittingPos, 1)
                 actCode = '';
                 actComment = line;
+                
+                if ~obj.IsInBlockComment && ...
+                    numel(regexp(trimmedLine, '^%%(\s+|$)'))
+                    isSectionSeparator = true;
+                end
                 return
             end
             

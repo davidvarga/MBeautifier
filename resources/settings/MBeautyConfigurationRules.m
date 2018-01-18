@@ -109,6 +109,15 @@ this.SpecialRules = struct();
 this.SpecialRules.MaximalNewLines = struct();
 this.SpecialRules.MaximalNewLinesValue = '2';
 
+this.SpecialRules.SectionPrecedingNewlineCount = struct();
+this.SpecialRules.SectionPrecedingNewlineCountValue = '1';
+
+this.SpecialRules.SectionTrailingNewlineCount = struct();
+this.SpecialRules.SectionTrailingNewlineCountValue = '-1';
+
+this.SpecialRules.EndingNewlineCount = struct();
+this.SpecialRules.EndingNewlineCountValue = '1';
+
 this.SpecialRules.AddCommasToMatrices = struct();
 this.SpecialRules.AddCommasToMatricesValue = '1';
 

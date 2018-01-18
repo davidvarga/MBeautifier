@@ -133,6 +133,18 @@
          <Value>2</Value>
       </SpecialRule>
       <SpecialRule>
+         <Key>SectionPrecedingNewlineCount</Key>
+         <Value>1</Value>
+      </SpecialRule>
+            <SpecialRule>
+         <Key>SectionTrailingNewlineCount</Key>
+         <Value>-1</Value>
+      </SpecialRule>
+      <SpecialRule>
+         <Key>EndingNewlineCount</Key>
+         <Value>1</Value>
+      </SpecialRule>
+      <SpecialRule>
          <Key>AddCommasToMatrices</Key>
          <Value>1</Value>
       </SpecialRule>
