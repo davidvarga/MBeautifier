@@ -15,7 +15,7 @@ classdef MFormatter < handle
     end
     
     properties(Access = private, Constant)
-        WhiteSpaceToken = '#MBeauty_WhiteSpace_Token';
+        WhiteSpaceToken = '#MBeauty_WhiteSpace_Token#';
         ContainerOpeningBrackets = {'[', '{', '('};
         ContainerClosingBrackets = {']', '}', ')'};
         TokenStruct = MFormatter.getTokenStruct();
@@ -436,7 +436,7 @@ classdef MFormatter < handle
             % (operators, containers, ...) -> restore strings -> restore transponations.
             
             code = obj.replaceStrings(obj.replaceTransponations(code));
-            code = obj.performFormattingSingleLine(code);
+            code = obj.performFormattingSingleLine(code, false, '', false);
             code = obj.restoreTransponations(obj.restoreStrings(code));
         end
         
@@ -555,7 +555,7 @@ classdef MFormatter < handle
             end  
         end
         
-        function data = performFormattingSingleLine(obj, data, doIndexing, contType)
+        function data = performFormattingSingleLine(obj, data, doIndexing, contType, isContainerElement)
             % Performs formatting on a code snippet, where the strings and transponations are already replaced:
             % operator, container formatting
             
@@ -737,6 +737,10 @@ classdef MFormatter < handle
                 end
             end
             
+            if ~isContainerElement && ~str2double(obj.SettingConfiguration.SpecialRules.AllowMultipleStatementsPerLineValue)
+                data = regexprep(data, ';(?!\s*$)', ';\n');
+            end
+            
             data = regexprep(data, obj.WhiteSpaceToken, ' ');
             
             data = regexprep(data, ' \)', ')');
@@ -866,7 +870,7 @@ classdef MFormatter < handle
                 if ~strcmp(openingBracket, '(')
                     if doIndexing
                         strNew = strtrim(str);
-                        strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end - 1), doIndexing, contType)), strNew(end)];
+                        strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end - 1), doIndexing, contType, true)), strNew(end)];
                     else
                         elementsCell = regexp(str, ' ', 'split');
                         
@@ -904,7 +908,7 @@ classdef MFormatter < handle
                             currElemStripped = regexprep(currElem, ['[', openingBracket, closingBracket, ']'], '');
                             nextElemStripped = regexprep(nextElem, ['[', openingBracket, closingBracket, ']'], '');
                             
-                            currElem = strtrim(obj.performFormattingSingleLine(currElem, doIndexing));
+                            currElem = strtrim(obj.performFormattingSingleLine(currElem, doIndexing, contType, true));
                             
                             if strcmp(openingBracket, '[')
                                 addCommas = str2double(obj.SettingConfiguration.SpecialRules.AddCommasToMatricesValue);
@@ -924,13 +928,13 @@ classdef MFormatter < handle
                             end
                         end
                         
-                        elementsCell{end} = strtrim(obj.performFormattingSingleLine(elementsCell{end}, doIndexing));
+                        elementsCell{end} = strtrim(obj.performFormattingSingleLine(elementsCell{end}, doIndexing, contType, true));
                         
                         strNew = [openingBracket, elementsCell{:}, closingBracket];
                     end
                 else
                     strNew = strtrim(str);
-                    strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end - 1), doIndexing, contType)), strNew(end)];
+                    strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end - 1), doIndexing, contType, true)), strNew(end)];
                 end
                 
                 datacell = cell(1, 3);

@@ -129,4 +129,7 @@ this.SpecialRules.CellArrayIndexing_ArithmeticOperatorPaddingValue = '0';
 
 this.SpecialRules.MatrixIndexing_ArithmeticOperatorPadding = struct();
 this.SpecialRules.MatrixIndexing_ArithmeticOperatorPaddingValue = '0';
+
+this.SpecialRules.AllowMultipleStatementsPerLine = struct();
+this.SpecialRules.AllowMultipleStatementsPerLineValue = '0';
 end

@@ -160,5 +160,9 @@
          <Key>MatrixIndexing_ArithmeticOperatorPadding</Key>
          <Value>0</Value>
       </SpecialRule>
+      <SpecialRule>
+         <Key>AllowMultipleStatementsPerLine</Key>
+         <Value>0</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>
