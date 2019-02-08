@@ -48,3 +48,27 @@ a(3, 4:5) = [3, 1]
 
 % norm notation
 1.e-6
+
+% #36
+a(1, 1:2) = [3, 1]
+a(3, :) = [3, 1]
+b = zeros(3, 3, 3);
+b(:, :, 2) = rand(2, 2);
+
+ %if AddCommasToMatrices=1
+a=[@(x) minus(x,1),]
+
+%if AddCommasToCellArrays=1
+a={@(x) minus(x,1),  @(x,y) minus(x,y)}
+
+% #34
+if -1 > -2
+end
+if +1 > -2
+end
+
+% #59
+a = [1, 2, 3];
+a = [1, a...
+.* 2]
+
