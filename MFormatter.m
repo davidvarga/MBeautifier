@@ -908,6 +908,11 @@ classdef MFormatter < handle
                             currElemStripped = regexprep(currElem, ['[', openingBracket, closingBracket, ']'], '');
                             nextElemStripped = regexprep(nextElem, ['[', openingBracket, closingBracket, ']'], '');
                             
+                            if strcmp(nextElemStripped, contTokenStruct.Token) && numel(elementsCell) > elemInd + 1
+                                 nextElem = strtrim(elementsCell{elemInd + 2});
+                                 nextElemStripped = regexprep(nextElem, ['[', openingBracket, closingBracket, ']'], '');
+                            end
+                            
                             currElem = strtrim(obj.performFormattingSingleLine(currElem, doIndexing, contType, true));
                             
                             if strcmp(openingBracket, '[')
