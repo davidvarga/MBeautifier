@@ -132,4 +132,13 @@ this.SpecialRules.MatrixIndexing_ArithmeticOperatorPaddingValue = '0';
 
 this.SpecialRules.AllowMultipleStatementsPerLine = struct();
 this.SpecialRules.AllowMultipleStatementsPerLineValue = '0';
+
+this.SpecialRules.InlineContinousLines = struct();
+this.SpecialRules.InlineContinousLinesValue = '0';
+
+this.SpecialRules.InlineContinousLinesInMatrixes = struct();
+this.SpecialRules.InlineContinousLinesInMatrixesValue = '0';
+
+this.SpecialRules.InlineContinousLinesInCurlyBracket = struct();
+this.SpecialRules.InlineContinousLinesInCurlyBracketValue = '0';
 end

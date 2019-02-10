@@ -164,5 +164,17 @@
          <Key>AllowMultipleStatementsPerLine</Key>
          <Value>0</Value>
       </SpecialRule>
+      <SpecialRule>
+         <Key>InlineContinousLines</Key>
+         <Value>0</Value>
+      </SpecialRule>
+      <SpecialRule>
+         <Key>InlineContinousLinesInMatrixes</Key>
+         <Value>0</Value>
+      </SpecialRule>
+      <SpecialRule>
+         <Key>InlineContinousLinesInCurlyBracket</Key>
+         <Value>0</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>

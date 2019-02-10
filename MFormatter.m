@@ -108,9 +108,14 @@ classdef MFormatter < handle
             formatSectionPrecedingNewlines = nSectionPrecedingNewlines >= 0;
             nSectionTrailingNewlines = str2double(obj.SettingConfiguration.SpecialRules.SectionTrailingNewlineCountValue);
             formatSectionTrailingNewlines = nSectionTrailingNewlines >= 0;
+            inlineGeneral = str2double(obj.SettingConfiguration.SpecialRules.InlineContinousLinesValue);
+            inlineMatrix = str2double(obj.SettingConfiguration.SpecialRules.InlineContinousLinesInMatrixesValue);
+            inlineCurly = str2double(obj.SettingConfiguration.SpecialRules.InlineContinousLinesInCurlyBracketValue);
             newLine = sprintf('\n');
             
             contTokenStruct = MFormatter.TokenStruct.ContinueToken;
+            contMatrixTokenStruct = MFormatter.TokenStruct.ContinueMatrixToken;
+            contCurlyTokenStruct = MFormatter.TokenStruct.ContinueCurlyToken;
             
             textArray = regexp(source, newLine, 'split');
             
@@ -208,14 +213,46 @@ classdef MFormatter < handle
                             actCodeFinal = obj.performReplacements(replacedLines);
                             
                             % Re-create the original structure
-                            splitToLine = regexp(actCodeFinal, contTokenStruct.Token, 'split');
-                            
-                            line = '';
-                            for iSplitLine = 1:numel(splitToLine) -1
-                                line = [line, strtrim(splitToLine{iSplitLine}), [' ', contTokenStruct.StoredValue, ' '], contLineArray{iSplitLine, 2}, newLine];
+                            [startIndices, endIndices] = regexp(actCodeFinal, '\s*#MBeutyCont(|Matrix|Curly)#');
+                            if numel(startIndices)
+                                line = '';
+                                prevComment = '';
+                                lastEndIndex = 0;
+                                for iMatch = 1:numel(startIndices)
+                                    partBefore = strtrim(actCodeFinal(lastEndIndex+1:startIndices(iMatch)-1));
+                                    token = actCodeFinal(startIndices(iMatch):endIndices(iMatch));
+                                    lastEndIndex = endIndices(iMatch);
+                                    if (inlineGeneral && strcmp(strtrim(token), contTokenStruct.Token)) || ...
+                                        (inlineMatrix && strcmp(strtrim(token), contMatrixTokenStruct.Token)) || ...
+                                        (inlineCurly && strcmp(strtrim(token), contCurlyTokenStruct.Token))
+                                        line = [line, partBefore];
+                                        if ~isempty(contLineArray{iMatch, 2})
+                                            if ~isempty(prevComment)
+                                                commentAfterContLine = contLineArray{iMatch, 2};
+                                                % ... XY -> XY is comment: In a new line the "%" character must be
+                                                % appended if missing
+                                                if ~numel(regexp(commentAfterContLine, '^\s*%'))
+                                                    commentAfterContLine = ['%', commentAfterContLine]
+                                                end
+                                                prevComment = [prevComment, newLine, commentAfterContLine];
+                                            else
+                                                prevComment = contLineArray{iMatch, 2};
+                                            end
+                                        end
+                                    else
+                                        line = [line, partBefore, [' ', contTokenStruct.StoredValue, ' '],  contLineArray{iMatch, 2} , newLine];
+                                    end
+                                    
+                                end
+                                line = [line, actCodeFinal(lastEndIndex+1:end), actComment];
+                                if ~isempty(prevComment)
+                                    line = [prevComment, newLine, line];
+                                end
+                                
+                            else
+                               line = [line, actComment]; 
                             end
-                            
-                            line = [line, strtrim(splitToLine{end}), actComment]; %#ok<*AGROW>
+    
                             replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
                             contLineArray = cell(0, 2);
                             
@@ -303,6 +340,8 @@ classdef MFormatter < handle
                 
                 tokenStructs = struct();
                 tokenStructs.ContinueToken = newStruct('...', '#MBeutyCont#');
+                tokenStructs.ContinueMatrixToken = newStruct('...', '#MBeutyContMatrix#');
+                tokenStructs.ContinueCurlyToken = newStruct('...', '#MBeutyContCurly#');
                 tokenStructs.StringToken = newStruct('', '#MBeutyString#');
                 tokenStructs.ArrayElementToken = newStruct('', '#MBeutyArrayElement#');
                 tokenStructs.TransposeToken = newStruct('''', '#MBeutyTransp#');
@@ -808,7 +847,8 @@ classdef MFormatter < handle
             data = regexprep(data, '\s+;', ';');
             
             operatorArray = {'+', '-', '&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^', '~'};
-            contTokenStruct = MFormatter.TokenStruct.ContinueToken;
+            contTokenStructMatrix = MFormatter.TokenStruct.ContinueMatrixToken;
+            contTokenStructCurly = MFormatter.TokenStruct.ContinueCurlyToken;
             
             [containerBorderIndexes, maxDepth] = obj.calculateContainerDepths(data);
             
@@ -908,7 +948,7 @@ classdef MFormatter < handle
                             currElemStripped = regexprep(currElem, ['[', openingBracket, closingBracket, ']'], '');
                             nextElemStripped = regexprep(nextElem, ['[', openingBracket, closingBracket, ']'], '');
                             
-                            if strcmp(nextElemStripped, contTokenStruct.Token) && numel(elementsCell) > elemInd + 1
+                            if obj.isContinueToken(nextElemStripped) && numel(elementsCell) > elemInd + 1
                                  nextElem = strtrim(elementsCell{elemInd + 2});
                                  nextElemStripped = regexprep(nextElem, ['[', openingBracket, closingBracket, ']'], '');
                             end
@@ -916,15 +956,22 @@ classdef MFormatter < handle
                             currElem = strtrim(obj.performFormattingSingleLine(currElem, doIndexing, contType, true));
                             
                             if strcmp(openingBracket, '[')
+                                if obj.isContinueToken(currElem) && true
+                                    currElem = contTokenStructMatrix.Token;
+                                end
                                 addCommas = str2double(obj.SettingConfiguration.SpecialRules.AddCommasToMatricesValue);
+                                
                             else
                                 addCommas = str2double(obj.SettingConfiguration.SpecialRules.AddCommasToCellArraysValue);
+                                if obj.isContinueToken(currElem)
+                                    currElem = contTokenStructCurly.Token;
+                                end
                             end
                             
                             if numel(currElem) && addCommas && ...
                                     ~(strcmp(currElem(end), ',') || strcmp(currElem(end), ';')) && ~isInCurlyBracket && ...
-                                    ~strcmp(currElem, contTokenStruct.Token) && ...
-                                    ~any(strcmp(currElemStripped, operatorArray)) && ~any(strcmp(nextElemStripped, operatorArray)) && ...
+                                    ~obj.isContinueToken(currElem) && ... 
+                                    ~any(strcmp(currElemStripped, operatorArray)) && ~any(strcmp(nextElemStripped, operatorArray)) && ~any(strcmp(currElemStripped(end), operatorArray)) && ...
                                     ~numel(regexp(currElemStripped, '^@#MBeauty_ArrayToken_\d+#$'))
                                 
                                 elementsCell{elemInd} = [currElem, '#MBeauty_OP_Comma#'];
@@ -990,5 +1037,10 @@ classdef MFormatter < handle
                 obj.SettingConfiguration.OperatorRules.Comma.ValueTo);
         end
         
+        function ret = isContinueToken(obj, element)
+            ret = strcmp(element, obj.TokenStruct.ContinueToken.Token) || ...
+                  strcmp(element, obj.TokenStruct.ContinueMatrixToken.Token) || ...
+                  strcmp(element, obj.TokenStruct.ContinueCurlyToken.Token);
+        end
     end
 end

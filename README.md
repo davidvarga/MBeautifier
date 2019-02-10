@@ -60,7 +60,9 @@ The current list of special rules:
  - **AddCommasToCellArrays**: [1|0]. Indicates whether the missing element separator commas in cell arrays should be inserted. For example: `{1 2 3}` will be formatted as `{1, 2, 3}`.
  - **MatrixIndexing_ArithmeticOperatorPadding**: [1|0]. Indicates whether the arithmetic operators should be padded by white spaces (using the operator padding rules), when they are used to index matrices. For example: `matrix(end+1) = 1` can be formatted as `matrix(end+1) = 1` when value is set to 0, or as `matrix(end + 1) = 1` if value is set to 1.
  - **CellArrayIndexing_ArithmeticOperatorPadding**: [1|0]. Indicates the same as `MatrixIndexing_ArithmeticOperatorPadding` but for cell arrays.
-
+ - **InlineContinousLines**: [1|0]. If set to 1, MBeautifier will in-line continuous line operators ("...") everywhere except in matrices (inside [] brackets) and in curly brackets ({}) - these cases are handled by the next two options. In-lining means: the "..." operator will be removed and the next line will be copied into its place.
+ - **InlineContinousLinesInMatrixes**: [1|0]. Same as **InlineContinousLines**, but only has effect inside brackets ("[]").
+ - **InlineContinousLinesInCurlyBracket**: [1|0]. Same as **InlineContinousLines**, but only has effect inside curly brackets ("{}").
 
 Usage
 -----
