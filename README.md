@@ -80,6 +80,57 @@ The current list of special rules:
  - **IndentationCount**: Integer value. Specifies the level of auto-indentation (how many **IndentationCharacter** means one level of indentation). Defaults to "4".
  - **Indentation_TrimBlankLines**: [1|0]. Specifies if blank lines (lines containing only white space characters - as result of auto-indentation) should be trimmed (made empty) by MBeautifier. Defaults to "1" as it can lead to smaller file sizes.
  
+#### Directives
+
+MBeautifier directives are special constructs which can be used in the source code to control MBeautifier during the formatting process. The example below controls the directive named `Format` and sets its value to `on` and then later to `off`.
+
+    a =  1;
+    % MBeautifierDirective:Format:Off
+    longVariableName = 'where the assigement is';
+    aligned          = 'with the next assignment';
+    % MBeautifierDirective:Format:On
+    someMatrix  =  [1 2 3];
+    
+The standard format of a directive line is:
+ - following the pattern: `<ws>%<ws>MBeautifierDirective<ws>:<ws>:NAME<ws>:<ws>VALUE<ws>[NEWLINE]` where
+    -   `<ws>` means zero or more optional white space characters
+    -   `NAME` means the directive name (only latin letters, case insensitive)
+    -   `VALUE` means the directive value (only latin letters, case insensitive)
+ - must not contain any code or any trailing comment  (only the directive comment above)
+ - must not be inside a block comment
+ - must not be inside any line continousment
+
+> **Note: Directive names which are not present in the list below, or directive values which are not applicable to the specified directive will be ignored together with a MATLAB warning**.
+
+
+
+##### Directive List
+
+###### `Format`
+Directive to generally control the formatting process.
+Possible values:
+- `on` - Enable formatting
+- `off` - Disable formatting
+
+Example:
+In the code-snippet below MBeautifier is formatting the first line using the configuration currently active, but will not format the lines 2,3,4,5. The last line will be beautified again using the current configuration.
+
+    a =  1;
+    % MBeautifierDirective:Format:Off
+    longVariableName = 'where the assigement is';
+    aligned          = 'with the next assignment';
+    % MBeautifierDirective:Format:On
+    someMatrix  =  [1 2 3];
+    
+The formatted code will look like (configuration dependently):
+
+	a = 1;
+	% MBeautifierDirective:Format:Off
+	longVariableName = 'where the assigement is';
+	aligned          = 'with the next assignment';
+	% MBeautifierDirective:Format:On
+	someMatrix = [1, 2, 3];
+
 Usage
 -----
 
