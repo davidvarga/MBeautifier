@@ -19,7 +19,7 @@ classdef MFormatter < handle
         WhiteSpaceToken = '#MBeauty_WhiteSpace_Token#';
         ContainerOpeningBrackets = {'[', '{', '('};
         ContainerClosingBrackets = {']', '}', ')'};
-        TokenStruct = MFormatter.getTokenStruct();
+        TokenStruct = MBeautifier.MFormatter.getTokenStruct();
     end
     
     methods
@@ -115,9 +115,9 @@ classdef MFormatter < handle
             inlineCurly = str2double(obj.SettingConfiguration.SpecialRules.InlineContinousLinesInCurlyBracketValue);
             newLine = sprintf('\n');
             
-            contTokenStruct = MFormatter.TokenStruct.ContinueToken;
-            contMatrixTokenStruct = MFormatter.TokenStruct.ContinueMatrixToken;
-            contCurlyTokenStruct = MFormatter.TokenStruct.ContinueCurlyToken;
+            contTokenStruct = MBeautifier.MFormatter.TokenStruct.ContinueToken;
+            contMatrixTokenStruct = MBeautifier.MFormatter.TokenStruct.ContinueMatrixToken;
+            contCurlyTokenStruct = MBeautifier.MFormatter.TokenStruct.ContinueCurlyToken;
             
             textArray = regexp(source, newLine, 'split');
             
@@ -157,7 +157,6 @@ classdef MFormatter < handle
                     continue
                 end
                 
-                
                 %% Process the maximal new-line count
                 if isempty(strtrim(line))
                     nNewLinesFound = nNewLinesFound + 1;
@@ -187,7 +186,7 @@ classdef MFormatter < handle
                 [actCode, actComment, splittingPos, isSectionSeparator] = obj.findComment(line);
                 
                 if isSectionSeparator && formatSectionPrecedingNewlines
-                    replacedTextArray = MFormatter.handleTrailingEmptyLines(replacedTextArray, nSectionPrecedingNewlines);      
+                    replacedTextArray = MBeautifier.MFormatter.handleTrailingEmptyLines(replacedTextArray, nSectionPrecedingNewlines);      
                 end
                 
                 %% Check for line continousment (...)
@@ -308,7 +307,7 @@ classdef MFormatter < handle
             formatEndingNewlines = nEndingNewlines >= 0;
             if formatEndingNewlines
                 
-                replacedTextArray = MFormatter.handleTrailingEmptyLines(replacedTextArray, nEndingNewlines);
+                replacedTextArray = MBeautifier.MFormatter.handleTrailingEmptyLines(replacedTextArray, nEndingNewlines);
                 
                 replacedTextArray{end} = strtrim(replacedTextArray{end});
             end
@@ -320,7 +319,7 @@ classdef MFormatter < handle
     methods (Access = private, Static)
         
         function textArray = handleTrailingEmptyLines(textArray, neededEmptyLineCount)
-            precedingNewLines = MFormatter.getPrecedingNewlineCount(textArray);
+            precedingNewLines = MBeautifier.MFormatter.getPrecedingNewlineCount(textArray);
             
             newLineDelta = neededEmptyLineCount - precedingNewLines;
             
@@ -392,8 +391,8 @@ classdef MFormatter < handle
         function code = restoreTransponations(code)
             % Restores transponation tokens to original transponation signs.
             
-            trnspTokStruct = MFormatter.TokenStruct.TransposeToken;
-            nonConjTrnspTokStruct = MFormatter.TokenStruct.NonConjTransposeToken;
+            trnspTokStruct = MBeautifier.MFormatter.TokenStruct.TransposeToken;
+            nonConjTrnspTokStruct = MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken;
             
             code = regexprep(code, trnspTokStruct.Token, trnspTokStruct.StoredValue);
             code = regexprep(code, nonConjTrnspTokStruct.Token, nonConjTrnspTokStruct.StoredValue);
@@ -402,8 +401,8 @@ classdef MFormatter < handle
         function actCode = replaceTransponations(actCode)
             % Replaces transponation signs in the code with tokens.
             
-            trnspTokStruct = MFormatter.TokenStruct.TransposeToken;
-            nonConjTrnspTokStruct = MFormatter.TokenStruct.NonConjTransposeToken;
+            trnspTokStruct = MBeautifier.MFormatter.TokenStruct.TransposeToken;
+            nonConjTrnspTokStruct = MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken;
             
             charsIndicateTranspose = '[a-zA-Z0-9\)\]\}\.]';
             
@@ -466,7 +465,7 @@ classdef MFormatter < handle
                 if ~isequal(mod(iSplit, 2), 0)
                     strArray{iSplit} = splittedCode{iSplit};
                 else % String
-                    strTokenStruct = MFormatter.TokenStruct.StringToken;
+                    strTokenStruct = MBeautifier.MFormatter.TokenStruct.StringToken;
                     
                     strArray{iSplit} = strTokenStruct.Token;
                     strTokenStruct.StoredValue = splittedCode{iSplit};
@@ -482,7 +481,7 @@ classdef MFormatter < handle
             % Replaces string tokens with the original string from the StringTokenStructs member.
             
             strTokStructs = obj.StringTokenStructs;
-            splitByStrTok = regexp(actCodeTemp, MFormatter.TokenStruct.StringToken.Token, 'split');
+            splitByStrTok = regexp(actCodeTemp, MBeautifier.MFormatter.TokenStruct.StringToken.Token, 'split');
             
             if numel(strTokStructs)
                 actCodeFinal = '';
@@ -702,8 +701,8 @@ classdef MFormatter < handle
                     for iSplit = 1:numel(splittedData) -1
                         beforeItem = strtrim(splittedData{iSplit});
                         if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
-                                ['([0-9a-zA-Z_)}\]\.]|', MFormatter.TokenStruct.TransposeToken.Token, '|#MBeauty_ArrayToken_\d+#)$'])) && ...
-                                (~numel(regexp(beforeItem, ['(?=^|\s)(', MFormatter.joinString(keywords', '|'), ')$'])) || doIndexing)
+                                ['([0-9a-zA-Z_)}\]\.]|', MBeautifier.MFormatter.TokenStruct.TransposeToken.Token, '|#MBeauty_ArrayToken_\d+#)$'])) && ...
+                                (~numel(regexp(beforeItem, ['(?=^|\s)(', MBeautifier.MFormatter.joinString(keywords', '|'), ')$'])) || doIndexing)
                             % + or - is a binary operator after:
                             %    - numbers [0-9.],
                             %    - variable names [a-zA-Z0-9_] or
@@ -715,10 +714,10 @@ classdef MFormatter < handle
                             % In this case the + and - signs are not operators so shoud be skipped
                             if numel(beforeItem) > 1 && strcmpi(beforeItem(end), 'e') && numel(regexp(beforeItem(end - 1), '[0-9.]'))
                                 if isPlus
-                                    replaceTokens{end + 1} = MFormatter.TokenStruct.NormNotationPlus.Token;
+                                    replaceTokens{end + 1} = MBeautifier.MFormatter.TokenStruct.NormNotationPlus.Token;
                                     normPlusOperatorPresent = true;
                                 else
-                                    replaceTokens{end + 1} = MFormatter.TokenStruct.NormNotationMinus.Token;
+                                    replaceTokens{end + 1} = MBeautifier.MFormatter.TokenStruct.NormNotationMinus.Token;
                                     normMinusOperatorPresent = true;
                                 end  
                             else
@@ -726,10 +725,10 @@ classdef MFormatter < handle
                             end
                         else
                             if isPlus
-                                replaceTokens{end + 1} = MFormatter.TokenStruct.UnaryPlus.Token;
+                                replaceTokens{end + 1} = MBeautifier.MFormatter.TokenStruct.UnaryPlus.Token;
                                 unaryPlusOperatorPresent = true;
                             else
-                                replaceTokens{end + 1} = MFormatter.TokenStruct.UnaryMinus.Token;
+                                replaceTokens{end + 1} = MBeautifier.MFormatter.TokenStruct.UnaryMinus.Token;
                                 unaryMinusOperatorPresent = true;
                             end
                         end
@@ -755,16 +754,16 @@ classdef MFormatter < handle
             % Special tokens: Unary Plus/Minus, Normalized Number Format
             % Performance tweak: only if there were any unary or norm operators
             if unaryPlusOperatorPresent
-                data = regexprep(data, ['\s*', MFormatter.TokenStruct.UnaryPlus.Token, '\s*'], [' ', MFormatter.TokenStruct.UnaryPlus.StoredValue]);
+                data = regexprep(data, ['\s*', MBeautifier.MFormatter.TokenStruct.UnaryPlus.Token, '\s*'], [' ', MBeautifier.MFormatter.TokenStruct.UnaryPlus.StoredValue]);
             end
             if unaryMinusOperatorPresent
-                data = regexprep(data, ['\s*', MFormatter.TokenStruct.UnaryMinus.Token, '\s*'], [' ', MFormatter.TokenStruct.UnaryMinus.StoredValue]);
+                data = regexprep(data, ['\s*', MBeautifier.MFormatter.TokenStruct.UnaryMinus.Token, '\s*'], [' ', MBeautifier.MFormatter.TokenStruct.UnaryMinus.StoredValue]);
             end
             if normPlusOperatorPresent
-                data = regexprep(data, ['\s*', MFormatter.TokenStruct.NormNotationPlus.Token, '\s*'], MFormatter.TokenStruct.NormNotationPlus.StoredValue);
+                data = regexprep(data, ['\s*', MBeautifier.MFormatter.TokenStruct.NormNotationPlus.Token, '\s*'], MBeautifier.MFormatter.TokenStruct.NormNotationPlus.StoredValue);
             end
             if normMinusOperatorPresent
-                data = regexprep(data, ['\s*', MFormatter.TokenStruct.NormNotationMinus.Token, '\s*'], MFormatter.TokenStruct.NormNotationMinus.StoredValue);
+                data = regexprep(data, ['\s*', MBeautifier.MFormatter.TokenStruct.NormNotationMinus.Token, '\s*'], MBeautifier.MFormatter.TokenStruct.NormNotationMinus.StoredValue);
             end
             
             
@@ -875,8 +874,8 @@ classdef MFormatter < handle
             data = regexprep(data, '\s+;', ';');
             
             operatorArray = {'+', '-', '&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^', '~'};
-            contTokenStructMatrix = MFormatter.TokenStruct.ContinueMatrixToken;
-            contTokenStructCurly = MFormatter.TokenStruct.ContinueCurlyToken;
+            contTokenStructMatrix = MBeautifier.MFormatter.TokenStruct.ContinueMatrixToken;
+            contTokenStructCurly = MBeautifier.MFormatter.TokenStruct.ContinueCurlyToken;
             
             [containerBorderIndexes, maxDepth] = obj.calculateContainerDepths(data);
             

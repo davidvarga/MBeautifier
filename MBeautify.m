@@ -67,7 +67,7 @@ classdef MBeautify
             
             document = matlab.desktop.editor.openDocument(file);
             % Format the code
-            formatter = MFormatter(MBeautify.getConfigurationStruct());
+            formatter = MBeautifier.MFormatter(MBeautify.getConfigurationStruct());
             document.Text = formatter.performFormatting(document.Text);
             
             MBeautify.indentPage(document, MBeautify.getConfigurationStruct());
@@ -175,7 +175,7 @@ classdef MBeautify
             selectedPosition = currentEditorPage.Selection;
             
             % Format the code
-            formatter = MFormatter(MBeautify.getConfigurationStruct());
+            formatter = MBeautifier.MFormatter(MBeautify.getConfigurationStruct());
             formattedSource = formatter.performFormatting(codeToFormat);
             
             % Save back the modified data then use Matlab samrt indent functionality
@@ -215,7 +215,7 @@ classdef MBeautify
             
             % Format the code
             configurationStruct = MBeautify.getConfigurationStruct();
-            formatter = MFormatter(configurationStruct);
+            formatter = MBeautifier.MFormatter(configurationStruct);
             currentEditorPage.Text = formatter.performFormatting(currentEditorPage.Text);
             
             % Set back the selection
