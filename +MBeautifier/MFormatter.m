@@ -271,7 +271,7 @@ classdef MFormatter < handle
                                     end
                                     
                                 end
-                                line = [line, actCodeFinal(lastEndIndex+1:end), actComment];
+                                line = [line, actCodeFinal(lastEndIndex+1:end), ' ', actComment];
                                 if ~isempty(prevComment)
                                     line = [prevComment, newLine, line];
                                 end
@@ -822,6 +822,7 @@ classdef MFormatter < handle
             
             % Fix semicolon whitespace at end of line
             data = regexprep(data, '\s+;\s*$', ';');
+            data = strtrim(data);
         end
         
         function ret = calculateContainerDepthDeltaOfLine(obj, code)
