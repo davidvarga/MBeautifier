@@ -70,7 +70,7 @@ classdef MBeautify
             formatter = MFormatter(MBeautify.getConfigurationStruct());
             document.Text = formatter.performFormatting(document.Text);
             
-            document.smartIndentContents();
+            MBeautify.indentPage(document, MBeautify.getConfigurationStruct());
             
             if nargin >= 2
                 if exist(outFile, 'file')
@@ -184,7 +184,7 @@ classdef MBeautify
             if ~isempty(selectedPosition)
                 currentEditorPage.goToLine(selectedPosition(1));
             end
-            currentEditorPage.smartIndentContents();
+            MBeautify.indentPage(currentEditorPage, MBeautify.getConfigurationStruct());
             currentEditorPage.makeActive();
             
             % Save if it is possible
@@ -214,7 +214,8 @@ classdef MBeautify
             selectedPosition = currentEditorPage.Selection;
             
             % Format the code
-            formatter = MFormatter(MBeautify.getConfigurationStruct());
+            configurationStruct = MBeautify.getConfigurationStruct();
+            formatter = MFormatter(configurationStruct);
             currentEditorPage.Text = formatter.performFormatting(currentEditorPage.Text);
             
             % Set back the selection
@@ -222,7 +223,9 @@ classdef MBeautify
                 currentEditorPage.goToLine(selectedPosition(1));
             end
             % Use Smart Indent
-            currentEditorPage.smartIndentContents();
+            
+            MBeautify.indentPage(currentEditorPage, configurationStruct);
+            
             currentEditorPage.makeActive();
             
             % Save if it is possible
@@ -250,6 +253,59 @@ classdef MBeautify
     %% Private helpers
     
     methods(Static = true, Access = private)
+        
+        function indentPage(editorPage, configurationStruct)
+            editorPage.smartIndentContents();
+            
+            indentationCharacter = configurationStruct.SpecialRules.IndentationCharacterValue;
+            indentationCount = str2double(configurationStruct.SpecialRules.IndentationCountValue);
+            
+            if strcmpi(indentationCharacter, 'white-space') && indentationCount == 4
+               return 
+            end
+            
+            if strcmpi(indentationCharacter, 'white-space')
+                regexIndentCharacter = ' ';
+            elseif strcmpi(indentationCharacter, 'tab')
+                regexIndentCharacter = '\t';
+            else
+                warning('MBeautifier:IllegalSetting:IndentationCharacter', 'MBeautifier: The indentation character must be set to "white-space" or "tab". MBeautifier using MATLAB defaults.');
+                return
+            end
+            
+            neededIndentation = regexIndentCharacter;
+            for i = 2:indentationCount
+                neededIndentation = [neededIndentation, regexIndentCharacter];
+            end
+            
+            newLine = sprintf('\n');
+            textArray = regexp(editorPage.Text, newLine, 'split');
+            
+            for i = 1:numel(textArray)
+                cText = textArray{i};
+                [~, ~, whiteSpaceCount] = regexp(cText, '^( )+', 'match');
+                if isempty(whiteSpaceCount)
+                    whiteSpaceCount = 0;
+                end
+                
+                amountOfReplace = floor(whiteSpaceCount/4);
+                if amountOfReplace == 0
+                    continue
+                end
+                
+                searchString = '    ';
+                replaceString = neededIndentation;
+                for iAmount = 2:amountOfReplace
+                    searchString = [searchString, '    '];
+                    replaceString = [replaceString, neededIndentation];
+                end
+                
+                replacedText = regexprep(cText, ['^', searchString], replaceString);
+                textArray{i} = replacedText;
+            end
+
+            editorPage.Text = strjoin(textArray, '\n');
+        end
         
         % Method to mimic a static data member
         % Indicates that the token parsing is up to date or the rules file should be reparsed

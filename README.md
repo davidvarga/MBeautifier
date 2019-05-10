@@ -51,18 +51,33 @@ These rules are basically switches for certain functionalities of MBeautifier.
 
 The current list of special rules:
 
+##### Special rules regarding new lines
  - **MaximalNewLines**: Integer value. MBeautifier will remove continuous empty lines. This rule can be used to specify the maximal number of maximal continuous empty lines.
  - **SectionPrecedingNewlineCount**: Integer value. Defines how many empty lines should precede the section comments (`%% `). Negative values mean no special formatting is needed (the final format is defined by the input and the MaximalNewLines rule). For any number "X" bigger or equal to zero: section comments will be preceded exactly by X empty lines.
  - **SectionTrailingNewlineCount**: Integer value. Defines how many empty lines should follow the section comments (`%% `). Negative values mean no special formatting is needed (the final format is defined by the input and the MaximalNewLines rule). For any number "X" bigger or equal to zero: section comments will be followed exactly by X empty lines.
  - **EndingNewlineCount**: Integer value. Defines how many empty lines should be placed on the end of the input. Negative values mean no special formatting is needed (the final format is defined by the input and the MaximalNewLines rule). For any number "X" bigger or equal to zero: input will trailed exactly by X empty lines.
  - **AllowMultipleStatementsPerLine**: [1|0]. If set to 1, MBeautifier will allow multiple statements per line (`a = 1; b = 2;`), otherwise it will break every statement into a new line. Defaults to "0".
+ 
+##### Special rules regarding matrix and cell array separators
+ 
  - **AddCommasToMatrices**: [1|0]. Indicates whether the missing element separator commas in matrices should be inserted. For example: `[1 2 3]` will be formatted as `[1, 2, 3]`.
  - **AddCommasToCellArrays**: [1|0]. Indicates whether the missing element separator commas in cell arrays should be inserted. For example: `{1 2 3}` will be formatted as `{1, 2, 3}`.
+ 
+##### Special rules arithmetic operators 
+
  - **MatrixIndexing_ArithmeticOperatorPadding**: [1|0]. Indicates whether the arithmetic operators should be padded by white spaces (using the operator padding rules), when they are used to index matrices. For example: `matrix(end+1) = 1` can be formatted as `matrix(end+1) = 1` when value is set to 0, or as `matrix(end + 1) = 1` if value is set to 1.
  - **CellArrayIndexing_ArithmeticOperatorPadding**: [1|0]. Indicates the same as `MatrixIndexing_ArithmeticOperatorPadding` but for cell arrays.
+ 
+##### Special rules regarding continous lines
+
  - **InlineContinousLines**: [1|0]. If set to 1, MBeautifier will in-line continuous line operators ("...") everywhere except in matrices (inside [] brackets) and in curly brackets ({}) - these cases are handled by the next two options. In-lining means: the "..." operator will be removed and the next line will be copied into its place.
  - **InlineContinousLinesInMatrixes**: [1|0]. Same as **InlineContinousLines**, but only has effect inside brackets ("[]").
  - **InlineContinousLinesInCurlyBracket**: [1|0]. Same as **InlineContinousLines**, but only has effect inside curly brackets ("{}").
+ 
+##### Special rules regarding indentation
+
+ - **IndentationCharacter**: [white-space|tab]. Specifies which character should be used for auto-indentation: white space or tabulator. Defaults to "white-space".
+ - **IndentationCount**: Integer value. Specifies the level of auto-indentation (how many **IndentationCharacter** means one level of indentation). Defaults to "4".
 
 Usage
 -----
@@ -91,12 +106,12 @@ Currently four approaches are supported:
  Supported Matlab versions
  -------------------------
  
- As MBeautifier uses the built-in Matlab Editor functionality, it supports Matlab versions from R2011a.
+ The oldest version of MATLAB to be used to test MBeautifier is R2013b.
  
  Planned future versions
  -----------------------
  
- As Matlab does not contain any formatter even in R2017 releases, and will not contain in R2018 releases this project will be at least maintained until R2019a (if live editor will contain a formatter).
+It is planned that the project is maintained until MATLAB is shipped with a code formatter with a similar functionality.
  
- As it is planned at the moment, the current release is the last one which is M-Script based, and the next release is planned to be implemented in Java with Matlab interface. This is the first step to make MBeautifier also usable in Octave.
+It is planned to make MBeautifier also usable in Octave, by starting a new development branch using Java/Kotlin (versions 2.*). The MATLAB based branched will be developed in branch versions (1.*). 
  

@@ -141,4 +141,10 @@ this.SpecialRules.InlineContinousLinesInMatrixesValue = '0';
 
 this.SpecialRules.InlineContinousLinesInCurlyBracket = struct();
 this.SpecialRules.InlineContinousLinesInCurlyBracketValue = '0';
+
+this.SpecialRules.IndentationCharacter = struct();
+this.SpecialRules.IndentationCharacterValue = 'tab';
+
+this.SpecialRules.IndentationCount = struct();
+this.SpecialRules.IndentationCountValue = '1';
 end

@@ -176,5 +176,13 @@
          <Key>InlineContinousLinesInCurlyBracket</Key>
          <Value>0</Value>
       </SpecialRule>
+	  <SpecialRule>
+         <Key>IndentationCharacter</Key>
+         <Value>white-space</Value>
+      </SpecialRule>
+      <SpecialRule>
+         <Key>IndentationCount</Key>
+         <Value>4</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>
