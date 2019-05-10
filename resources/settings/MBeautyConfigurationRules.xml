@@ -184,5 +184,9 @@
          <Key>IndentationCount</Key>
          <Value>4</Value>
       </SpecialRule>
+	  <SpecialRule>
+         <Key>Indentation_TrimBlankLines</Key>
+         <Value>1</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>

@@ -19,8 +19,8 @@ classdef MBeautify
     %
     %   Shortcuts:
     %
-    %   Shortcuts can be automatically created for "formatCurrentEditorPage", "formatEditorSelection" and 
-    %   "formatFile" methods by executing MBeautify.createShortcut() in order with the parameter 'editorpage', 
+    %   Shortcuts can be automatically created for "formatCurrentEditorPage", "formatEditorSelection" and
+    %   "formatFile" methods by executing MBeautify.createShortcut() in order with the parameter 'editorpage',
     %   'editorselection' or 'file'.
     %   The created shortcuts add MBeauty to the Matlab path also (therefore no preparation of the path is needed additionally).
     
@@ -260,8 +260,10 @@ classdef MBeautify
             indentationCharacter = configurationStruct.SpecialRules.IndentationCharacterValue;
             indentationCount = str2double(configurationStruct.SpecialRules.IndentationCountValue);
             
-            if strcmpi(indentationCharacter, 'white-space') && indentationCount == 4
-               return 
+            makeBlankLinesEmpty = str2double(configurationStruct.SpecialRules.Indentation_TrimBlankLinesValue);
+            
+            if strcmpi(indentationCharacter, 'white-space') && indentationCount == 4 && ~makeBlankLinesEmpty
+                return
             end
             
             if strcmpi(indentationCharacter, 'white-space')
@@ -270,7 +272,8 @@ classdef MBeautify
                 regexIndentCharacter = '\t';
             else
                 warning('MBeautifier:IllegalSetting:IndentationCharacter', 'MBeautifier: The indentation character must be set to "white-space" or "tab". MBeautifier using MATLAB defaults.');
-                return
+                regexIndentCharacter = ' ';
+                indentationCount = 4;
             end
             
             neededIndentation = regexIndentCharacter;
@@ -281,29 +284,41 @@ classdef MBeautify
             newLine = sprintf('\n');
             textArray = regexp(editorPage.Text, newLine, 'split');
             
+            skipIndentation = strcmpi(indentationCharacter, 'white-space') && indentationCount == 4;
+            
             for i = 1:numel(textArray)
                 cText = textArray{i};
-                [~, ~, whiteSpaceCount] = regexp(cText, '^( )+', 'match');
-                if isempty(whiteSpaceCount)
-                    whiteSpaceCount = 0;
+                if ~skipIndentation
+                    [~, ~, whiteSpaceCount] = regexp(cText, '^( )+', 'match');
+                    if isempty(whiteSpaceCount)
+                        whiteSpaceCount = 0;
+                    end
+                    
+                    amountOfReplace = floor(whiteSpaceCount/4);
+                    if amountOfReplace == 0
+                        continue
+                    end
+                    
+                    searchString = '    ';
+                    replaceString = neededIndentation;
+                    for iAmount = 2:amountOfReplace
+                        searchString = [searchString, '    '];
+                        replaceString = [replaceString, neededIndentation];
+                    end
+                    
+                    cText = regexprep(cText, ['^', searchString], replaceString);
                 end
                 
-                amountOfReplace = floor(whiteSpaceCount/4);
-                if amountOfReplace == 0
-                    continue
+                if makeBlankLinesEmpty
+                    trimmedLine = strtrim(cText);
+                    if isempty(trimmedLine)
+                        cText = trimmedLine;
+                    end
                 end
                 
-                searchString = '    ';
-                replaceString = neededIndentation;
-                for iAmount = 2:amountOfReplace
-                    searchString = [searchString, '    '];
-                    replaceString = [replaceString, neededIndentation];
-                end
-                
-                replacedText = regexprep(cText, ['^', searchString], replaceString);
-                textArray{i} = replacedText;
+                textArray{i} = cText;
             end
-
+            
             editorPage.Text = strjoin(textArray, '\n');
         end
         
@@ -528,7 +543,7 @@ classdef MBeautify
             
         end
         
-      
+        
     end
 end
 

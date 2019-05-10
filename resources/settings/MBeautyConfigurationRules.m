@@ -143,8 +143,11 @@ this.SpecialRules.InlineContinousLinesInCurlyBracket = struct();
 this.SpecialRules.InlineContinousLinesInCurlyBracketValue = '0';
 
 this.SpecialRules.IndentationCharacter = struct();
-this.SpecialRules.IndentationCharacterValue = 'tab';
+this.SpecialRules.IndentationCharacterValue = 'white-space';
 
 this.SpecialRules.IndentationCount = struct();
-this.SpecialRules.IndentationCountValue = '1';
+this.SpecialRules.IndentationCountValue = '4';
+
+this.SpecialRules.Indentation_TrimBlankLines = struct();
+this.SpecialRules.Indentation_TrimBlankLinesValue = '1';
 end

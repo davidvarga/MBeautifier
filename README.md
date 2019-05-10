@@ -78,7 +78,8 @@ The current list of special rules:
 
  - **IndentationCharacter**: [white-space|tab]. Specifies which character should be used for auto-indentation: white space or tabulator. Defaults to "white-space".
  - **IndentationCount**: Integer value. Specifies the level of auto-indentation (how many **IndentationCharacter** means one level of indentation). Defaults to "4".
-
+ - **Indentation_TrimBlankLines**: [1|0]. Specifies if blank lines (lines containing only white space characters - as result of auto-indentation) should be trimmed (made empty) by MBeautifier. Defaults to "1" as it can lead to smaller file sizes.
+ 
 Usage
 -----
 
