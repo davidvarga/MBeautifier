@@ -9,6 +9,7 @@ classdef MFormatter < handle
         StringTokenStructs;
         BlockCommentDepth;
         IsInBlockComment;
+        DirectiveDirector;
         
         MatrixIndexingOperatorPadding;
         CellArrayIndexingOperatorPadding;
@@ -102,6 +103,7 @@ classdef MFormatter < handle
             obj.StringTokenStructs = {};
             obj.BlockCommentDepth = 0;
             obj.IsInBlockComment = false;
+            obj.DirectiveDirector = MBeautifier.DirectiveDirector();
             
             nMaximalNewLines = str2double(obj.SettingConfiguration.SpecialRules.MaximalNewLinesValue);
             nSectionPrecedingNewlines = str2double(obj.SettingConfiguration.SpecialRules.SectionPrecedingNewlineCountValue);
@@ -125,9 +127,36 @@ classdef MFormatter < handle
             contLineArray = cell(0, 2);
             isSectionSeparator = false;
             
+            isFormattingOff = false;
+            
             nNewLinesFound = 0;
             for j = 1:numel(textArray)
                 line = textArray{j};
+                
+                %% Check for directives if ...
+                % ... NOT in continous line
+                % ... NOT in block comment
+                if ~isInContinousLine && ~obj.IsInBlockComment
+                    directiveChange = obj.DirectiveDirector.updateFromLine(line);
+                    if ~isequal(directiveChange.Type, MBeautifier.DirectiveChangeType.NONE)
+                       switch (lower(directiveChange.DirectiveName))
+                           case 'format'
+                               if isequal(directiveChange.Type, MBeautifier.DirectiveChangeType.REMOVED)
+                                  isFormattingOff = false;
+                               elseif isequal(directiveChange.Type, MBeautifier.DirectiveChangeType.ADDED) || isequal(directiveChange.Type, MBeautifier.DirectiveChangeType.CHANGED)
+                                   isFormattingOff = numel(directiveChange.Directive.Values) > 0 && strcmpi(directiveChange.Directive.Values{1}, 'off');
+                               end
+                           otherwise
+                               % Ignore
+                       end
+                    end
+                end
+                
+                if isFormattingOff
+                    replacedTextArray = [replacedTextArray, line, sprintf('\n')];
+                    continue
+                end
+                
                 
                 %% Process the maximal new-line count
                 if isempty(strtrim(line))
@@ -153,13 +182,13 @@ classdef MFormatter < handle
                 
                 
                 
+
                 %% Determine the position where the line shall be splitted into code and comment
                 [actCode, actComment, splittingPos, isSectionSeparator] = obj.findComment(line);
                 
                 if isSectionSeparator && formatSectionPrecedingNewlines
                     replacedTextArray = MFormatter.handleTrailingEmptyLines(replacedTextArray, nSectionPrecedingNewlines);      
                 end
-                
                 
                 %% Check for line continousment (...)
                 % Continous lines have to be converted into one single code line to perform replacement on it
@@ -179,7 +208,6 @@ classdef MFormatter < handle
                         else
                             actCode = [actCode, '; ...'];
                         end
-                        
                     end
                     
                     trimmedCode = strtrim(actCode);
