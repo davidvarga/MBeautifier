@@ -1,6 +1,6 @@
 classdef OperatorPaddingRule
 
-    properties(SetAccess = immutable)
+    properties (SetAccess = immutable)
         Key
         ValueFrom
         ValueTo
@@ -8,7 +8,7 @@ classdef OperatorPaddingRule
         ReplacementPattern
     end
 
-    properties(Access = private)
+    properties (Access = private)
         MatrixIndexingReplacementPattern
         CellArrayIndexingReplacementPattern
     end

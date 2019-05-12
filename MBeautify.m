@@ -19,7 +19,7 @@ classdef MBeautify
     %   'editorselection' or 'file'.
     %   The created shortcuts add MBeauty to the Matlab path also (therefore no preparation of the path is needed additionally).
 
-    properties(Access = private, Constant)
+    properties (Access = private, Constant)
         RulesXMLFile = 'MBeautyConfigurationRules.xml';
         SettingDirectory = [fileparts(mfilename('fullpath')), filesep, 'resources', filesep, 'settings'];
         RulesMFileFull = [fileparts(mfilename('fullpath')), filesep, 'resources', filesep, 'settings', filesep, 'MBeautyConfigurationRules.m'];
@@ -28,7 +28,7 @@ classdef MBeautify
 
     %% Public API
 
-    methods(Static = true)
+    methods (Static = true)
 
         function formatFile(file, outFile)
             % Formats the file specified in the first argument. The file is opened in the Matlab Editor. If the second
@@ -227,7 +227,7 @@ classdef MBeautify
 
     %% Private helpers
 
-    methods(Static = true, Access = private)
+    methods (Static = true, Access = private)
 
         function indentPage(editorPage, configuration)
             editorPage.smartIndentContents();

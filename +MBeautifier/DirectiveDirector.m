@@ -1,6 +1,6 @@
 classdef DirectiveDirector < handle
 
-    properties(SetAccess = private)
+    properties (SetAccess = private)
         Directives;
     end
 

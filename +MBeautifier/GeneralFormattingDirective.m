@@ -1,10 +1,10 @@
 classdef GeneralFormattingDirective < MBeautifier.Directive
 
-    properties(SetAccess = immutable)
+    properties (SetAccess = immutable)
         Name = 'Format'
     end
 
-    methods(Access = protected)
+    methods (Access = protected)
         function [success, toBeGarbadeCollected] = tryToupdateFromValue(obj, value)
             success = true;
             toBeGarbadeCollected = false;
@@ -19,5 +19,4 @@ classdef GeneralFormattingDirective < MBeautifier.Directive
             end
         end
     end
-
 end

@@ -1,10 +1,10 @@
 classdef (Abstract) StringMemento
 
-    properties(SetAccess = immutable)
+    properties (SetAccess = immutable)
         StoredText
     end
 
-    properties(Abstract, Dependent)
+    properties (Abstract, Dependent)
         Text
     end
 

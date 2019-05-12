@@ -1,5 +1,5 @@
 classdef DirectiveChange < handle
-    properties(SetAccess = immutable)
+    properties (SetAccess = immutable)
         DirectiveName;
         Directive;
         Type;

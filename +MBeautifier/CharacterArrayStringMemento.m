@@ -1,6 +1,6 @@
 classdef CharacterArrayStringMemento < MBeautifier.StringMemento
 
-    properties(Dependent)
+    properties (Dependent)
         Text
     end
 

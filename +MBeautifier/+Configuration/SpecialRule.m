@@ -1,11 +1,11 @@
 classdef SpecialRule
 
-    properties(SetAccess = immutable)
+    properties (SetAccess = immutable)
         Key
         Value
     end
 
-    properties(Dependent)
+    properties (Dependent)
         ValueAsDouble
     end
 

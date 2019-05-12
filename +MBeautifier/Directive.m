@@ -1,9 +1,9 @@
 classdef (Abstract) Directive < handle
-    
+
     properties(SetAccess = protected)
         Values
     end
-    
+
     properties(Abstract, SetAccess = immutable)
         Name
     end
