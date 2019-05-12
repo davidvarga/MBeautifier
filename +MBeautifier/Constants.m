@@ -3,14 +3,14 @@ classdef Constants
         WhiteSpaceToken = '#MBeauty_WhiteSpace_Token#';
         ContainerOpeningBrackets = {'[', '{', '('};
         ContainerClosingBrackets = {']', '}', ')'};
-       
+        NewLine = sprintf('\n');
     end
     
     methods(Access = private)
         function obj = Constants()
         end
     end
- 
+    
     
 end
 
