@@ -127,6 +127,54 @@
          <ValueTo>:</ValueTo>
       </OperatorPaddingRule>
    </OperatorPadding>
+   
+   <KeyworPadding>
+      <KeyworPaddingRule>
+         <Keyword>case</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>classdef</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>elseif</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>for</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>parfor</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>if</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>switch</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>while</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>properties</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>methods</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
+         <Keyword>events</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+   </KeyworPadding>
+   
    <SpecialRules>
       <SpecialRule>
          <Key>MaximalNewLines</Key>

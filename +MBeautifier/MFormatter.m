@@ -227,7 +227,7 @@ classdef MFormatter < handle
                                 line = [line, actComment];
                             end
 
-                            replacedTextArray = [replacedTextArray, {line, sprintf('\n')}];
+                            replacedTextArray = [replacedTextArray, [line, sprintf('\n')]];
                             contLineArray = cell(0, 2);
 
                             continue;
@@ -733,8 +733,12 @@ classdef MFormatter < handle
             data = regexprep(data, '\( ', '(');
             data = regexprep(data, '\[ ', '[');
 
-            % TODO: keyword formatting here could be done
-            data = regexprep(data, '^function(?=#MBeauty_ArrayToken_\d+#)', 'function ');
+            % Keyword formatting
+            keywordRules = obj.Configuration.keywordPaddingRules();
+            for i = 1:numel(keywordRules)
+                rule = keywordRules{i};
+                data = regexprep(data, [rule.Keyword, '(?=#MBeauty_ArrayToken_\d+#)'], rule.ReplaceTo);
+            end
 
             % Restore containers
             data = obj.restoreContainers(data, arrayMapCell);

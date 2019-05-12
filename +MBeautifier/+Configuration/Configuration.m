@@ -1,15 +1,17 @@
 classdef Configuration < handle
 
-    properties(Access = private)
+    properties (Access = private)
         OperatorPaddingRules;
         OperatorPaddingRuleNamesInOrder;
+        KeywordPaddingRules;
         SpecialRules;
     end
 
-    methods(Access = private)
-        function obj = Configuration(operatorPaddingRules, operatorPaddingRuleNamesInOrder, specialRules)
+    methods (Access = private)
+        function obj = Configuration(operatorPaddingRules, operatorPaddingRuleNamesInOrder, keywordRules, specialRules)
             obj.OperatorPaddingRules = operatorPaddingRules;
             obj.SpecialRules = specialRules;
+            obj.KeywordPaddingRules = keywordRules;
             obj.OperatorPaddingRuleNamesInOrder = operatorPaddingRuleNamesInOrder;
         end
     end
@@ -28,6 +30,13 @@ classdef Configuration < handle
             rule = obj.OperatorPaddingRules(lower(name));
         end
 
+        function rule = keywordPaddingRule(obj, name)
+            rule = obj.KeywordPaddingRules(lower(name));
+        end
+
+        function rules = keywordPaddingRules(obj)
+            rules = obj.KeywordPaddingRules.values;
+        end
 
         function names = operatorPaddingRuleNames(obj)
             keys = obj.OperatorPaddingRuleNamesInOrder;
@@ -46,13 +55,13 @@ classdef Configuration < handle
         end
     end
 
-    methods(Static)
+    methods (Static)
         function obj = fromFile(xmlFile)
             obj = MBeautifier.Configuration.Configuration.readSettingsXML(xmlFile);
         end
     end
 
-    methods(Static, Access = private)
+    methods (Static, Access = private)
         function configuration = readSettingsXML(xmlFile)
             XMLDoc = xmlread(xmlFile);
 
@@ -82,7 +91,18 @@ classdef Configuration < handle
                 specialRules(lower(key)) = MBeautifier.Configuration.SpecialRule(key, value);
             end
 
-            configuration = MBeautifier.Configuration.Configuration(operatorRules, operatorPaddingRuleNamesInOrder, specialRules);
+            allKeywordItems = XMLDoc.getElementsByTagName('KeyworPaddingRule');
+            keywordRules = containers.Map();
+
+            for iKeywordRule = 0:allKeywordItems.getLength() - 1
+                currentRule = allKeywordItems.item(iKeywordRule);
+                keyword = char(currentRule.getElementsByTagName('Keyword').item(0).getTextContent().toString());
+                rightPadding = str2double(char(currentRule.getElementsByTagName('RightPadding').item(0).getTextContent().toString()));
+
+                keywordRules(lower(keyword)) = MBeautifier.Configuration.KeywordPaddingRule(keyword, rightPadding);
+            end
+
+            configuration = MBeautifier.Configuration.Configuration(operatorRules, operatorPaddingRuleNamesInOrder, keywordRules, specialRules);
 
             function escapedValue = removeXMLEscaping(value)
                 escapedValue = regexprep(value, '&lt;', '<');
