@@ -7,13 +7,14 @@ MBeautifier is a lightweight M-Script based MATLAB source code formatter usable 
 
 Main features
 -------------
-
- - Padding operators with white spaces based on the XML configuration file.
- - Correction white space padding of keywords
- - Correction of indentation using the Smart Indent functionality of the Matlab Editor
- - Removal of continuous empty lines (the number can be configured)
- - Optionally inserting missing element separators (commas) in matrix and cell array initializations
- - Different working modes: format the current page of the Matlab editor, format only a selection in the Matlab Editor or format file(s) 
+ - Padding operators and keywords with white spaces
+ - Configurable indentation character and level. Indentation using the Smart Indent functionality of the MATLAB Editor
+ - Removal/addition of continuous empty lines
+ - Inserting missing element separators (commas) in matrix and cell array initializations
+ - Insert missing continuous symbol line in matrix and cell array initializations
+ - In-lining continuous lines 
+ - Formats the current page of the MATLAB Editor or only a selection in the MATLAB Editor or file(s) 
+ - While everything above is configurable in a single XML file
 
 Deployment and Configuration
 ----------------------------
@@ -25,7 +26,7 @@ The configuration can be modified by editing the `MBeautifier\resources\settings
 
 #### Configuration rules
 
-Currently two types of configuration rules are implemented: `OperatorPaddingRule` and `SpecialRule`.
+Currently three types of configuration rules are implemented: `Operator padding rule`, `Keyword padding rule` and `Special rule`.
 
 #### Operator padding rules
 
@@ -38,6 +39,19 @@ Each `OperatorPaddingRule` represents the formatting rules for one single operat
     </OperatorPaddingRule>
 	
 The example above shows the rule for the "not equals" operator. The `ValueFrom` node stores the operator `~=` and the `ValueTo` node stores the expected format: the operator should be preceded and followed by a white-space character.
+
+#### Keyword padding rules
+
+Each `KeyworPaddingRule` represents the formatting rules for one single keyword and consists the keyword itself, and a numeric value of the needed white-space padding on the right side.
+
+	<KeyworPaddingRule>
+		<Keyword>properties</Keyword>
+		<RightPadding>1</RightPadding>
+	</KeyworPaddingRule>
+	
+The example above shows the rule for the keyword "properties". The `RightPadding` node stores the expected right padding white space amount: the keyword should be preceded by one white space character.
+
+> Note: Not all of the keywords are listed - only the ones where controlling padding makes sense.
 
 #### Special rules
 
