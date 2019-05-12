@@ -4,10 +4,11 @@ classdef MFormatter < handle
     properties(Access = private)
         Configuration;
         AllOperators;
+
         DirectiveDirector;
+        StringMemory;
 
         % Properties used during the formatting
-        StringTokenStructs;
         BlockCommentDepth;
         IsInBlockComment;
 
@@ -20,7 +21,6 @@ classdef MFormatter < handle
     end
 
     methods
-
         function obj = MFormatter(configuration)
             % Creates a new formatter using the passed configuration.
 
@@ -30,7 +30,7 @@ classdef MFormatter < handle
             obj.CellArrayIndexingOperatorPadding = configuration.specialRule('CellArrayIndexing_ArithmeticOperatorPadding').ValueAsDouble;
 
             % Init run-time members
-            obj.StringTokenStructs = {};
+            obj.StringMemory = [];
             obj.BlockCommentDepth = 0;
             obj.IsInBlockComment = false;
             obj.AllOperators = configuration.operatorCharacters();
@@ -39,7 +39,6 @@ classdef MFormatter < handle
         function formattedSource = performFormatting(obj, source)
             % Performs formatting on the specified source.
 
-            obj.StringTokenStructs = {};
             obj.BlockCommentDepth = 0;
             obj.IsInBlockComment = false;
             obj.DirectiveDirector = MBeautifier.DirectiveDirector();
@@ -314,7 +313,6 @@ classdef MFormatter < handle
                 tokenStructs.ContinueToken = newStruct('...', '#MBeutyCont#');
                 tokenStructs.ContinueMatrixToken = newStruct('...', '#MBeutyContMatrix#');
                 tokenStructs.ContinueCurlyToken = newStruct('...', '#MBeutyContCurly#');
-                tokenStructs.StringToken = newStruct('', '#MBeutyString#');
                 tokenStructs.ArrayElementToken = newStruct('', '#MBeutyArrayElement#');
                 tokenStructs.TransposeToken = newStruct('''', '#MBeutyTransp#');
                 tokenStructs.NonConjTransposeToken = newStruct('.''', '#MBeutyNonConjTransp#');
@@ -393,54 +391,23 @@ classdef MFormatter < handle
         end
     end
 
-
     methods(Access = private)
         function actCodeTemp = replaceStrings(obj, actCode)
-            % Replaces strings in the code with string tokens while filling StringTokenStructs member to store the
-            % original values.
+            % Replaces strings in the code with string tokens memorizing the original text
 
-            %% Strings
-            splittedCode = regexp(actCode, '''', 'split');
-
-            obj.StringTokenStructs = cell(1, ceil(numel(splittedCode)/2));
-            strArray = cell(1, numel(splittedCode));
-
-            for iSplit = 1:numel(splittedCode)
-                % Not string
-                if ~isequal(mod(iSplit, 2), 0)
-                    strArray{iSplit} = splittedCode{iSplit};
-                else % String
-                    strTokenStruct = MBeautifier.MFormatter.TokenStruct.StringToken;
-
-                    strArray{iSplit} = strTokenStruct.Token;
-                    strTokenStruct.StoredValue = splittedCode{iSplit};
-                    obj.StringTokenStructs{iSplit} = strTokenStruct;
-                end
-            end
-
-            obj.StringTokenStructs = obj.StringTokenStructs(cellfun(@(x) ~isempty(x), obj.StringTokenStructs));
-            actCodeTemp = [strArray{:}];
+            obj.StringMemory = MBeautifier.StringMemory.fromCodeLine(actCode);
+            actCodeTemp = obj.StringMemory.MemorizedCodeLine;
         end
 
         function actCodeFinal = restoreStrings(obj, actCodeTemp)
-            % Replaces string tokens with the original string from the StringTokenStructs member.
+            % Replaces string tokens with the original string from the memory
 
-            strTokStructs = obj.StringTokenStructs;
-            splitByStrTok = regexp(actCodeTemp, MBeautifier.MFormatter.TokenStruct.StringToken.Token, 'split');
-
-            if numel(strTokStructs)
-                actCodeFinal = '';
-
-                for iSplit = 1:numel(strTokStructs)
-                    actCodeFinal = [actCodeFinal, splitByStrTok{iSplit}, '''', strTokStructs{iSplit}.StoredValue, ''''];
-                end
-
-                if numel(splitByStrTok) > numel(strTokStructs)
-                    actCodeFinal = [actCodeFinal, splitByStrTok{end}];
-                end
-            else
-                actCodeFinal = actCodeTemp;
+            for i = 1:numel(obj.StringMemory.Mementos)
+                actCodeTemp = regexprep(actCodeTemp, MBeautifier.Constants.StringToken, ...
+                    regexptranslate('escape', obj.StringMemory.Mementos{i}.Text), 'once');
             end
+
+            actCodeFinal = actCodeTemp;
         end
 
         function code = performReplacements(obj, code)
@@ -754,7 +721,9 @@ classdef MFormatter < handle
             end
 
             if ~isContainerElement && ~obj.Configuration.specialRule('AllowMultipleStatementsPerLine').ValueAsDouble
-                data = regexprep(data, ';(?!\s*$)', ';\n');
+                if numel(regexp(data, ';')) > 1
+                    data = regexprep(data, ';(?!\s*$)', ';\n');
+                end
             end
 
             data = regexprep(data, MBeautifier.Constants.WhiteSpaceToken, ' ');
