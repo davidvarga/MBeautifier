@@ -96,17 +96,18 @@ MBeautifier directives are special constructs which can be used in the source co
     % MBeautifierDirective:Format:Off
     longVariableName = 'where the assigement is';
     aligned          = 'with the next assignment';
-    % MBeautifierDirective:Format:On
+    % MBD:Format:On
     someMatrix  =  [1 2 3];
     
 The standard format of a directive line is:
- - following the pattern: `<ws>%<ws>MBeautifierDirective<ws>:<ws>:NAME<ws>:<ws>VALUE<ws>[NEWLINE]` where
+ - following the pattern: `<ws>%<ws>MBeautifierDirective<ws>:<ws>:NAME<ws>:<ws>VALUE<ws>[NEWLINE]` or : `<ws>%<ws>MBD<ws>:<ws>:NAME<ws>:<ws>VALUE<ws>[NEWLINE]`where
     -   `<ws>` means zero or more optional white space characters
     -   `NAME` means the directive name (only latin letters, case insensitive)
     -   `VALUE` means the directive value (only latin letters, case insensitive)
  - must not contain any code or any trailing comment  (only the directive comment above)
  - must not be inside a block comment
  - must not be inside any line continousment
+ - the keyword `MBeautifierDirective` is freely interchangable with `MBD`
 
 > **Note: Directive names which are not present in the list below, or directive values which are not applicable to the specified directive will be ignored together with a MATLAB warning**.
 

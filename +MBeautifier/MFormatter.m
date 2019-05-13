@@ -1,7 +1,7 @@
 classdef MFormatter < handle
     % Performs the actual code formatting. Should not be used directly but only by MBeautify.
 
-    properties(Access = private)
+    properties (Access = private)
         Configuration;
         AllOperators;
 
@@ -16,7 +16,7 @@ classdef MFormatter < handle
         CellArrayIndexingOperatorPadding;
     end
 
-    properties(Access = private, Constant)
+    properties (Access = private, Constant)
         TokenStruct = MBeautifier.MFormatter.getTokenStruct();
     end
 
@@ -262,7 +262,7 @@ classdef MFormatter < handle
         end
     end
 
-    methods(Access = private, Static)
+    methods (Access = private, Static)
 
         function textArray = handleTrailingEmptyLines(textArray, neededEmptyLineCount)
             precedingNewLines = MBeautifier.MFormatter.getPrecedingNewlineCount(textArray);
@@ -308,7 +308,7 @@ classdef MFormatter < handle
             % Persistent variable to serve as cache
             persistent tokenStructStored;
             if isempty(tokenStructStored)
-                % MBeautifierDirective:Format:Off
+                % MBD:Format:Off
                 tokenStructs = struct();
                 tokenStructs.ContinueToken = newStruct('...', '#MBeutyCont#');
                 tokenStructs.ContinueMatrixToken = newStruct('...', '#MBeutyContMatrix#');
@@ -391,7 +391,7 @@ classdef MFormatter < handle
         end
     end
 
-    methods(Access = private)
+    methods (Access = private)
         function actCodeTemp = replaceStrings(obj, actCode)
             % Replaces strings in the code with string tokens memorizing the original text
 

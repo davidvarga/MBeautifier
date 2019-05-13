@@ -13,7 +13,7 @@ classdef DirectiveDirector < handle
             changed = MBeautifier.NoDirectiveChanged();
 
             lineTrimmed = strtrim(line);
-            directiveTokens = regexp(lineTrimmed, '%\s*MBeautifierDirective\s*:\s*([a-zA-Z]+)\s*:\s*(\w+)$', 'tokens');
+            directiveTokens = regexp(lineTrimmed, '%\s*(?:MBeautifierDirective|MBD)\s*:\s*([a-zA-Z]+)\s*:\s*(\w+)$', 'tokens');
             if ~isempty(directiveTokens)
                 directiveName = lower(strtrim(directiveTokens{1}{1}));
                 directiveValue = lower(strtrim(directiveTokens{1}{2}));
