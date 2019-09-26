@@ -236,5 +236,9 @@
          <Key>Indentation_TrimBlankLines</Key>
          <Value>1</Value>
       </SpecialRule>
+      <SpecialRule>
+         <Key>Indentation_Strategy</Key>
+         <Value>AllFunctions</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>

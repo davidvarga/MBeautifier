@@ -197,6 +197,7 @@ classdef MBeautify
             if ~isempty(selectedPosition)
                 currentEditorPage.goToLine(selectedPosition(1));
             end
+            
             % Use Smart Indent
 
             MBeautify.indentPage(currentEditorPage, configuration);
@@ -230,8 +231,22 @@ classdef MBeautify
     methods (Static = true, Access = private)
 
         function indentPage(editorPage, configuration)
+            indentationStrategy = configuration.specialRule('Indentation_Strategy').Value;
+            currentlySetPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
+            
+            switch lower(indentationStrategy)
+                case 'allfunctions'
+                    com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', 'AllFunctionIndent');
+                case 'nestedfunctions'
+                    com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', 'MixedFunctionIndent');
+                case 'noindent'
+                    com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', 'ClassicFunctionIndent');
+            end
+            
             editorPage.smartIndentContents();
 
+            com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', currentlySetPreference);
+             
             indentationCharacter = configuration.specialRule('IndentationCharacter').Value;
             indentationCount = configuration.specialRule('IndentationCount').ValueAsDouble;
             makeBlankLinesEmpty = configuration.specialRule('Indentation_TrimBlankLines').ValueAsDouble;
