@@ -737,7 +737,7 @@ classdef MFormatter < handle
             keywordRules = obj.Configuration.keywordPaddingRules();
             for i = 1:numel(keywordRules)
                 rule = keywordRules{i};
-                data = regexprep(data, ['\b', rule.Keyword, '(?=#MBeauty_ArrayToken_\d+#)'], rule.ReplaceTo);
+                data = regexprep(data, ['(?<=\b|^)', rule.Keyword, '\s*(?=#MBeauty_ArrayToken_\d+#)'], rule.ReplaceTo);
             end
 
             % Restore containers
