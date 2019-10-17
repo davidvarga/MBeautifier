@@ -127,7 +127,7 @@
          <ValueTo>:</ValueTo>
       </OperatorPaddingRule>
    </OperatorPadding>
-   
+
    <KeyworPadding>
       <KeyworPaddingRule>
          <Keyword>case</Keyword>
@@ -174,7 +174,7 @@
          <RightPadding>1</RightPadding>
       </KeyworPaddingRule>
    </KeyworPadding>
-   
+
    <SpecialRules>
       <SpecialRule>
          <Key>MaximalNewLines</Key>
@@ -238,7 +238,7 @@
       </SpecialRule>
       <SpecialRule>
          <Key>Indentation_Strategy</Key>
-         <Value>AllFunctions</Value>
+         <Value>NestedFunctions</Value>
       </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>
