@@ -79,7 +79,7 @@ classdef MIndenter < handle
                             % correction for function keywords according to
                             % configuration
                             if (strcmp(stack{end}, 'function'))
-                                switch (strategy)
+                                switch lower(strategy)
                                     case 'nestedfunctions'
                                         if (numel(stack) == 1)
                                             % top level function
@@ -121,7 +121,7 @@ classdef MIndenter < handle
                             % correction for function keywords according to
                             % configuration
                             if (strcmp(stack{end}, 'function'))
-                                switch (strategy)
+                                switch lower(strategy)
                                     case 'nestedfunctions'
                                         if (numel(stack) == 1)
                                             % top level function
