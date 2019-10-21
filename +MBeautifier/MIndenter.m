@@ -70,6 +70,11 @@ classdef MIndenter < handle
                 if (~isempty(lines{linect}) && (lines{linect}(1) ~= '%'))
                     % find keywords and adjust indent
                     for wordct = 1:numel(words)
+                        % detect end of line comments
+                        if (strcmp(words{wordct}, '%'))
+                            break;
+                        end
+                        
                         % look for keywords that increase indent
                         if (sum(strcmp(words{wordct}, obj.KeywordsIncrease)))
                             layerNext = layerNext + 1;
