@@ -90,9 +90,14 @@ classdef MIndenter < handle
                                             % top level function
                                             layerNext = layerNext - 1;
                                         else
-                                            % nested function
-                                            layer = layer + 1;
-                                            layerNext = layerNext + 1;
+                                            if (strcmp(stack{end-1}, 'function'))                             
+                                                % nested function
+                                                layer = layer + 1;
+                                                layerNext = layerNext + 1;
+                                            else
+                                                % class method
+                                                % do nothing
+                                            end
                                         end
                                     case 'noindent'
                                         layerNext = layerNext - 1;
@@ -132,8 +137,13 @@ classdef MIndenter < handle
                                             % top level function
                                             layerNext = layerNext + 1;
                                         else
-                                            % nested function
-                                            layerNext = layerNext - 1;
+                                            if (strcmp(stack{end-1}, 'function'))
+                                                % nested function
+                                                layer = layer - 1;
+                                            else
+                                                % class method
+                                                % do nothing
+                                            end
                                         end
                                     case 'noindent'
                                         if (wordct == 1)
