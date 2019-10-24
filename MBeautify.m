@@ -264,7 +264,7 @@ classdef MBeautify
 
         function indentPage(editorPage, configuration)
             indentationStrategy = configuration.specialRule('Indentation_Strategy').Value;
-            currentlySetPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
+            originalPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
             
             switch lower(indentationStrategy)
                 case 'allfunctions'
@@ -277,7 +277,10 @@ classdef MBeautify
             
             editorPage.smartIndentContents();
 
-            com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', currentlySetPreference);
+            % Restore original settings, if necessary
+            if (length(originalPreference) > 0 && originalPreference ~= com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType'))
+                com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', originalPreference);
+            end
              
             indentationCharacter = configuration.specialRule('IndentationCharacter').Value;
             indentationCount = configuration.specialRule('IndentationCount').ValueAsDouble;
