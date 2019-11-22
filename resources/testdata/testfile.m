@@ -88,6 +88,11 @@ if true || ... % aaa
 end
 
 %80
-a + sprintf("%d", b)
+a + sprintf("%d", b)%comment
+a + sprintf("'%d'", b) %comment
+a + sprintf("""%d""", b) % comment
+a + sprintf('"%d"', b)
+a.' + sprintf('''%d''', b)
+a' + sprintf('%d', b)
 
 

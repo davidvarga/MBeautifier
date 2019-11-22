@@ -341,11 +341,16 @@ classdef MFormatter < handle
             code = regexprep(code, nonConjTrnspTokStruct.Token, nonConjTrnspTokStruct.StoredValue);
         end
 
-        function actCode = replaceTransponations(actCode)
+        function actCode = replaceTransponations(actCode, token)
             % Replaces transponation signs in the code with tokens.
 
-            trnspTokStruct = MBeautifier.MFormatter.TokenStruct.TransposeToken;
-            nonConjTrnspTokStruct = MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken;
+            if nargin < 2
+                trnspTok = MBeautifier.MFormatter.TokenStruct.TransposeToken.Token;
+                nonConjTrnspTok = MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken.Token;
+            else
+                trnspTok = token;
+                nonConjTrnspTok = [token, token];
+            end
 
             charsIndicateTranspose = '[a-zA-Z0-9\)\]\}\.]';
 
@@ -359,14 +364,14 @@ classdef MFormatter < handle
                 if isequal(actChar, '''')
                     % .' => NonConj transpose
                     if isLastCharDot
-                        tempCode = [tempCode(1:end-1), nonConjTrnspTokStruct.Token];
+                        tempCode = [tempCode(1:end-1), nonConjTrnspTok];
                         isLastCharTransp = true;
                     else
                         if isLastCharTransp
-                            tempCode = [tempCode, trnspTokStruct.Token];
+                            tempCode = [tempCode, trnspTok];
                         else
                             if numel(tempCode) && ~isInStr && numel(regexp(tempCode(end), charsIndicateTranspose))
-                                tempCode = [tempCode, trnspTokStruct.Token];
+                                tempCode = [tempCode, trnspTok];
                                 isLastCharTransp = true;
                             else
                                 tempCode = [tempCode, actChar];
@@ -472,9 +477,13 @@ classdef MFormatter < handle
 
             %% Searh for comment signs(%) and exclamation marks(!)
 
-            exclamationInd = strfind(line, '!');
-            commentSignIndexes = strfind(line, '%');
-            contIndexes = strfind(line, '...');
+            % Replace transponation (and non-conjugate transponations) to avoid not relevant matches
+            % This is just to help identify actual strings.
+            possibleCode = obj.replaceTransponations(line, '#');
+
+            exclamationInd = strfind(possibleCode, '!');
+            commentSignIndexes = strfind(possibleCode, '%');
+            contIndexes = strfind(possibleCode, '...');
 
             if ~iscell(exclamationInd)
                 exclamationInd = num2cell(exclamationInd);
@@ -496,8 +505,6 @@ classdef MFormatter < handle
                 retComm = -1;
                 exclamationPos = -1;
             else
-                % Replace transponation (and non-conjugate transponations) to avoid not relevant matches
-                possibleCode = obj.replaceTransponations(line);
 
                 % Find the start and end of all single- or double-quoted strings
                 % This treats escaped quotes as two separate quotes, which is fine
