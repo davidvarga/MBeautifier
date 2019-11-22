@@ -87,4 +87,7 @@ if true || ... % aaa
         false % //
 end
 
+%80
+a + sprintf("%d", b)
+
 

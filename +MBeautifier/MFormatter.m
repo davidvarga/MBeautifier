@@ -496,16 +496,19 @@ classdef MFormatter < handle
                 retComm = -1;
                 exclamationPos = -1;
             else
+                % Replace transponation (and non-conjugate transponations) to avoid not relevant matches
+                possibleCode = obj.replaceTransponations(line);
+
+                % Find the start and end of all single- or double-quoted strings
+                % This treats escaped quotes as two separate quotes, which is fine
+                [quoteStartInds, quoteEndInds] = regexp(possibleCode, '("|'').*?\1');
+                quoteInds = sort([quoteStartInds, quoteEndInds]);
 
                 for iCommSign = 1:commentSignCount
                     currentIndex = indexUnion{iCommSign};
 
-                    % Check all leading parts that can be "code"
-                    % Replace transponation (and noin-conjugate transponations) to avoid not relevant matches
-                    possibleCode = obj.replaceTransponations(line(1:currentIndex-1));
-
                     % The line is currently "not in string"
-                    if isequal(mod(numel(strfind(possibleCode, '''')), 2), 0)
+                    if isequal(mod(sum(quoteInds < currentIndex), 2), 0)
                         if ismember(currentIndex, [commentSignIndexes{:}])
                             retComm = currentIndex;
                         elseif ismember(currentIndex, [exclamationInd{:}])
