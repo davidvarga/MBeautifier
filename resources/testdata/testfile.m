@@ -95,4 +95,10 @@ a + sprintf('"%d"', b)
 a.' + sprintf('''%d''', b)
 a' + sprintf('%d', b)
 
+% Remove extra space after @
+f = @ (x) a
+num@MySuper(obj) - a
+% remove spaces around @
+num @ MySuper(obj) - a
+
 
