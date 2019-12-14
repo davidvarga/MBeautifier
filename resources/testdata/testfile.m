@@ -97,6 +97,8 @@ a' + sprintf('%d', b)
 
 % Remove extra space after @
 f = @ (x) a
+% Remove extra space before unary operator
+f = @(x) - a
 num@MySuper(obj) - a
 % remove spaces around @
 num @ MySuper(obj) - a

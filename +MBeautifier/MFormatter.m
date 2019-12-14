@@ -625,19 +625,29 @@ classdef MFormatter < handle
 
                     splittedData = regexp(data, opToken, 'split');
 
+                    posMatch = ['(', MBeautifier.MFormatter.joinString({'[0-9a-zA-Z_)}\]\.]', ...
+                        MBeautifier.MFormatter.TokenStruct.TransposeToken.Token, ...
+                        MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken.Token, ...
+                        '#MBeauty_ArrayToken_\d+#'}, '|'), ')$'];
+                    negMatch = [obj.Configuration.operatorPaddingRule('At').Token, ...
+                        '#MBeauty_ArrayToken_\d+#$'];
+                    keywordMatch = ['(?=^|\s)(', MBeautifier.MFormatter.joinString(keywords', '|'), ')$'];
+
                     replaceTokens = {};
                     for iSplit = 1:numel(splittedData) - 1
                         beforeItem = strtrim(splittedData{iSplit});
-                        if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
-                                ['([0-9a-zA-Z_)}\]\.]|', MBeautifier.MFormatter.TokenStruct.TransposeToken.Token, '|', ...
-                                MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken.Token, '|#MBeauty_ArrayToken_\d+#)$'])) && ...
-                                (~numel(regexp(beforeItem, ['(?=^|\s)(', MBeautifier.MFormatter.joinString(keywords', '|'), ')$'])) || doIndexing)
+                        if ~isempty(beforeItem) && ...
+                                numel(regexp(beforeItem, posMatch)) && ...
+                                ~numel(regexp(beforeItem, negMatch)) && ...
+                                (doIndexing || ~numel(regexp(beforeItem, keywordMatch)))
                             % + or - is a binary operator after:
                             %    - numbers [0-9.],
                             %    - variable names [a-zA-Z0-9_] or
                             %    - closing brackets )}]
                             %    - transpose signs ', here represented as #MBeutyTransp#
+                            %    - non-conjugate transpose signs .', here represented as #MBeutyNonConjTransp#
                             %    - keywords
+                            % but not after an anonymous function
 
                             % Special treatment for E: 7E-3 or 7e+4 normalized notation
                             % In this case the + and - signs are not operators so shoud be skipped
