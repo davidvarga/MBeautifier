@@ -126,6 +126,11 @@
          <ValueFrom>:</ValueFrom>
          <ValueTo>:</ValueTo>
       </OperatorPaddingRule>
+      <OperatorPaddingRule>
+         <Key>At</Key>
+         <ValueFrom>@</ValueFrom>
+         <ValueTo>@</ValueTo>
+      </OperatorPaddingRule>
    </OperatorPadding>
 
    <KeyworPadding>
