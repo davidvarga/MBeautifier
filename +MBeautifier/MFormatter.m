@@ -982,7 +982,7 @@ classdef MFormatter < handle
                 tokenOfCUrElem = ['#MBeauty_ArrayToken_', idStr, '#'];
                 arrayMap(tokenOfCUrElem) = strNew;
                 id = id + 1;
-                datacell{2} = tokenOfCUrElem;
+                datacell{2} = [' ', tokenOfCUrElem];
                 data = [datacell{:}];
 
                 containerBorderIndexes = obj.calculateContainerDepths(data);
