@@ -341,11 +341,16 @@ classdef MFormatter < handle
             code = regexprep(code, nonConjTrnspTokStruct.Token, nonConjTrnspTokStruct.StoredValue);
         end
 
-        function actCode = replaceTransponations(actCode)
+        function actCode = replaceTransponations(actCode, token)
             % Replaces transponation signs in the code with tokens.
 
-            trnspTokStruct = MBeautifier.MFormatter.TokenStruct.TransposeToken;
-            nonConjTrnspTokStruct = MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken;
+            if nargin < 2
+                trnspTok = MBeautifier.MFormatter.TokenStruct.TransposeToken.Token;
+                nonConjTrnspTok = MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken.Token;
+            else
+                trnspTok = token;
+                nonConjTrnspTok = [token, token];
+            end
 
             charsIndicateTranspose = '[a-zA-Z0-9\)\]\}\.]';
 
@@ -359,14 +364,14 @@ classdef MFormatter < handle
                 if isequal(actChar, '''')
                     % .' => NonConj transpose
                     if isLastCharDot
-                        tempCode = [tempCode(1:end-1), nonConjTrnspTokStruct.Token];
+                        tempCode = [tempCode(1:end-1), nonConjTrnspTok];
                         isLastCharTransp = true;
                     else
                         if isLastCharTransp
-                            tempCode = [tempCode, trnspTokStruct.Token];
+                            tempCode = [tempCode, trnspTok];
                         else
                             if numel(tempCode) && ~isInStr && numel(regexp(tempCode(end), charsIndicateTranspose))
-                                tempCode = [tempCode, trnspTokStruct.Token];
+                                tempCode = [tempCode, trnspTok];
                                 isLastCharTransp = true;
                             else
                                 tempCode = [tempCode, actChar];
@@ -472,9 +477,13 @@ classdef MFormatter < handle
 
             %% Searh for comment signs(%) and exclamation marks(!)
 
-            exclamationInd = strfind(line, '!');
-            commentSignIndexes = strfind(line, '%');
-            contIndexes = strfind(line, '...');
+            % Replace transponation (and non-conjugate transponations) to avoid not relevant matches
+            % This is just to help identify actual strings.
+            possibleCode = obj.replaceTransponations(line, '#');
+
+            exclamationInd = strfind(possibleCode, '!');
+            commentSignIndexes = strfind(possibleCode, '%');
+            contIndexes = strfind(possibleCode, '...');
 
             if ~iscell(exclamationInd)
                 exclamationInd = num2cell(exclamationInd);
@@ -497,15 +506,16 @@ classdef MFormatter < handle
                 exclamationPos = -1;
             else
 
+                % Find the start and end of all single- or double-quoted strings
+                % This treats escaped quotes as two separate quotes, which is fine
+                [quoteStartInds, quoteEndInds] = regexp(possibleCode, '("|'').*?\1');
+                quoteInds = sort([quoteStartInds, quoteEndInds]);
+
                 for iCommSign = 1:commentSignCount
                     currentIndex = indexUnion{iCommSign};
 
-                    % Check all leading parts that can be "code"
-                    % Replace transponation (and noin-conjugate transponations) to avoid not relevant matches
-                    possibleCode = obj.replaceTransponations(line(1:currentIndex-1));
-
                     % The line is currently "not in string"
-                    if isequal(mod(numel(strfind(possibleCode, '''')), 2), 0)
+                    if isequal(mod(sum(quoteInds < currentIndex), 2), 0)
                         if ismember(currentIndex, [commentSignIndexes{:}])
                             retComm = currentIndex;
                         elseif ismember(currentIndex, [exclamationInd{:}])
@@ -615,18 +625,29 @@ classdef MFormatter < handle
 
                     splittedData = regexp(data, opToken, 'split');
 
+                    posMatch = ['(', MBeautifier.MFormatter.joinString({'[0-9a-zA-Z_)}\]\.]', ...
+                        MBeautifier.MFormatter.TokenStruct.TransposeToken.Token, ...
+                        MBeautifier.MFormatter.TokenStruct.NonConjTransposeToken.Token, ...
+                        '#MBeauty_ArrayToken_\d+#'}, '|'), ')$'];
+                    negMatch = [obj.Configuration.operatorPaddingRule('At').Token, ...
+                        '#MBeauty_ArrayToken_\d+#$'];
+                    keywordMatch = ['(?=^|\s)(', MBeautifier.MFormatter.joinString(keywords', '|'), ')$'];
+
                     replaceTokens = {};
                     for iSplit = 1:numel(splittedData) - 1
                         beforeItem = strtrim(splittedData{iSplit});
-                        if ~isempty(beforeItem) && numel(regexp(beforeItem, ...
-                                ['([0-9a-zA-Z_)}\]\.]|', MBeautifier.MFormatter.TokenStruct.TransposeToken.Token, '|#MBeauty_ArrayToken_\d+#)$'])) && ...
-                                (~numel(regexp(beforeItem, ['(?=^|\s)(', MBeautifier.MFormatter.joinString(keywords', '|'), ')$'])) || doIndexing)
+                        if ~isempty(beforeItem) && ...
+                                numel(regexp(beforeItem, posMatch)) && ...
+                                ~numel(regexp(beforeItem, negMatch)) && ...
+                                (doIndexing || ~numel(regexp(beforeItem, keywordMatch)))
                             % + or - is a binary operator after:
                             %    - numbers [0-9.],
                             %    - variable names [a-zA-Z0-9_] or
                             %    - closing brackets )}]
                             %    - transpose signs ', here represented as #MBeutyTransp#
+                            %    - non-conjugate transpose signs .', here represented as #MBeutyNonConjTransp#
                             %    - keywords
+                            % but not after an anonymous function
 
                             % Special treatment for E: 7E-3 or 7e+4 normalized notation
                             % In this case the + and - signs are not operators so shoud be skipped

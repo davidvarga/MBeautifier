@@ -29,6 +29,38 @@ classdef MBeautify
     %% Public API
 
     methods (Static = true)
+        
+        function formatFileNoEditor(file, outFile)
+            % Formats the file specified in the first argument. If the
+            % second argument is also specified, the formatted source is
+            % saved to this file. The input and the output file can be the
+            % same, in which case the format operation is carried out
+            % in-place.
+            %
+            if ~exist(file, 'file')
+                return;
+            end
+            
+            text = fileread(file);
+           
+            % Format the code
+            configuration = MBeautify.getConfiguration();
+            formatter = MBeautifier.MFormatter(configuration);
+            text = formatter.performFormatting(text);
+
+            % Indent the code
+            indenter = MBeautifier.MIndenter(configuration);
+            text = indenter.performIndenting(text);
+
+            if (nargin == 1)
+                outFile = file;
+            end
+            
+            % write formatted text to file
+            fid = fopen(outFile, 'wt');
+            fprintf(fid, '%s', text);
+            fclose(fid);
+        end
 
         function formatFile(file, outFile)
             % Formats the file specified in the first argument. The file is opened in the Matlab Editor. If the second
@@ -232,7 +264,7 @@ classdef MBeautify
 
         function indentPage(editorPage, configuration)
             indentationStrategy = configuration.specialRule('Indentation_Strategy').Value;
-            currentlySetPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
+            originalPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
             
             switch lower(indentationStrategy)
                 case 'allfunctions'
@@ -245,7 +277,10 @@ classdef MBeautify
             
             editorPage.smartIndentContents();
 
-            com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', currentlySetPreference);
+            % Restore original settings, if necessary
+            if (length(originalPreference) > 0 && originalPreference ~= com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType'))
+                com.mathworks.services.Prefs.setStringPref('EditorMFunctionIndentType', originalPreference);
+            end
              
             indentationCharacter = configuration.specialRule('IndentationCharacter').Value;
             indentationCount = configuration.specialRule('IndentationCount').ValueAsDouble;
