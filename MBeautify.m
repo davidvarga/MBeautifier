@@ -139,6 +139,8 @@ classdef MBeautify
                     currentEditorPage.Selection = lineBeforePosition;
                     lineBeforeText = currentEditorPage.SelectedText;
                 end
+            else
+                lineBeforePosition = 1;
             end
             expandedSelection = [lineBeforePosition(1), 1, expandedSelection(3), Inf];
 
@@ -170,7 +172,7 @@ classdef MBeautify
             if endReached
                 codeAfter = '';
             else
-                codeAfterSelection = [expandedSelection(3) + 1, 1, Inf, Inf];
+                codeAfterSelection = [expandedSelection(3), 1, Inf, Inf];
                 currentEditorPage.Selection = codeAfterSelection;
                 codeAfter = currentEditorPage.SelectedText;
 
