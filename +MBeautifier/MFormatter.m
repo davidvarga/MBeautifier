@@ -884,6 +884,7 @@ classdef MFormatter < handle
                         strNew = strtrim(str);
                         strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end-1), doIndexing, contType, true)), strNew(end)];
                     else
+                        str = regexprep(str, '\s*(#MBeauty_ArrayToken_\d+#)', ' $1');
                         elementsCell = regexp(str, ' ', 'split');
 
                         firstElem = strtrim(elementsCell{1});
@@ -1003,7 +1004,7 @@ classdef MFormatter < handle
                 tokenOfCUrElem = ['#MBeauty_ArrayToken_', idStr, '#'];
                 arrayMap(tokenOfCUrElem) = strNew;
                 id = id + 1;
-                datacell{2} = [' ', tokenOfCUrElem];
+                datacell{2} = tokenOfCUrElem;
                 data = [datacell{:}];
 
                 containerBorderIndexes = obj.calculateContainerDepths(data);
