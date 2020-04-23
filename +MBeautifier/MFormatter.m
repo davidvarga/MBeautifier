@@ -841,15 +841,32 @@ classdef MFormatter < handle
 
                 openingBracket = data(containerBorderIndexes{indexes(1), 1});
                 closingBracket = data(containerBorderIndexes{indexes(2), 1});
+                
+                %% Calcualte container indexing
+                
+                % Container indexing is like:
+                %   - "myArray{2}" but NOT "myArray {2}"
+                %   - "myMatrix(4)" or "myMatrix (4)"
+                % 
+                % Exceptions:
+                %   - NOT after keywords: while(true)
+                %   - "myMatrix (4)" is not working inside other containers, like: "[myArray (4)]" must be translated as "[myArray, (4)]"
 
-                isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), ['[a-zA-Z0-9_]\s*[', openingBracket, ']$']));
+                isEmbeddedContainer = indexes(1) > 1;
+                
+                if isEmbeddedContainer
+                    isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), '[a-zA-Z0-9_][(|{]($'));
+                else
+                     isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), '[a-zA-Z0-9_]\s*\($')) || ...
+                         numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), '[a-zA-Z0-9_]\{$'));
+                end
+                
                 preceedingKeyWord = false;
                 if isContainerIndexing
                     keywords = iskeyword();
                     prevStr = strtrim(data(1:containerBorderIndexes{indexes(1), 1}-1));
 
                     if numel(prevStr) >= 2
-
                         for i = 1:numel(keywords)
                             if numel(regexp(prevStr, ['(\s|^)', keywords{i}, '$']))
                                 isContainerIndexing = false;
@@ -859,6 +876,8 @@ classdef MFormatter < handle
                         end
                     end
                 end
+                
+                %% 
 
                 doIndexing = isContainerIndexing;
                 contType = '';
@@ -884,7 +903,6 @@ classdef MFormatter < handle
                         strNew = strtrim(str);
                         strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end-1), doIndexing, contType, true)), strNew(end)];
                     else
-%                         str = regexprep(str, '\s*(#MBeauty_ArrayToken_\d+#)', ' $1');
                         elementsCell = regexp(str, ' ', 'split');
 
                         firstElem = strtrim(elementsCell{1});
