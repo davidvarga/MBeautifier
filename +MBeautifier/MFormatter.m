@@ -884,7 +884,7 @@ classdef MFormatter < handle
                         strNew = strtrim(str);
                         strNew = [strNew(1), strtrim(obj.performFormattingSingleLine(strNew(2:end-1), doIndexing, contType, true)), strNew(end)];
                     else
-                        str = regexprep(str, '\s*(#MBeauty_ArrayToken_\d+#)', ' $1');
+%                         str = regexprep(str, '\s*(#MBeauty_ArrayToken_\d+#)', ' $1');
                         elementsCell = regexp(str, ' ', 'split');
 
                         firstElem = strtrim(elementsCell{1});
