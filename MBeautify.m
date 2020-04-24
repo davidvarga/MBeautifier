@@ -95,7 +95,7 @@ classdef MBeautify
             files = dir(fullfile(directory, fileFilter));
 
             for iF = 1:numel(files)
-                file = fullfile(directory, files(iF).name);
+                file = fullfile(files(iF).folder, files(iF).name);
                 MBeautify.formatFile(file, file);
             end
         end
