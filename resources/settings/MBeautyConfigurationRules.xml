@@ -193,9 +193,13 @@
          <Key>SectionTrailingNewlineCount</Key>
          <Value>-1</Value>
       </SpecialRule>
+	  <SpecialRule>
+         <Key>StartingNewlineCount</Key>
+         <Value>0</Value>
+      </SpecialRule>
       <SpecialRule>
          <Key>EndingNewlineCount</Key>
-         <Value>1</Value>
+         <Value>0</Value>
       </SpecialRule>
       <SpecialRule>
          <Key>AddCommasToMatrices</Key>

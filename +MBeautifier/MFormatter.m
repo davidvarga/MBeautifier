@@ -250,6 +250,12 @@ classdef MFormatter < handle
                 replacedTextArray{end} = strtrim(replacedTextArray{end});
             end
 
+            nStartingNewlines = obj.Configuration.specialRule('StartingNewlineCount').ValueAsDouble;
+            formatEndingNewlines = nStartingNewlines >= 0;
+            if formatEndingNewlines
+                replacedTextArray = MBeautifier.MFormatter.handleStartingEmptyLines(replacedTextArray, nStartingNewlines);
+            end
+            
             nEndingNewlines = obj.Configuration.specialRule('EndingNewlineCount').ValueAsDouble;
             formatEndingNewlines = nEndingNewlines >= 0;
             if formatEndingNewlines
@@ -263,6 +269,28 @@ classdef MFormatter < handle
     end
 
     methods (Access = private, Static)
+        function textArray = handleStartingEmptyLines(textArray, neededEmptyLineCount)
+            followingNewLines = MBeautifier.MFormatter.getFollowingNewlineCount(textArray);
+
+            newLineDelta = neededEmptyLineCount - followingNewLines;
+
+            if newLineDelta < 0
+                   textArray(1:abs(newLineDelta)) = [];
+            elseif newLineDelta > 0
+                textArray = [repmat({newline},1,newLineDelta), textArray];
+            end
+        end
+        
+        function count = getFollowingNewlineCount(textArray)
+            count = 0;
+            for i = 1:numel(textArray)
+                if isempty(strtrim(textArray{i}))
+                    count = count + 1;
+                else
+                    return;
+                end
+            end
+        end
 
         function textArray = handleTrailingEmptyLines(textArray, neededEmptyLineCount)
             precedingNewLines = MBeautifier.MFormatter.getPrecedingNewlineCount(textArray);
@@ -274,12 +302,11 @@ classdef MFormatter < handle
                     textArray(end) = [];
                 end
             elseif newLineDelta > 0
-                for i = 1:newLineDelta
-                    textArray = [textArray, sprintf('\n')];
-                end
+                textArray = [textArray, repmat({newline},1,newLineDelta)];
             end
         end
-
+        
+        
         function count = getPrecedingNewlineCount(textArray)
             count = 0;
             for i = numel(textArray):-1:1
