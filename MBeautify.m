@@ -31,6 +31,9 @@ classdef MBeautify
     methods (Static = true)
         
         function formatFileNoEditor(file, outFile)
+            % Format file outside of editor
+            % function formatFileNoEditor(file, outFile)
+            %
             % Formats the file specified in the first argument. If the
             % second argument is also specified, the formatted source is
             % saved to this file. The input and the output file can be the
@@ -63,6 +66,9 @@ classdef MBeautify
         end
         
         function formatFile(file, outFile)
+            % Format file in editor
+            % function formatFile(file, outFile)
+            %
             % Formats the file specified in the first argument. The file is opened in the Matlab Editor. If the second
             % argument is also specified, the formatted source is saved to this file. Otherwise the formatted input
             % file remains opened in the Matlab Editor. The input and the output file can be the same.
@@ -89,8 +95,15 @@ classdef MBeautify
         end
         
         function formatFiles(directory, fileFilter)
+            % Formats the files in-place
+            % function formatFiles(directory, fileFilter)
+            %
             % Formats the files in-place (files are overwritten) in the specified directory, collected by the specified filter.
             % The file filter is a wildcard expression used by the dir command.
+            
+            if nargin < 2
+                fileFilter = '*.m';
+            end
             
             files = dir(fullfile(directory, fileFilter));
             
@@ -205,6 +218,8 @@ classdef MBeautify
         
         function formatCurrentEditorPage(doSave)
             % Performs formatting on the currently active Matlab Editor page.
+            % function formatCurrentEditorPage(doSave)
+            %
             % Optionally saves the file (if it is possible) and it is forced on the first argument (true). By default
             % the file is not saved.
             
@@ -246,6 +261,9 @@ classdef MBeautify
         end
         
         function createShortcut(mode)
+            % Adds MBeauty to path and creates shortcut in Matlab editor
+            % function createShortcut(mode)
+            %
             % Creates a shortcut with the selected mode: 'editorpage', 'editorselection', 'file'. The shortcut adds
             % MBeauty to the Matlab path and executes the following command:
             %   'editorpage' - MBeauty.formatCurrentEditorPage
