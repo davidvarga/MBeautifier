@@ -189,7 +189,7 @@
          <Key>SectionPrecedingNewlineCount</Key>
          <Value>1</Value>
       </SpecialRule>
-            <SpecialRule>
+      <SpecialRule>
          <Key>SectionTrailingNewlineCount</Key>
          <Value>-1</Value>
       </SpecialRule>
@@ -199,7 +199,7 @@
       </SpecialRule>
       <SpecialRule>
          <Key>EndingNewlineCount</Key>
-         <Value>0</Value>
+         <Value>1</Value>
       </SpecialRule>
       <SpecialRule>
          <Key>AddCommasToMatrices</Key>
