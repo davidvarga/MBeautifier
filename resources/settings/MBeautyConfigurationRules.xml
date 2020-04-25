@@ -197,7 +197,7 @@
          <Key>StartingNewlineCount</Key>
          <Value>0</Value>
       </SpecialRule>
-      <SpecialRule>
+	  <SpecialRule>
          <Key>EndingNewlineCount</Key>
          <Value>1</Value>
       </SpecialRule>
