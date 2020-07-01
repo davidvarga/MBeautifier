@@ -231,7 +231,7 @@ classdef MFormatter < handle
                             contLineArray = cell(0, 2);
                             
                             continue;
-                        end                        
+                        end
                     end
                     
                     actCodeFinal = obj.performReplacements(actCode);
@@ -276,7 +276,7 @@ classdef MFormatter < handle
             if newLineDelta < 0
                 textArray(1:abs(newLineDelta)) = [];
             elseif newLineDelta > 0
-                textArray = [repmat({newline},1,newLineDelta), textArray];
+                textArray = [repmat({MBeautifier.Constants.NewLine},1,newLineDelta), textArray];
             end
         end
         
@@ -301,7 +301,7 @@ classdef MFormatter < handle
                     textArray(end) = [];
                 end
             elseif newLineDelta > 0
-                textArray = [textArray, repmat({newline},1,newLineDelta)];
+                textArray = [textArray, repmat({MBeautifier.Constants.NewLine},1,newLineDelta)];
             end
         end
         
@@ -317,13 +317,12 @@ classdef MFormatter < handle
         end
         
         function outStr = joinString(cellStr, delim)
-            
             outStr = '';
             for i = 1:numel(cellStr)
                 outStr = [outStr, cellStr{i}, delim];
             end
             
-            outStr(end-numel(delim)+1:end) = '';            
+            outStr(end-numel(delim)+1:end) = '';
         end
         
         function tokenStructs = getTokenStruct()
@@ -528,7 +527,7 @@ classdef MFormatter < handle
             if ~commentSignCount
                 retComm = -1;
                 exclamationPos = -1;
-            else                
+            else
                 % Find the start and end of all single- or double-quoted strings
                 % This treats escaped quotes as two separate quotes, which is fine
                 [quoteStartInds, quoteEndInds] = regexp(possibleCode, '("|'').*?\1');
@@ -603,7 +602,7 @@ classdef MFormatter < handle
             
             if obj.Configuration.specialRule('InlineContinousLines').ValueAsDouble
                 data = regexprep(data, MBeautifier.MFormatter.TokenStruct.ContinueToken.Token, '');
-            end            
+            end
             
             % Convert all operators like + * == etc to #MBeautifier_OP_whatever# tokens
             opBuffer = {};
@@ -725,13 +724,13 @@ classdef MFormatter < handle
             end
             if normMinusOperatorPresent
                 data = regexprep(data, ['\s*', MBeautifier.MFormatter.TokenStruct.NormNotationMinus.Token, '\s*'], MBeautifier.MFormatter.TokenStruct.NormNotationMinus.StoredValue);
-            end            
+            end
             
             % Replace all other operators
-            for iOpConf = 1:numel(operatorPaddingRules)                
+            for iOpConf = 1:numel(operatorPaddingRules)
                 currField = operatorPaddingRules{iOpConf};
                 
-                if any(strcmp(currField, opBuffer))                    
+                if any(strcmp(currField, opBuffer))
                     currOpStruct = obj.Configuration.operatorPaddingRule(currField);
                     
                     valTo = currOpStruct.ValueTo;
@@ -748,7 +747,7 @@ classdef MFormatter < handle
                                 valTo = strrep(valTo, ' ', '');
                             end
                         end
-                    else                        
+                    else
                         replacementPattern = currOpStruct.ReplacementPattern;
                     end
                     
@@ -844,7 +843,7 @@ classdef MFormatter < handle
             
             id = 0;
             
-            while maxDepth > 0                
+            while maxDepth > 0
                 if isempty(containerBorderIndexes)
                     break;
                 end

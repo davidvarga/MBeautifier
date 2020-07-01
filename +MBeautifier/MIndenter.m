@@ -90,7 +90,7 @@ classdef MIndenter < handle
                                             % top level function
                                             layerNext = layerNext - 1;
                                         else
-                                            if (strcmp(stack{end-1}, 'function'))                             
+                                            if (strcmp(stack{end-1}, 'function'))
                                                 % nested function
                                                 layer = layer + 1;
                                                 layerNext = layerNext + 1;
@@ -189,7 +189,7 @@ classdef MIndenter < handle
                     lines{linect} = [indent, lines{linect}];
                 end
             end
-            complete = join(lines, newline);
+            complete = join(lines, MBeautifier.Constants.NewLine);
             indentedSource = complete{1};
         end
     end
