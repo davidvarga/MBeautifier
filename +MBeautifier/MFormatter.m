@@ -85,7 +85,7 @@ classdef MFormatter < handle
                 end
                 
                 if isFormattingOff
-                    replacedTextArray = [replacedTextArray, line, sprintf('\n')];
+                    replacedTextArray = [replacedTextArray, line, MBeautifier.Constants.NewLine];
                     continue
                 end
                 
@@ -98,13 +98,13 @@ classdef MFormatter < handle
                         continue;
                     end
                     
-                    replacedTextArray = [replacedTextArray, sprintf('\n')];
+                    replacedTextArray = [replacedTextArray, MBeautifier.Constants.NewLine];
                     continue;
                     
                 else
                     if isSectionSeparator && formatSectionTrailingNewlines && (nNewLinesFound - nSectionTrailingNewlines < 0)
                         for i = 1:abs(nNewLinesFound-nSectionTrailingNewlines)
-                            replacedTextArray = [replacedTextArray, sprintf('\n')];
+                            replacedTextArray = [replacedTextArray, MBeautifier.Constants.NewLine];
                         end
                     end
                     
@@ -227,7 +227,7 @@ classdef MFormatter < handle
                                 line = [line, actComment];
                             end
                             
-                            replacedTextArray = [replacedTextArray, [line, sprintf('\n')]];
+                            replacedTextArray = [replacedTextArray, [line, MBeautifier.Constants.NewLine]];
                             contLineArray = cell(0, 2);
                             
                             continue;
@@ -242,7 +242,7 @@ classdef MFormatter < handle
                 else
                     line = [strtrim(actCodeFinal), actComment];
                 end
-                replacedTextArray = [replacedTextArray, [line, sprintf('\n')]];
+                replacedTextArray = [replacedTextArray, [line, MBeautifier.Constants.NewLine]];
             end
             % The last new-line must be removed: inner new-lines are removed by the split, the last one is an additional one
             if numel(replacedTextArray) && numel(strtrim(replacedTextArray{end}))
