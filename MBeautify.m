@@ -114,6 +114,9 @@ classdef MBeautify
         end
         
         function formatEditorSelection(doSave)
+            %
+            % function formatEditorSelection(doSave)
+            %
             % Performs formatting on selection of the currently active Matlab Editor page.
             % The selection is automatically extended until the first empty line above and below.
             % This method can be useful for large files, but using "formatCurrentEditorPage" is always suggested.
@@ -278,6 +281,10 @@ classdef MBeautify
     
     methods (Static = true, Access = private)
         function indentPage(editorPage, configuration)
+            %
+            % function indentPage(editorPage, configuration)
+            %
+            %
             indentationStrategy = configuration.specialRule('Indentation_Strategy').Value;
             originalPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
             
@@ -362,6 +369,10 @@ classdef MBeautify
         end
         
         function configuration = getConfiguration()
+            %
+            % function configuration = getConfiguration()
+            %
+            %
             [parent, file, ext] = fileparts(MBeautify.RulesXMLFileFull);
             path = java.nio.file.Paths.get(parent, [file, ext]);
             
