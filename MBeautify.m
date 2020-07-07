@@ -327,11 +327,7 @@ classdef MBeautify
                 neededIndentation = [neededIndentation, regexIndentCharacter];
             end
             
-<<<<<<< HEAD
             newLine = MBeautifier.Constants.NewLine;
-=======
-            newLine = sprintf('\n');
->>>>>>> 2183d2c (feat: MBeautify.formatFiles new input to recurse subfolders)
             textArray = regexp(editorPage.Text, newLine, 'split');
             
             skipIndentation = strcmpi(indentationCharacter, 'white-space') && indentationCount == 4;
@@ -397,9 +393,5 @@ classdef MBeautify
                 setappdata(0, 'MBeautifier_ConfigurationObject', configuration);
             end
         end
-<<<<<<< HEAD
-=======
-        
->>>>>>> 2183d2c (feat: MBeautify.formatFiles new input to recurse subfolders)
     end
 end
