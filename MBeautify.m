@@ -88,9 +88,34 @@ classdef MBeautify
             end
         end
         
-        function formatFiles(directory, fileFilter)
-            % Formats the files in-place (files are overwritten) in the specified directory, collected by the specified filter.
-            % The file filter is a wildcard expression used by the dir command.
+        function formatFiles(directory, fileFilter, recurse)
+            % Format multiple files. Supports file type filtering and subfolder recursion
+            % function formatFiles(directory, fileFilter, recurse)
+            %
+            % Formats the files in-place (files are overwritten) in the
+            % specified directory, collected by the specified filter and optionally recurse subfolders.
+            % The file filter is a wildcard expression used by the dir
+            % command. Defaults to '*.m'
+            %
+            % Recurse defaults to false. Set true to recurse subfolders of directory.
+            
+            if ~exist('fileFilter','var') || isempty(fileFilter)
+                fileFilter = '*.m';
+            end
+            
+            if ~exist('recurse','var') || isempty(recurse)
+                recurse = false;
+            end
+            
+            if recurse
+                contents = dir(directory);
+                for k = numel(contents):-1:1
+                    if contents(k).isdir && ~startsWith(contents(k).name,'.')
+                        % Recursive call in subfolder
+                        MBeautify.formatFiles(fullfile(contents(k).folder, contents(k).name), fileFilter, recurse);
+                    end
+                end
+            end
             
             files = dir(fullfile(directory, fileFilter));
             
@@ -302,7 +327,11 @@ classdef MBeautify
                 neededIndentation = [neededIndentation, regexIndentCharacter];
             end
             
+<<<<<<< HEAD
             newLine = MBeautifier.Constants.NewLine;
+=======
+            newLine = sprintf('\n');
+>>>>>>> 2183d2c (feat: MBeautify.formatFiles new input to recurse subfolders)
             textArray = regexp(editorPage.Text, newLine, 'split');
             
             skipIndentation = strcmpi(indentationCharacter, 'white-space') && indentationCount == 4;
@@ -368,5 +397,9 @@ classdef MBeautify
                 setappdata(0, 'MBeautifier_ConfigurationObject', configuration);
             end
         end
+<<<<<<< HEAD
+=======
+        
+>>>>>>> 2183d2c (feat: MBeautify.formatFiles new input to recurse subfolders)
     end
 end
