@@ -45,7 +45,7 @@ classdef MIndenter < handle
             end
             
             % TODO
-            %makeBlankLinesEmpty = Configuration.specialRule('Indentation_TrimBlankLines').ValueAsDouble;
+            makeBlankLinesEmpty = obj.Configuration.specialRule('Indentation_TrimBlankLines').ValueAsDouble;
             
             % currently in continuation mode (line before ended with ...)?
             continuationMode = 0;
@@ -186,7 +186,9 @@ classdef MIndenter < handle
                 
                 % add correct indentation
                 for ict = 1:layer
-                    lines{linect} = [indent, lines{linect}];
+                    if ~makeBlankLinesEmpty || ~isempty(lines{linect})
+                        lines{linect} = [indent, lines{linect}];
+                    end
                 end
             end
             complete = join(lines, newline);
