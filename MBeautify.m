@@ -31,6 +31,9 @@ classdef MBeautify
     methods (Static = true)
         
         function formatFileNoEditor(file, outFile)
+            % Format file outside of editor
+            % function formatFileNoEditor(file, outFile)
+            %
             % Formats the file specified in the first argument. If the
             % second argument is also specified, the formatted source is
             % saved to this file. The input and the output file can be the
@@ -63,6 +66,9 @@ classdef MBeautify
         end
         
         function formatFile(file, outFile)
+            % Format file in editor
+            % function formatFile(file, outFile)
+            %
             % Formats the file specified in the first argument. The file is opened in the Matlab Editor. If the second
             % argument is also specified, the formatted source is saved to this file. Otherwise the formatted input
             % file remains opened in the Matlab Editor. The input and the output file can be the same.
@@ -89,7 +95,7 @@ classdef MBeautify
         end
         
         function formatFiles(directory, fileFilter, recurse)
-            % Format multiple files. Supports file type filtering and subfolder recursion
+            % Format multiple files in-place. Supports file type filtering and subfolder recursion
             % function formatFiles(directory, fileFilter, recurse)
             %
             % Formats the files in-place (files are overwritten) in the
@@ -99,7 +105,7 @@ classdef MBeautify
             %
             % Recurse defaults to false. Set true to recurse subfolders of directory.
             
-            if ~exist('fileFilter','var') || isempty(fileFilter)
+            if nargin < 2
                 fileFilter = '*.m';
             end
             
@@ -126,6 +132,9 @@ classdef MBeautify
         end
         
         function formatEditorSelection(doSave)
+            %
+            % function formatEditorSelection(doSave)
+            %
             % Performs formatting on selection of the currently active Matlab Editor page.
             % The selection is automatically extended until the first empty line above and below.
             % This method can be useful for large files, but using "formatCurrentEditorPage" is always suggested.
@@ -230,6 +239,8 @@ classdef MBeautify
         
         function formatCurrentEditorPage(doSave)
             % Performs formatting on the currently active Matlab Editor page.
+            % function formatCurrentEditorPage(doSave)
+            %
             % Optionally saves the file (if it is possible) and it is forced on the first argument (true). By default
             % the file is not saved.
             
@@ -271,6 +282,9 @@ classdef MBeautify
         end
         
         function createShortcut(mode)
+            % Adds MBeauty to path and creates shortcut in Matlab editor
+            % function createShortcut(mode)
+            %
             % Creates a shortcut with the selected mode: 'editorpage', 'editorselection', 'file'. The shortcut adds
             % MBeauty to the Matlab path and executes the following command:
             %   'editorpage' - MBeauty.formatCurrentEditorPage
@@ -285,6 +299,10 @@ classdef MBeautify
     
     methods (Static = true, Access = private)
         function indentPage(editorPage, configuration)
+            %
+            % function indentPage(editorPage, configuration)
+            %
+            %
             indentationStrategy = configuration.specialRule('Indentation_Strategy').Value;
             originalPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
             
@@ -369,6 +387,10 @@ classdef MBeautify
         end
         
         function configuration = getConfiguration()
+            %
+            % function configuration = getConfiguration()
+            %
+            %
             [parent, file, ext] = fileparts(MBeautify.RulesXMLFileFull);
             path = java.nio.file.Paths.get(parent, [file, ext]);
             
