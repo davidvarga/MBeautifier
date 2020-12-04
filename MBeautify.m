@@ -302,7 +302,7 @@ classdef MBeautify
             %
             % function indentPage(editorPage, configuration)
             %
-            %
+            
             indentationStrategy = configuration.specialRule('Indentation_Strategy').Value;
             originalPreference = com.mathworks.services.Prefs.getStringPref('EditorMFunctionIndentType');
             
@@ -390,7 +390,7 @@ classdef MBeautify
             %
             % function configuration = getConfiguration()
             %
-            %
+            
             [parent, file, ext] = fileparts(MBeautify.RulesXMLFileFull);
             path = java.nio.file.Paths.get(parent, [file, ext]);
             
