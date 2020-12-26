@@ -103,4 +103,15 @@ num@MySuper(obj) - a
 % remove spaces around @
 num @ MySuper(obj) - a
 
+% if AddCommasToMatrices=1
+% add comma after b
+[a, - b c + d]
+% add comma before b
+[a -b]
+% one comma added after b
+[a *b (c -d)]
 
+% treat whitespace as delimiter regardless of AddCommasToMatrices
+[1 (2) {3}]
+% same for cells
+{1 (2) {3}}

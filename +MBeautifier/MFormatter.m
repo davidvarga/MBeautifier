@@ -835,9 +835,13 @@ classdef MFormatter < handle
             
             data = regexprep(data, '\s+;', ';');
             
-            operatorArray = {'+', '-', '&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^', '~'};
+            nonUnaryOperatorArray = {'&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^'};
+            nonUnaryOperatorArray1 = nonUnaryOperatorArray(cellfun(@numel, nonUnaryOperatorArray) == 1);
+            nonUnaryOperatorArray2 = nonUnaryOperatorArray(cellfun(@numel, nonUnaryOperatorArray) == 2);
+            operatorArray = [nonUnaryOperatorArray(:)', {'+'}, {'-'}, {'~'}];
             contTokenStructMatrix = MBeautifier.MFormatter.TokenStruct.ContinueMatrixToken;
             contTokenStructCurly = MBeautifier.MFormatter.TokenStruct.ContinueCurlyToken;
+            commaToken = obj.Configuration.operatorPaddingRule('Comma').Token;
             
             [containerBorderIndexes, maxDepth] = obj.calculateContainerDepths(data);
             
@@ -858,7 +862,7 @@ classdef MFormatter < handle
                 openingBracket = data(containerBorderIndexes{indexes(1), 1});
                 closingBracket = data(containerBorderIndexes{indexes(2), 1});
                 
-                %% Calcualte container indexing
+                %% Calculate container indexing
                 
                 % Container indexing is like:
                 %   - "myArray{2}" but NOT "myArray {2}"
@@ -868,15 +872,20 @@ classdef MFormatter < handle
                 %   - NOT after keywords: while(true)
                 %   - "myMatrix (4)" is not working inside other containers, like: "[myArray (4)]" must be translated as "[myArray, (4)]"
                 
+                % Determine if whitespace can be a delimiter in this context
                 isEmbeddedContainer = indexes(1) > 1;
                 
-                if isEmbeddedContainer
-                    isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), '[a-zA-Z0-9_][(|{]($'));
+                if isEmbeddedContainer && ...
+                        (data(containerBorderIndexes{indexes(1)-1, 1}) == '[' ...
+                        || data(containerBorderIndexes{indexes(1)-1, 1}) == '{')
+                    isWhitespaceDelimiter = true;
+                    contRegex = ['[a-zA-Z0-9_][', openingBracket, ']$'];
                 else
-                    isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), '[a-zA-Z0-9_]\s*\($')) || ...
-                        numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), '[a-zA-Z0-9_]\{$'));
+                    isWhitespaceDelimiter = false;
+                    contRegex = ['[a-zA-Z0-9_]\s*[', openingBracket, ']$'];
                 end
                 
+                isContainerIndexing = numel(regexp(data(1:containerBorderIndexes{indexes(1), 1}), contRegex));
                 preceedingKeyWord = false;
                 if isContainerIndexing
                     keywords = iskeyword();
@@ -987,18 +996,60 @@ classdef MFormatter < handle
                                 end
                             end
                             
-                            currElem = strtrim(obj.performFormattingSingleLine(currElem, doIndexing, contType, true));
                             
-                            if numel(currElem) && addCommas && ...
-                                    ~(strcmp(currElem(end), ',') || strcmp(currElem(end), ';')) && ~isInCurlyBracket && ...
-                                    ~obj.isContinueToken(currElem) && ...
-                                    ~any(strcmp(currElemStripped, operatorArray)) && ~any(strcmp(nextElemStripped, operatorArray)) && ~any(strcmp(currElemStripped(end), operatorArray)) && ...
-                                    ~numel(regexp(currElemStripped, '^@#MBeauty_ArrayToken_\d+#$'))
-                                % MBeautifierDirective:Format:Off
-                                elementsCell{elemInd} = [currElem, '#MBeautifier_OP_Comma#'];
-                                % MBeautifierDirective:Format:On
-                            else
+                            % Handle space between unary operator and operand
+                            % Detect if there is a potential unary operator
+                            % and determine if it is the beginning of an
+                            % expression
+                            lastChar = currElem(end);
+                            if lastChar == '-' || lastChar == '+' || lastChar == '~'
+                                prevChar = [];
+                                if numel(currElem) > 1
+                                    prevChar = currElem(end-1);
+                                elseif elemInd > 1
+                                    prevElems = strtrim(elementsCell(1:elemInd-1));
+                                    prevElems = prevElems(~cellfun(@isempty, prevElems));
+                                    prevElem = prevElems{end};
+                                    if numel(prevElem) >= numel(commaToken) && ...
+                                            strcmp(prevElem(end-numel(commaToken)+1:end), commaToken)
+                                        prevChar = ',';
+                                    else
+                                        prevChar = prevElem(end);
+                                    end
+                                end
+                                if isempty(prevChar) || prevChar == ','
+                                    currElem = [currElem, nextElem];
+                                    currElemStripped = regexprep(currElem, ['[', openingBracket, closingBracket, ']'], '');
+                                    elementsCell{elemInd+1} = '';
+                                    if numel(elementsCell) > elemInd + 1
+                                        nextElem = strtrim(elementsCell{elemInd+2});
+                                        nextElemStripped = regexprep(nextElem, ['[', openingBracket, closingBracket, ']'], '');
+                                    else
+                                        elementsCell{elemInd} = currElem;
+                                        break
+                                    end
+                                end
+                            end
+
+                            currElem = strtrim(obj.performFormattingSingleLine(currElem, doIndexing, contType, true));
+                            numNext = numel(nextElemStripped);
+
+                            if ~addCommas || ...
+                                    isempty(currElem) || ...
+                                    strcmp(currElem(end), ',') || ...
+                                    strcmp(currElem(end), ';') || ...
+                                    isInCurlyBracket || ...
+                                    obj.isContinueToken(currElem) || ...
+                                    any(strcmp(currElemStripped, operatorArray)) || ...
+                                    any(strcmp(currElemStripped(end), operatorArray)) || ...
+                                    (numNext >= 1 && any(strcmp(nextElemStripped(1), nonUnaryOperatorArray1))) || ...
+                                    (numNext > 1 && any(strcmp(nextElemStripped(1:2), nonUnaryOperatorArray2))) || ...
+                                    (numNext == 1 && any(strcmp(nextElemStripped, operatorArray))) || ...
+                                    numel(regexp(currElemStripped, '^@#MBeauty_ArrayToken_\d+#$'))
+
                                 elementsCell{elemInd} = [currElem, ' '];
+                            else
+                                elementsCell{elemInd} = [currElem, commaToken];
                             end
                         end
                         elementsCell(cellfun('isempty', elementsCell)) = [];
@@ -1020,7 +1071,11 @@ classdef MFormatter < handle
                     
                     datacell{1} = data(1:containerBorderIndexes{indexes(1), 1}-1);
                     if isContainerIndexing
-                        datacell{1} = strtrim(datacell{1});
+                        if isWhitespaceDelimiter && datacell{1}(end) == ' '
+                            datacell{1} = [strtrim(datacell{1}), ' '];
+                        else
+                            datacell{1} = strtrim(datacell{1});
+                        end
                     elseif preceedingKeyWord
                         datacell{1} = strtrim(datacell{1});
                         datacell{1} = [datacell{1}, ' '];
