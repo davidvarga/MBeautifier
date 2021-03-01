@@ -175,6 +175,10 @@
          <RightPadding>1</RightPadding>
       </KeyworPaddingRule>
       <KeyworPaddingRule>
+         <Keyword>arguments</Keyword>
+         <RightPadding>1</RightPadding>
+      </KeyworPaddingRule>
+      <KeyworPaddingRule>
          <Keyword>events</Keyword>
          <RightPadding>1</RightPadding>
       </KeyworPaddingRule>
