@@ -223,7 +223,7 @@ classdef MBeautify
             currentEditorPage.Text = [codeBefore, formattedSource, codeAfter];
             MBeautify.indentPage(currentEditorPage, configuration);
             if ~isempty(selectedPosition)
-                currentEditorPage.goToLine(selectedPosition(1));
+                currentEditorPage.goToPositionInLine(selectedPosition(1), selectedPosition(2));
             end
             currentEditorPage.makeActive();
             
@@ -265,7 +265,7 @@ classdef MBeautify
 
             % Set back the selection
             if ~isempty(selectedPosition)
-                currentEditorPage.goToLine(selectedPosition(1));
+                currentEditorPage.goToPositionInLine(selectedPosition(1), selectedPosition(2));
             end
             
             currentEditorPage.makeActive();
