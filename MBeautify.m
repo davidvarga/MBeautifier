@@ -193,7 +193,7 @@ classdef MBeautify
             endReached = isequal(lineAfterSelection(1), currentSelection(1));
             expandedSelection = [expandedSelection(1), 1, lineAfterSelection(3), Inf];
             
-            if isequal(currentSelection(1), 1)
+            if isequal(expandedSelection(1), 1)
                 codeBefore = '';
             else
                 codeBeforeSelection = [1, 1, expandedSelection(1), Inf];
