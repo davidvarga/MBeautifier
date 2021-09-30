@@ -221,10 +221,10 @@ classdef MBeautify
             % Save back the modified data then use Matlab samrt indent functionality
             % Set back the selection
             currentEditorPage.Text = [codeBefore, formattedSource, codeAfter];
+            MBeautify.indentPage(currentEditorPage, configuration);
             if ~isempty(selectedPosition)
                 currentEditorPage.goToLine(selectedPosition(1));
             end
-            MBeautify.indentPage(currentEditorPage, configuration);
             currentEditorPage.makeActive();
             
             % Save if it is possible
@@ -260,14 +260,13 @@ classdef MBeautify
             formatter = MBeautifier.MFormatter(configuration);
             currentEditorPage.Text = formatter.performFormatting(currentEditorPage.Text);
             
+            % Use Smart Indent
+            MBeautify.indentPage(currentEditorPage, configuration);
+
             % Set back the selection
             if ~isempty(selectedPosition)
                 currentEditorPage.goToLine(selectedPosition(1));
             end
-            
-            % Use Smart Indent
-            
-            MBeautify.indentPage(currentEditorPage, configuration);
             
             currentEditorPage.makeActive();
             
