@@ -165,34 +165,52 @@ classdef MBeautify
             
             
             % Search for the first empty line before the selection
-            if currentSelection(1) > 1
-                lineBeforePosition = [currentSelection(1) - 1, 1, currentSelection(1) - 1, Inf];
-                
-                currentEditorPage.Selection = lineBeforePosition;
-                lineBeforeText = currentEditorPage.SelectedText;
-                
-                while lineBeforePosition(1) > 1 && ~isempty(strtrim(lineBeforeText))
-                    lineBeforePosition = [lineBeforePosition(1) - 1, 1, lineBeforePosition(1) - 1, Inf];
+            
+            % First test the first line of the selection for emptiness
+            currentEditorPage.Selection = [currentSelection(1), 1,  currentSelection(1), Inf];
+            if (isempty(strtrim(currentEditorPage.SelectedText)))
+                lineBeforePosition = currentSelection(1);
+            else
+                % Otherwise look for the first empty line before
+                if currentSelection(1) > 1
+                    lineBeforePosition = [currentSelection(1) - 1, 1, currentSelection(1) - 1, Inf];
+                    
                     currentEditorPage.Selection = lineBeforePosition;
                     lineBeforeText = currentEditorPage.SelectedText;
+                    
+                    while lineBeforePosition(1) > 1 && ~isempty(strtrim(lineBeforeText))
+                        lineBeforePosition = [lineBeforePosition(1) - 1, 1, lineBeforePosition(1) - 1, Inf];
+                        currentEditorPage.Selection = lineBeforePosition;
+                        lineBeforeText = currentEditorPage.SelectedText;
+                    end
+                else
+                    lineBeforePosition = 1;
                 end
-            else
-                lineBeforePosition = 1;
             end
+            
+            
             expandedSelection = [lineBeforePosition(1), 1, expandedSelection(3), Inf];
             
             % Search for the first empty line after the selection
-            lineAfterSelection = [currentSelection(3) + 1, 1, currentSelection(3) + 1, Inf];
-            currentEditorPage.Selection = lineAfterSelection;
-            lineAfterText = currentEditorPage.SelectedText;
-            beforeselect = currentSelection(1);
-            while ~isequal(lineAfterSelection(1), beforeselect) && ~isempty(strtrim(lineAfterText))
-                beforeselect = lineAfterSelection(1);
-                lineAfterSelection = [lineAfterSelection(1) + 1, 1, lineAfterSelection(1) + 1, Inf];
+            % First test the last line of the selection for emptiness
+            currentEditorPage.Selection = [currentSelection(3), 1, currentSelection(3), Inf];
+            if (isempty(strtrim(currentEditorPage.SelectedText)))
+                lineAfterSelection = [currentSelection(3), 1, currentSelection(3), Inf];
+            else
+                % Otherwise look for the first empty line after
+                lineAfterSelection = [currentSelection(3) + 1, 1, currentSelection(3) + 1, Inf];
                 currentEditorPage.Selection = lineAfterSelection;
                 lineAfterText = currentEditorPage.SelectedText;
+                beforeselect = currentSelection(1);
+                while ~isequal(lineAfterSelection(1), beforeselect) && ~isempty(strtrim(lineAfterText))
+                    beforeselect = lineAfterSelection(1);
+                    lineAfterSelection = [lineAfterSelection(1) + 1, 1, lineAfterSelection(1) + 1, Inf];
+                    currentEditorPage.Selection = lineAfterSelection;
+                    lineAfterText = currentEditorPage.SelectedText;
+                end
             end
-            
+          
+           
             endReached = isequal(lineAfterSelection(1), currentSelection(1));
             expandedSelection = [expandedSelection(1), 1, lineAfterSelection(3), Inf];
             
@@ -201,7 +219,7 @@ classdef MBeautify
             else
                 codeBeforeSelection = [1, 1, expandedSelection(1), Inf];
                 currentEditorPage.Selection = codeBeforeSelection;
-                codeBefore = currentEditorPage.SelectedText;
+                codeBefore = [currentEditorPage.SelectedText, MBeautifier.Constants.NewLine];
             end
             
             if endReached
@@ -228,6 +246,7 @@ classdef MBeautify
             if ~isempty(selectedPosition)
                 currentEditorPage.goToPositionInLine(selectedPosition(1), selectedPosition(2));
             end
+            currentEditorPage.Selection = expandedSelection;
             currentEditorPage.makeActive();
             
             % Save if it is possible
