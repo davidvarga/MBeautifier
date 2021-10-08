@@ -22,15 +22,56 @@ classdef MBeautyShortcuts
             
             shortCutStruct = MBeautyShortcuts.getShortcutCategoryStructure(mode);
             
-            shortcutUtils = com.mathworks.mlwidgets.shortcuts.ShortcutUtils();
-            
-            try
-                shortcutUtils.removeShortcut(category, shortCutStruct.Name);
-            catch %#ok<CTCH>
-                % This command only fails on R2012b
+            % Below 2019b shortcuts will be sued
+            if verLessThan('matlab', '9.5')
+                shortcutUtils = com.mathworks.mlwidgets.shortcuts.ShortcutUtils();
+                
+                try
+                    shortcutUtils.removeShortcut(category, shortCutStruct.Name);
+                catch %#ok<CTCH>
+                    % This command only fails on R2012b
+                end
+                shortcutUtils.addShortcutToBottom(shortCutStruct.Name, shortCutStruct.Callback, '', category, 'true');
+            else
+                % Above 2019b favourites + quick access toolbar will be
+                % used
+                fc = com.mathworks.mlwidgets.favoritecommands.FavoriteCommands.getInstance();
+                
+                if fc.hasCategory(category)
+                    
+                    method = fc.getClass().getDeclaredMethod('getCategories', []);
+                    method.setAccessible(true)
+                    categories = method.invoke(fc,[]);
+                    
+                    for catInd = 0:categories.size-1
+                        if strcmp(categories.get(catInd).getLabel, category)
+                            categoryMBeautifier = categories.get(catInd);
+                        end
+                    end
+                    
+                    if categoryMBeautifier.hasChildren()
+                        childToBeUpdated = [];
+                        childs = categoryMBeautifier.getChildren();
+                        for childInd = 0:childs.size-1
+                            if strcmp(childs.get(childInd).getLabel, shortCutStruct.Name)
+                                childToBeUpdated =  childs.get(childInd);
+                            end
+                        end
+                        
+                        if ~isempty(childToBeUpdated)
+                            childToBeUpdated.setCode(shortCutStruct.Callback);
+                        else
+                            MBeautyShortcuts.createFavouriteEntry(fc, category, shortCutStruct);
+                        end
+                        
+                    else
+                        MBeautyShortcuts.createFavouriteEntry(fc, category, shortCutStruct);
+                    end
+                    
+                else
+                    MBeautyShortcuts.createFavouriteEntry(fc, category, shortCutStruct);
+                end
             end
-            shortcutUtils.addShortcutToBottom(shortCutStruct.Name, shortCutStruct.Callback, '', category, 'true');
-            
         end
         
         function executeCallback(mode)
@@ -46,6 +87,17 @@ classdef MBeautyShortcuts
     end
     
     methods (Static, Access = private)
+        
+        function createFavouriteEntry(fc, category, shortCutStruct)
+            newMBeautyShortcut = com.mathworks.mlwidgets.favoritecommands.FavoriteCommandProperties();
+            newMBeautyShortcut.setLabel(shortCutStruct.Name);
+            newMBeautyShortcut.setCategoryLabel(category);
+            newMBeautyShortcut.setCode(shortCutStruct.Callback);
+            newMBeautyShortcut.setIsOnQuickToolBar(true);
+            newMBeautyShortcut.setIsShowingLabelOnToolBar(true);
+            
+            fc.addCommand(newMBeautyShortcut);
+        end
         
         function structure = getShortcutCategoryStructure(mode)
             mode = MBeautyShortcuts.checkMode(mode);
