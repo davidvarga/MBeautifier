@@ -153,7 +153,7 @@ Currently four approaches are supported:
  
 ### Shortcuts
  
- There is a possibility to create shortcuts for the first three approaches above, which shortcut buttons will appear under the "Shortcuts" tab of MATLAB's main window.
+ There is a possibility to create shortcuts for the first three approaches above, which shortcut buttons will appear under the "Shortcuts" tab of MATLAB's main window below Matlab R2019, and under "Favourites" and on the "Quick Access Toolbar" above.
  
  To create these buttons, the following commands can be used:
  
