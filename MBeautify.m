@@ -94,7 +94,7 @@ classdef MBeautify
             end
         end
         
-        function formatFiles(directory, fileFilter, recurse)
+        function formatFiles(directory, fileFilter, recurse, editor)
             % Format multiple files in-place. Supports file type filtering and subfolder recursion
             % function formatFiles(directory, fileFilter, recurse)
             %
@@ -104,6 +104,7 @@ classdef MBeautify
             % command. Defaults to '*.m'
             %
             % Recurse defaults to false. Set true to recurse subfolders of directory.
+            % Editor defaults to true.  Set to false to format files outside the editor.
             
             if nargin < 2
                 fileFilter = '*.m';
@@ -113,21 +114,23 @@ classdef MBeautify
                 recurse = false;
             end
             
+            if ~exist('editor','var') || isempty(editor)
+                editor = true;
+            end
+            
             if recurse
-                contents = dir(directory);
-                for k = numel(contents):-1:1
-                    if contents(k).isdir && ~startsWith(contents(k).name,'.')
-                        % Recursive call in subfolder
-                        MBeautify.formatFiles(fullfile(contents(k).folder, contents(k).name), fileFilter, recurse);
-                    end
-                end
+                directory = fullfile(directory, '**');
             end
             
             files = dir(fullfile(directory, fileFilter));
             
             for iF = 1:numel(files)
                 file = fullfile(files(iF).folder, files(iF).name);
-                MBeautify.formatFile(file, file);
+                if editor
+                    MBeautify.formatFile(file, file);
+                else
+                    MBeautify.formatFileNoEditor(file, file);
+                end
             end
         end
         
