@@ -837,7 +837,8 @@ classdef MFormatter < handle
 
             data = regexprep(data, '\s+;', ';');
 
-            nonUnaryOperatorArray = {'&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^'};
+            % TODO: Bind obj.AllOperators in in a filtered manner
+            nonUnaryOperatorArray = {'&', '&&', '|', '||', '/', './', '\', '.\', '*', '.*', ':', '^', '.^', '<', '>'};
             nonUnaryOperatorArray1 = nonUnaryOperatorArray(cellfun(@numel, nonUnaryOperatorArray) == 1);
             nonUnaryOperatorArray2 = nonUnaryOperatorArray(cellfun(@numel, nonUnaryOperatorArray) == 2);
             operatorArray = [nonUnaryOperatorArray(:)', {'+'}, {'-'}, {'~'}];
