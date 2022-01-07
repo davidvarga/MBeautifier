@@ -947,6 +947,9 @@ classdef MFormatter < handle
                             elem = strtrim(elementsCell{iElem});
                             if numel(elem) && strcmp(elem(1), ',')
                                 elem = elem(2:end);
+                                if iElem > 1
+                                    elementsCell{iElem-1} = [elementsCell{iElem-1}, ','];
+                                end
                             end
                             elementsCell{iElem} = elem;
                         end
