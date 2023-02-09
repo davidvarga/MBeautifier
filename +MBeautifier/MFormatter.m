@@ -380,9 +380,15 @@ classdef MFormatter < handle
             tempCode = '';
             isLastCharDot = false;
             isLastCharTransp = false;
-            isInStr = false;
+            isInCharStr = false;
+            isInDblQuoteStr = false;
+
             for iStr = 1:numel(actCode)
                 actChar = actCode(iStr);
+
+                if isequal(actChar, '"') && ~isInCharStr
+                    isInDblQuoteStr = ~isInDblQuoteStr;
+                end
 
                 if isequal(actChar, '''')
                     % .' => NonConj transpose
@@ -393,19 +399,22 @@ classdef MFormatter < handle
                         if isLastCharTransp
                             tempCode = [tempCode, trnspTok];
                         else
-                            if numel(tempCode) && ~isInStr && numel(regexp(tempCode(end), charsIndicateTranspose))
+                            if isInDblQuoteStr
+                                tempCode = [tempCode, actChar];
+                                isLastCharTransp = false;
+                            elseif numel(tempCode) && ~isInCharStr && numel(regexp(tempCode(end), charsIndicateTranspose))
                                 tempCode = [tempCode, trnspTok];
                                 isLastCharTransp = true;
                             else
                                 tempCode = [tempCode, actChar];
-                                isInStr = ~isInStr;
+                                isInCharStr = ~isInCharStr;
                                 isLastCharTransp = false;
                             end
                         end
                     end
 
                     isLastCharDot = false;
-                elseif isequal(actChar, '.') && ~isInStr
+                elseif isequal(actChar, '.') && ~isInCharStr
                     isLastCharDot = true;
                     tempCode = [tempCode, actChar];
                     isLastCharTransp = false;
