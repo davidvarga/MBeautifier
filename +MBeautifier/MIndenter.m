@@ -65,11 +65,14 @@ classdef MIndenter < handle
                 % remove existing indentation and whitespace
                 lines{linect} = strtrim(lines{linect});
                 
+                % remove strings and comments for processing
+                line = regexprep(lines{linect}, '(".*")|(''.*'')|(%.*)', '');
+
                 % split line in words
                 pattern = ['[', obj.joinString(obj.Delimiters, '|'), ']'];
-                words = regexp(lines{linect}, pattern, 'split');
+                words = regexp(line, pattern, 'split');
                 % ignore empty lines and comments
-                if (~isempty(lines{linect}) && (lines{linect}(1) ~= '%'))
+                if (~isempty(line) && (line(1) ~= '%'))
                     % find keywords and adjust indent
                     for wordct = 1:numel(words)
                         % detect end of line comments
