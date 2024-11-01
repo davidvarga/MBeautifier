@@ -113,6 +113,10 @@ classdef MFormatter < handle
 
                 %% Determine the position where the line shall be splitted into code and comment
                 [actCode, actComment, splittingPos, isSectionSeparator] = obj.findComment(line);
+                commentSpacing = regexp(actCode, '\s+$', 'match');
+                if numel(commentSpacing) > 0 && actComment ~= "" && obj.Configuration.specialRule('PreserveInlineCommentSpacing').ValueAsDouble() ~= 0
+                    actComment = [commentSpacing{1}, actComment];
+                end
 
                 if isSectionSeparator && formatSectionPrecedingNewlines
                     replacedTextArray = MBeautifier.MFormatter.handleTrailingEmptyLines(replacedTextArray, nSectionPrecedingNewlines);
@@ -237,7 +241,7 @@ classdef MFormatter < handle
                     actCodeFinal = obj.performReplacements(actCode);
                 end
 
-                if ~obj.IsInBlockComment
+                if ~obj.IsInBlockComment && obj.Configuration.specialRule('PreserveInlineCommentSpacing').ValueAsDouble() == 0
                     line = [strtrim(actCodeFinal), ' ', actComment];
                 else
                     line = [strtrim(actCodeFinal), actComment];
