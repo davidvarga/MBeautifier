@@ -70,12 +70,14 @@ classdef MBeautify
             % function formatFile(file, outFile)
             %
             % Formats the file specified in the first argument. The file is opened in the Matlab Editor. If the second
-            % argument is also specified, the formatted source is saved to this file. Otherwise the formatted input
-            % file remains opened in the Matlab Editor. The input and the output file can be the same.
+            % argument is also specified, the formatted source is saved to this file and it is closed if it wasn't already
+            % open in the Editor. Otherwise the formatted input file remains opened in the Matlab Editor.
+            % The input and the output file can be the same.
             if ~exist(file, 'file')
                 return;
             end
             
+            isOpen = matlab.desktop.editor.isOpen(file);
             document = matlab.desktop.editor.openDocument(file);
             % Format the code
             configuration = MBeautify.getConfiguration();
@@ -90,7 +92,9 @@ classdef MBeautify
                 end
                 
                 document.saveAs(outFile)
-                document.close();
+                if ~isOpen
+                    document.close();
+                end
             end
         end
         
