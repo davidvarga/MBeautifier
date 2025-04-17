@@ -253,5 +253,9 @@
          <Key>Indentation_Strategy</Key>
          <Value>NestedFunctions</Value>
       </SpecialRule>
+      <SpecialRule>
+         <Key>PreserveInlineCommentSpacing</Key>
+         <Value>0</Value>
+      </SpecialRule>
    </SpecialRules>
 </MBeautifyRuleConfiguration>
