@@ -263,8 +263,6 @@ classdef MFormatter < handle
             formatEndingNewlines = nEndingNewlines >= 0;
             if formatEndingNewlines
                 replacedTextArray = MBeautifier.MFormatter.handleTrailingEmptyLines(replacedTextArray, nEndingNewlines);
-
-                replacedTextArray{end} = strtrim(replacedTextArray{end});
             end
 
             formattedSource = [replacedTextArray{:}];
@@ -315,6 +313,9 @@ classdef MFormatter < handle
                 if isempty(strtrim(textArray{i}))
                     count = count + 1;
                 else
+                    if count > 0
+                        count = count+1;
+                    end
                     return;
                 end
             end
